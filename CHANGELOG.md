@@ -1,0 +1,4 @@
+ - Fixed bugs related with `select` and `conditional` models
+ - Added custom behavior for `composite` and `empty` models
+ - Something like Wiki is now available [here](https://github.com/Danrus1100/rpf/blob/multiversion/PACK_DEVELOPERS.md)
+ - Added logging system (type `/rpf_toggle_debug` to see it)

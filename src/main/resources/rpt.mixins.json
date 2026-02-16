@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.danrus.rpt.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "accessor.ModelBakerImplInvoker",
+    "load.BakingContextMixin",
+    "load.ClientItemMixin",
+    "load.ModelBakeryMixin",
+    "load.ModelManagerMixin",
+    "regs.ConditionalItemModelPropertiesMixin",
+    "regs.ItemModelsMixin"
+  ],
+  "mixins": [
+    "regs.SelectItemModelPropertiesMixin",
+    "render.ItemStackMixin",
+    "rpf.SignedItemModelMixin"
+  ]
+}

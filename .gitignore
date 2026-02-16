@@ -1,0 +1,50 @@
+# Gradle
+
+.gradle/
+build/
+out/
+
+# IntelliJ IDEA
+
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+*.hprof
+
+# VSCode
+
+.vscode/
+
+# Minecraft/Forge/Fabric
+
+run/
+*.log
+*.lock
+*.tmp
+logs/
+crash-reports/
+debug.log
+
+# Fabric/loom generated
+
+*.cache
+*.class
+fabric-example-mod/build/
+
+# Misc
+
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local environment files
+
+local.properties
+.env
+
+# Generated resource packs / assets
+
+resources/generated/
