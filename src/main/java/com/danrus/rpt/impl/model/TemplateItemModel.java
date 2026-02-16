@@ -4,6 +4,8 @@ import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.logging.ModelTestsResultCollector;
 import com.danrus.rpt.Rpt;
+import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -19,10 +21,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class TemplateItemModel implements ItemModel, RpfItemModel {
 
-    private final ItemModel template;
+    private final RptTemplate template;
     private boolean isFallback = false;
 
-    public TemplateItemModel(ItemModel template) {
+    public TemplateItemModel(RptTemplate template) {
         this.template = template;
     }
 
@@ -39,12 +41,14 @@ public class TemplateItemModel implements ItemModel, RpfItemModel {
     @Override
     public boolean rpf$doDelegate(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity owner, @Nullable ItemModel prev, int seed, ResourceLocation itemModelId, String packName, ModelTestsResultCollector collector) {
         collector.touchInfo(getClass().getSimpleName() + ": delegating to template model: " + template.getClass().getSimpleName(), packName, itemModelId);
-        return ((RpfItemModel) template).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner, prev, seed, itemModelId, packName, collector);
+        return ((RpfItemModel) template.model()).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner, prev, seed, itemModelId, packName, collector);
     }
 
     @Override
     public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-        template.update(renderState, stack, itemModelResolver, displayContext, level, entity, seed);
+        RptItemParams merged = RptItemParams.merge(template.params(), RptItemParams.fromItemStack(stack));
+        RptItemParams.putToItemStack(stack, merged);
+        template.model().update(renderState, stack, itemModelResolver, displayContext, level, entity, seed);
     }
 
     public static record Unbaked(ResourceLocation templateId) implements ItemModel.Unbaked {
@@ -62,7 +66,8 @@ public class TemplateItemModel implements ItemModel, RpfItemModel {
 
         @Override
         public @NotNull ItemModel bake(BakingContext context) {
-            return new TemplateItemModel(Rpt.getTemplatesManager().getTemplate(templateId));
+            RptTemplate template = Rpt.getTemplatesManager().getTemplate(templateId);
+            return new TemplateItemModel(template);
         }
 
         @Override

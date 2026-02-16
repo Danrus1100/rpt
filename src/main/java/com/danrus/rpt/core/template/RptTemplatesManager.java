@@ -1,4 +1,4 @@
-package com.danrus.rpt;
+package com.danrus.rpt.core.template;
 
 import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;
@@ -24,15 +24,15 @@ public class RptTemplatesManager {
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
     private static final Logger log = LoggerFactory.getLogger(RptTemplatesManager.class);
 
-    private final Map<ResourceLocation, ItemModel.Unbaked> unbakedTemplates = new HashMap<>();
-    private final Map<ResourceLocation, ItemModel> templates = new HashMap<>();
+    private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
+    private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();
 
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         templates.clear();
         return CompletableFuture.runAsync(() -> {
             TEMPLATE_LISTENER.listMatchingResources(resourceManager).forEach((location, resource) -> {
                 try (var reader = resource.openAsReader()) {
-                    ItemModel.Unbaked unbaked = ItemModels.CODEC.parse(JsonOps.INSTANCE, StrictJsonParser.parse(reader)).getOrThrow(string -> new RuntimeException("Failed to parse template: " + location + ": " + string));
+                    RptTemplate.Unbaked unbaked = RptTemplate.Unbaked.CODEC.parse(JsonOps.INSTANCE, StrictJsonParser.parse(reader)).getOrThrow(string -> new RuntimeException("Failed to parse template: " + location + ": " + string));
                     unbakedTemplates.put(TEMPLATE_LISTENER.fileToId(location), unbaked);
                 } catch (Exception e) {
                     log.error("Failed to load template: {}", location, e);
@@ -50,7 +50,7 @@ public class RptTemplatesManager {
             ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker);
             for (var entry : unbakedTemplates.entrySet()) {
                 try {
-                    ItemModel baked = entry.getValue().bake(bakingContext);
+                    RptTemplate baked = entry.getValue().bake(bakingContext);
                     templates.put(entry.getKey(), baked);
                 } catch (Exception e) {
                     log.error("Failed to bake template: {}", entry.getKey(), e);
@@ -59,10 +59,10 @@ public class RptTemplatesManager {
         }, executor);
     }
 
-    public ItemModel getTemplate(ResourceLocation id) {
+    public RptTemplate getTemplate(ResourceLocation id) {
         return templates.get(id);
     }
     public void forEachUnbakedTemplate(Consumer<ResolvableModel> consumer) {
-        unbakedTemplates.values().forEach(consumer);
+        unbakedTemplates.values().forEach(unbaked -> consumer.accept(unbaked.unbaked()));
     }
 }

@@ -38,6 +38,13 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         throw new IllegalArgumentException("Unsupported variable type: " + type);
     }
 
+    public void merge(RptItemVariables other) {
+        strings.putAll(other.strings);
+        numbers.putAll(other.numbers);
+        flags.putAll(other.flags);
+        models.putAll(other.models);
+    }
+
     public record Type<T>(Class<T> clazz)  {
         public static final Type<String> STRING = new Type<>(String.class);
         public static final Type<Double> NUMBER = new Type<>(Double.class);

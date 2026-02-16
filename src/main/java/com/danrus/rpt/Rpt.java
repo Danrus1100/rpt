@@ -7,6 +7,7 @@ import com.danrus.rpf.api.event.type.PostBakeEvent;
 import com.danrus.rpf.api.event.type.PreBakeEvent;
 import com.danrus.rpf.api.event.type.UpdateModelEvent;
 import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.template.RptTemplatesManager;
 import com.danrus.rpt.duck.RptBakingContext;
 import com.danrus.rpt.duck.RptClientItem;
 import com.danrus.rpt.duck.RptItemParamsHolder;
