@@ -1,6 +1,6 @@
 package com.danrus.rpt.impl.conditional;
 
-import com.danrus.rpt.duck.RptItemParamsHolder;
+import com.danrus.rpt.core.item.RptItemParams;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -24,6 +24,6 @@ public record HasFlagProperty(String property) implements ConditionalItemModelPr
 
     @Override
     public boolean get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
-        return RptItemParamsHolder.class.cast(stack).rpt$getParams().map(params -> params.hasFlag(property)).orElse(false);
+        return RptItemParams.fromItemStack(stack).hasFlag(property);
     }
 }

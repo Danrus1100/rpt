@@ -47,9 +47,9 @@ public class RptTemplatesManager {
             Executor executor
             ) {
         return CompletableFuture.runAsync(() ->{
-            ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker);
             for (var entry : unbakedTemplates.entrySet()) {
                 try {
+                    ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker);
                     RptTemplate baked = entry.getValue().bake(bakingContext);
                     templates.put(entry.getKey(), baked);
                 } catch (Exception e) {

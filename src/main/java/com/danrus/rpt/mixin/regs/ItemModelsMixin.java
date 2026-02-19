@@ -1,5 +1,6 @@
 package com.danrus.rpt.mixin.regs;
 
+import com.danrus.rpt.impl.model.RegexItemModel;
 import com.danrus.rpt.impl.model.TemplateItemModel;
 import com.danrus.rpt.impl.model.VariableBlockModelWrapper;
 import com.mojang.serialization.MapCodec;
@@ -27,5 +28,6 @@ public class ItemModelsMixin {
     private static void rpt$injectBootstrap(CallbackInfo ci) {
         ID_MAPPER.put(TemplateItemModel.Unbaked.ID, TemplateItemModel.Unbaked.MAP_CODEC);
         ID_MAPPER.put(VariableBlockModelWrapper.Unbaked.ID, VariableBlockModelWrapper.Unbaked.MAP_CODEC);
+        ID_MAPPER.put(RegexItemModel.Unbaked.ID, RegexItemModel.Unbaked.MAP_CODEC);
     }
 }

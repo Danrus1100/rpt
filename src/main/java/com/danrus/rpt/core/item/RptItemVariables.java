@@ -1,4 +1,4 @@
-package com.danrus.rpt.core;
+package com.danrus.rpt.core.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

@@ -1,6 +1,7 @@
 package com.danrus.rpt.mixin.regs;
 
 import com.danrus.rpt.impl.conditional.HasFlagProperty;
+import com.danrus.rpt.impl.conditional.MatchCustomNameRegexProperty;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
@@ -26,5 +27,6 @@ public class ConditionalItemModelPropertiesMixin {
     )
     private static void rpt$injectBootstrap(CallbackInfo ci) {
         ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "has_flag"), HasFlagProperty.MAP_CODEC);
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "match"), MatchCustomNameRegexProperty.MAP_CODEC);
     }
 }

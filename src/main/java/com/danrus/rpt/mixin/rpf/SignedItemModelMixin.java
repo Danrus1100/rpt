@@ -1,7 +1,7 @@
 package com.danrus.rpt.mixin.rpf;
 
 import com.danrus.rpf.core.SignedItemModel;
-import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.duck.RptSignedItemModel;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

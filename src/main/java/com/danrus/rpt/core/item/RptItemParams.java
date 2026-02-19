@@ -1,4 +1,4 @@
-package com.danrus.rpt.core;
+package com.danrus.rpt.core.item;
 
 import com.danrus.rpt.duck.RptItemParamsHolder;
 import com.mojang.serialization.Codec;

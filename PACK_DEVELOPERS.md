@@ -28,7 +28,9 @@
 }
 ```
 
-# `rpt:template` item model
+# Item Models
+
+## `rpt:template` item model
 in `minecraft/items` folder:
 ```json
 {
@@ -41,12 +43,17 @@ in `minecraft/items` folder:
 in `namespace/rpt/templates` folder:
 ```json
 {
-  "type": "model",
-  "model": "item/diamond"
+  "model": {
+    "type": "model",
+    "model": "item/diamond"
+  },
+  "rpt": {
+    ...
+  }
 }
 ```
 
-# `rpt:variable` item model
+## `rpt:variable` item model
 in `minecraft/items` folder:
 ```json
 {
@@ -62,4 +69,39 @@ in `minecraft/items` folder:
     }
   }
 }
+```
+
+## `rpt:regex` item model
+if `minecraft/items` folder: 
+```json
+{
+  "model": {
+    "type": "rpt:regex",
+    "cases": [
+      {
+        "when": ["^Hello ", "^Привет"],
+        "model": ...
+      },
+      {
+        "when": "123",
+        "model": ...
+      }
+    ]
+
+    }
+  }
+}
+```
+
+# Conditional item model
+todo: доделать
+
+## `rpt:has_flag` property
+```json
+"flag": "123"
+```
+
+## `rpt:match`
+```json
+"regex": "some_regex"
 ```

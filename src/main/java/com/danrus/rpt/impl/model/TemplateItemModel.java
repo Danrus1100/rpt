@@ -4,7 +4,7 @@ import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.logging.ModelTestsResultCollector;
 import com.danrus.rpt.Rpt;
-import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,23 +19,12 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TemplateItemModel implements ItemModel, RpfItemModel {
+public class TemplateItemModel extends AbstractRpfItemModel {
 
     private final RptTemplate template;
-    private boolean isFallback = false;
 
     public TemplateItemModel(RptTemplate template) {
         this.template = template;
-    }
-
-    @Override
-    public void rpf$markAsFallback() {
-        this.isFallback = true;
-    }
-
-    @Override
-    public boolean rpf$isFallback() {
-        return isFallback;
     }
 
     @Override

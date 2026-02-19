@@ -1,7 +1,7 @@
 package com.danrus.rpt.mixin.load;
 
 import com.danrus.rpt.duck.RptClientItem;
-import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.item.RptItemParams;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.item.ClientItem;

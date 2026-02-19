@@ -1,6 +1,8 @@
 package com.danrus.rpt.impl.model;
 
+import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
+import com.danrus.rpf.logging.ModelTestsResultCollector;
 import com.danrus.rpt.duck.RptBakingContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -20,7 +22,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public record VariableBlockModelWrapper(ItemModel model) implements ItemModel {
+public class VariableBlockModelWrapper extends AbstractRpfItemModel  {
+
+    private final ItemModel model;
+
+    public VariableBlockModelWrapper(ItemModel model) {
+        this.model = model;
+    }
+
+    @Override
+    public boolean rpf$doDelegate(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity owner, @Nullable ItemModel prev, int seed, ResourceLocation itemModelId, String packName, ModelTestsResultCollector collector) {
+        return RpfItemModel.class.cast(model).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner, prev, seed, itemModelId, packName, collector);
+    }
+
     @Override
     public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         model.update(renderState, stack, itemModelResolver, displayContext, level, entity, seed);

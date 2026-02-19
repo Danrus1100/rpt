@@ -6,7 +6,7 @@ import com.danrus.rpf.api.event.type.ModelDiscoveryEvent;
 import com.danrus.rpf.api.event.type.PostBakeEvent;
 import com.danrus.rpf.api.event.type.PreBakeEvent;
 import com.danrus.rpf.api.event.type.UpdateModelEvent;
-import com.danrus.rpt.core.RptItemParams;
+import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplatesManager;
 import com.danrus.rpt.duck.RptBakingContext;
 import com.danrus.rpt.duck.RptClientItem;
@@ -48,7 +48,7 @@ public class Rpt implements ClientModInitializer {
         });
 
         Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext()).rpt$setParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptItemParams.EMPTY));
+            RptBakingContext.class.cast(event.getBakingContext()).rpt$addParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptItemParams.EMPTY));
         });
 
         Rpf.getEventBus().register(PostBakeEvent.class, event -> {
