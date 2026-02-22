@@ -9,3 +9,4 @@ accessible field net/minecraft/client/renderer/item/SelectItemModel property Lne
 accessible field net/minecraft/client/renderer/item/SelectItemModel models Lnet/minecraft/client/renderer/item/SelectItemModel$ModelSelector;
 
 accessible method net/minecraft/client/renderer/item/RangeSelectItemModel lastIndexLessOrEqual ([FF)I
+accessible class net/minecraft/client/resources/model/ModelBakery$PartCacheImpl

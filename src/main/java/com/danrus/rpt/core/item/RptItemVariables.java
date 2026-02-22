@@ -1,12 +1,14 @@
 package com.danrus.rpt.core.item;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
+public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, Identifier> models) {
 
     public static final Codec<RptItemVariables> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.STRING)
@@ -18,7 +20,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
             Codec.unboundedMap(Codec.STRING, Codec.BOOL)
                     .optionalFieldOf("flags", Map.of())
                     .forGetter(RptItemVariables::flags),
-            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
+            Codec.unboundedMap(Codec.STRING, Identifier.CODEC)
                     .optionalFieldOf("models", Map.of())
                     .forGetter(RptItemVariables::models)
     ).apply(instance, RptItemVariables::new));
@@ -45,10 +47,50 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         models.putAll(other.models);
     }
 
-    public record Type<T>(Class<T> clazz)  {
-        public static final Type<String> STRING = new Type<>(String.class);
-        public static final Type<Double> NUMBER = new Type<>(Double.class);
-        public static final Type<Boolean> FLAG = new Type<>(Boolean.class);
-        public static final Type<ResourceLocation> MODEL = new Type<>(ResourceLocation.class);
+    public record Type<T>(Class<T> clazz, String name)  {
+        public static final Codec<Type<?>> CODEC = Codec.STRING.comapFlatMap(
+                Type::validate,
+                Type::name
+        );
+
+        public static Type<?> getOrThrow(String name) {
+            return switch (name) {
+                case "string" -> STRING;
+                case "number" -> NUMBER;
+                case "flag" -> FLAG;
+                case "model" -> MODEL;
+                default -> throw new IllegalArgumentException("Unknown variable type:" + name);
+            };
+        }
+
+        public Codec<?> codecOrThrow() {
+            return switch (name) {
+                case "string" -> Codec.STRING;
+                case "number" -> Codec.DOUBLE;
+                case "flag" -> Codec.BOOL;
+                case "model" -> Identifier.CODEC;
+                default -> throw new IllegalArgumentException("Unknown variable type:" + this);
+            };
+        }
+
+        @Override
+        public @NotNull String toString() {
+            return "Type{" +
+                    "name='" + name + '\'' +
+                    '}';
+        }
+
+        public static DataResult<Type<?>> validate(String name) {
+            try {
+                return DataResult.success(getOrThrow(name));
+            } catch (Exception e) {
+                return DataResult.error(e::getMessage);
+            }
+        }
+
+        public static final Type<String> STRING = new Type<>(String.class, "string");
+        public static final Type<Double> NUMBER = new Type<>(Double.class, "number");
+        public static final Type<Boolean> FLAG = new Type<>(Boolean.class, "flag");
+        public static final Type<Identifier> MODEL = new Type<>(Identifier.class, "model");
     }
 }

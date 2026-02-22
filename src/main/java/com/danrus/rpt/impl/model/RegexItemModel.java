@@ -3,6 +3,7 @@ package com.danrus.rpt.impl.model;
 import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.logging.ModelTestsResultCollector;
+import com.danrus.rpt.core.OwnerHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,11 +12,9 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -35,13 +34,13 @@ public class RegexItemModel extends AbstractRpfItemModel{
     }
 
     @Override
-    public boolean rpf$doDelegate(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity owner, @Nullable ItemModel prev, int seed, ResourceLocation itemModelId, String packName, ModelTestsResultCollector collector) {
-        return RpfItemModel.class.cast(selectModelFromRegex(stack)).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner, prev, seed, itemModelId, packName, collector);
+    public boolean rpf$doDelegate(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, @Nullable ItemModel prev, int seed, Identifier itemModelId, String packName, ModelTestsResultCollector collector) {
+        return RpfItemModel.class.cast(selectModelFromRegex(stack)).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner.get(), prev, seed, itemModelId, packName, collector);
     }
 
     @Override
-    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity owner, int seed) {
-        selectModelFromRegex(stack).update(renderState, stack, itemModelResolver, displayContext, level, owner, seed);
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner ,int seed) {
+        selectModelFromRegex(stack).update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
     private ItemModel selectModelFromRegex(ItemStack stack) {
@@ -70,7 +69,7 @@ public class RegexItemModel extends AbstractRpfItemModel{
         ).apply(instance, Unbaked::new));
 
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "regex");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "regex");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

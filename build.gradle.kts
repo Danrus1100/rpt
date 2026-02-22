@@ -41,15 +41,16 @@ stonecutter{
             replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")
         }
 
-        string {
-            direction = eval(current.version, ">=1.21.10")
-            replace("LivingEntity ", "ItemOwner ")
-        }
-
-        string {
-            direction = eval(current.version, ">=1.21.10")
-            replace("LivingEntity;", "ItemOwner;")
-        }
+        // FIXME: breaks conditional item properties
+//        string {
+//            direction = eval(current.version, ">=1.21.10")
+//            replace("LivingEntity ", "ItemOwner ")
+//        }
+//
+//        string {
+//            direction = eval(current.version, ">=1.21.10")
+//            replace("LivingEntity;", "ItemOwner;")
+//        }
     }
 }
 
@@ -86,6 +87,12 @@ tasks.processResources {
     )
 
     filesMatching("fabric.mod.json") { expand(map) }
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 base {
