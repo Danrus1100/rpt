@@ -2,17 +2,13 @@ package com.danrus.rpt;
 
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
-import com.danrus.rpf.api.event.type.ModelDiscoveryEvent;
-import com.danrus.rpf.api.event.type.PostBakeEvent;
-import com.danrus.rpf.api.event.type.PreBakeEvent;
-import com.danrus.rpf.api.event.type.UpdateModelEvent;
+import com.danrus.rpf.api.event.type.*;
 import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplatesManager;
-import com.danrus.rpt.duck.RptBakingContext;
-import com.danrus.rpt.duck.RptClientItem;
-import com.danrus.rpt.duck.RptItemParamsHolder;
-import com.danrus.rpt.duck.RptSignedItemModel;
+import com.danrus.rpt.duck.*;
+import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +29,19 @@ public class Rpt implements ClientModInitializer {
                 signedItemModel.rpt$getParams().ifPresent(params -> {
                     RptItemParamsHolder.class.cast(event.getStack()).rpt$setParams(params);
                 });
+        });
+
+        Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
+            SelectItemModelProperty property = event.getProperty();
+            if (property instanceof RptSelectItemModelProperty rptProperty) {
+                RptItemParams params = RptItemParamsHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getParams());
+                event.setGetter(() -> rptProperty.get(
+                        event.getStack(), event.getContext().level(), event.getOwner()
+                        //? if >=1.21.10
+                        /*.asLivingEntity()*/
+                        , event.getContext().seed(), event.getContext().displayContext(), params
+                ));
+            }
         });
 
         Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {

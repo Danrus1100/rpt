@@ -23,10 +23,11 @@ repositories {
     maven("https://maven.fabricmc.net/")
     maven("https://maven.parchmentmc.org")
     maven("https://api.modrinth.com/maven")
+    maven("https://maven.shlakoblock.com/releases")
 }
 
 loom {
-    accessWidenerPath = rootProject.file("src/main/resources/rpt.accesswidener")
+    accessWidenerPath = project.file("src/main/resources/rpt.accesswidener")
 }
 
 stonecutter{
@@ -40,17 +41,6 @@ stonecutter{
             direction = eval(current.version, ">=1.21.11")
             replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")
         }
-
-        // FIXME: breaks conditional item properties
-//        string {
-//            direction = eval(current.version, ">=1.21.10")
-//            replace("LivingEntity ", "ItemOwner ")
-//        }
-//
-//        string {
-//            direction = eval(current.version, ">=1.21.10")
-//            replace("LivingEntity;", "ItemOwner;")
-//        }
     }
 }
 
@@ -64,7 +54,7 @@ dependencies {
     })
     modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
-    modImplementation("maven.modrinth:rpf:${findProperty("deps.rpf")}")
+    modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
 }
 
 tasks.processResources {

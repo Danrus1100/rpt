@@ -3,12 +3,13 @@ package com.danrus.rpt.core.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, Identifier> models) {
+public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
 
     public static final Codec<RptItemVariables> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.STRING)
@@ -20,7 +21,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
             Codec.unboundedMap(Codec.STRING, Codec.BOOL)
                     .optionalFieldOf("flags", Map.of())
                     .forGetter(RptItemVariables::flags),
-            Codec.unboundedMap(Codec.STRING, Identifier.CODEC)
+            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
                     .optionalFieldOf("models", Map.of())
                     .forGetter(RptItemVariables::models)
     ).apply(instance, RptItemVariables::new));
@@ -40,11 +41,25 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         throw new IllegalArgumentException("Unsupported variable type: " + type);
     }
 
-    public void merge(RptItemVariables other) {
-        strings.putAll(other.strings);
-        numbers.putAll(other.numbers);
-        flags.putAll(other.flags);
-        models.putAll(other.models);
+    public RptItemVariables merge(RptItemVariables other) {
+        Map<String, String> newStrings = new HashMap<>(this.strings);
+        newStrings.putAll(other.strings);
+
+        Map<String, Double> newNumbers = new HashMap<>(this.numbers);
+        newNumbers.putAll(other.numbers);
+
+        Map<String, Boolean> newFlags = new HashMap<>(this.flags);
+        newFlags.putAll(other.flags);
+
+        Map<String, ResourceLocation> newModels = new HashMap<>(this.models);
+        newModels.putAll(other.models);
+
+        return new RptItemVariables(
+                Map.copyOf(newStrings),
+                Map.copyOf(newNumbers),
+                Map.copyOf(newFlags),
+                Map.copyOf(newModels)
+        );
     }
 
     public record Type<T>(Class<T> clazz, String name)  {
@@ -68,7 +83,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
                 case "string" -> Codec.STRING;
                 case "number" -> Codec.DOUBLE;
                 case "flag" -> Codec.BOOL;
-                case "model" -> Identifier.CODEC;
+                case "model" -> ResourceLocation.CODEC;
                 default -> throw new IllegalArgumentException("Unknown variable type:" + this);
             };
         }
@@ -91,6 +106,6 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         public static final Type<String> STRING = new Type<>(String.class, "string");
         public static final Type<Double> NUMBER = new Type<>(Double.class, "number");
         public static final Type<Boolean> FLAG = new Type<>(Boolean.class, "flag");
-        public static final Type<Identifier> MODEL = new Type<>(Identifier.class, "model");
+        public static final Type<ResourceLocation> MODEL = new Type<>(ResourceLocation.class, "model");
     }
 }

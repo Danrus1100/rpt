@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,14 +21,17 @@ public record RptItemParams(List<String> customFlags, RptItemVariables variables
 
     public static final RptItemParams EMPTY = new RptItemParams(List.of(), RptItemVariables.EMPTY);
 
-    public void merge(RptItemParams other) {
-        customFlags.addAll(other.customFlags);
-        variables.merge(other.variables);
+    public RptItemParams merge(RptItemParams other) {
+        List<String> newFlags = new ArrayList<>(this.customFlags);
+        newFlags.addAll(other.customFlags);
+
+        RptItemVariables newVariables = this.variables.merge(other.variables);
+
+        return new RptItemParams(List.copyOf(newFlags), newVariables);
     }
 
     public static RptItemParams merge(RptItemParams target, RptItemParams source) {
-        target.merge(source);
-        return target;
+        return target.merge(source);
     }
 
     public static RptItemParams fromItemStack(ItemStack stack) {

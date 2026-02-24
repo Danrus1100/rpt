@@ -13,7 +13,9 @@
     "load.ModelBakeryMixin",
     "load.ModelManagerMixin",
     "regs.ConditionalItemModelPropertiesMixin",
-    "regs.ItemModelsMixin"
+    "regs.ItemModelsMixin",
+    "item.select.SelectItemModelMixin",
+    "item.select.UnbakedMixin"
   ],
   "mixins": [
     "regs.SelectItemModelPropertiesMixin",

@@ -5,10 +5,11 @@ import com.danrus.rpt.duck.RptBakingContext;
 import com.mojang.serialization.Codec;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.renderer.item.EmptyModel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
 
-public record RptTemplate(ItemModel model, RptItemParams params) {
+public record RptTemplate(ItemModel model, RptItemParams params, boolean needRebake) {
 
     public static record Unbaked(ItemModel.Unbaked unbaked, RptItemParams params) {
         public static final Codec<Unbaked> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -22,9 +23,16 @@ public record RptTemplate(ItemModel model, RptItemParams params) {
             rptContext.rpt$addParams(params);
             RptItemParams merged = rptContext.rpt$getParams();
 
-            ItemModel model = unbaked.bake(context);
+            boolean needRebake = false;
+            ItemModel model;
+            try {
+                model = unbaked.bake(context);
+            } catch (Exception e) {
+                needRebake = true;
+                model = new EmptyModel();
+            }
 
-            return new RptTemplate(model, merged);
+            return new RptTemplate(model, merged, needRebake);
         }
 
     }

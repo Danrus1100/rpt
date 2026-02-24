@@ -1,8 +1,9 @@
 package com.danrus.rpt.impl.model;
 
 import com.danrus.rpf.api.RpfItemModel;
+import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
-import com.danrus.rpf.logging.ModelTestsResultCollector;
+import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -14,7 +15,7 @@ import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +35,8 @@ public class RegexItemModel extends AbstractRpfItemModel{
     }
 
     @Override
-    public boolean rpf$doDelegate(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, @Nullable ItemModel prev, int seed, Identifier itemModelId, String packName, ModelTestsResultCollector collector) {
-        return RpfItemModel.class.cast(selectModelFromRegex(stack)).rpf$doDelegate(renderState, stack, itemModelResolver, displayContext, level, owner.get(), prev, seed, itemModelId, packName, collector);
+    boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, OwnerHolder owner, @Nullable ItemModel prev, TestsResultCollector collector) {
+        return RpfItemModel.class.cast(selectModelFromRegex(stack)).rpf$doDelegate(context, stack, owner.get(), prev, collector);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class RegexItemModel extends AbstractRpfItemModel{
         ).apply(instance, Unbaked::new));
 
 
-        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "regex");
+        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "regex");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

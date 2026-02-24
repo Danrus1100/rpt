@@ -16,6 +16,11 @@
       "com.danrus.rpt.Rpt"
     ]
   },
+  "contact": {
+    "homepage": "https://danrus1100.github.io/rtp-rpf-docs/",
+    "issues": "https://github.com/Danrus1100/rpt/issues",
+    "sources": "https://github.com/Danrus1100/rpt"
+  },
   "mixins": [
     "rpt.mixins.json",
     "rpt.12111.mixins.json"
@@ -23,6 +28,6 @@
   "depends": {
     "fabricloader": ">=0.17",
     "minecraft": "${mcdep}",
-    "rpf": ">=1.2.2"
+    "rpf": ">=1.3.1"
   }
 }
