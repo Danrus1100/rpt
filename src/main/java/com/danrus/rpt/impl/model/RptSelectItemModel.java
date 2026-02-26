@@ -24,10 +24,10 @@ public class RptSelectItemModel<T> extends SelectItemModel<T> {
     @Override
     public void update(ItemStackRenderState itemStackRenderState, ItemStack itemStack, ItemModelResolver itemModelResolver, ItemDisplayContext itemDisplayContext, @Nullable ClientLevel clientLevel,
                        //? if <=1.21.8 {
-                       /*@Nullable LivingEntity owner,
-                       *///? } else {
-                       net.minecraft.world.entity.ItemOwner owner,
-                       //? }
+                       @Nullable LivingEntity owner,
+                       //? } else {
+                       /*net.minecraft.world.entity.ItemOwner owner,
+                       *///? }
                        int i) {
         if (property instanceof RptSelectItemModelProperty<T>) {
 

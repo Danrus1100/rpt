@@ -5,7 +5,7 @@ import com.danrus.rpt.impl.conditional.MatchCustomNameRegexProperty;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,14 +19,14 @@ public class ConditionalItemModelPropertiesMixin {
 
     @Shadow
     @Final
-    public static ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends ConditionalItemModelProperty>> ID_MAPPER;
+    public static ExtraCodecs.LateBoundIdMapper<ResourceLocation, MapCodec<? extends ConditionalItemModelProperty>> ID_MAPPER;
 
     @Inject(
             method = "bootstrap",
             at = @At("HEAD")
     )
     private static void rpt$injectBootstrap(CallbackInfo ci) {
-        ID_MAPPER.put(Identifier.fromNamespaceAndPath("rpt", "has_flag"), HasFlagProperty.MAP_CODEC);
-        ID_MAPPER.put(Identifier.fromNamespaceAndPath("rpt", "match"), MatchCustomNameRegexProperty.MAP_CODEC);
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "has_flag"), HasFlagProperty.MAP_CODEC);
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "match"), MatchCustomNameRegexProperty.MAP_CODEC);
     }
 }

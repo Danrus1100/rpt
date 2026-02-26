@@ -14,7 +14,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -41,12 +41,12 @@ public class TemplateItemModel extends AbstractRpfItemModel {
         template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
-    public static record Unbaked(Identifier templateId) implements ItemModel.Unbaked {
+    public static record Unbaked(ResourceLocation templateId) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                Identifier.CODEC.fieldOf("template").forGetter(Unbaked::templateId)
+                ResourceLocation.CODEC.fieldOf("template").forGetter(Unbaked::templateId)
         ).apply(instance, Unbaked::new));
-        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "template");
+        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "template");
 
         @Override
         @NotNull
