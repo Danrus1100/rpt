@@ -1,4 +1,1 @@
-- Исправлены ошибки, связанные с моделями `select` и `conditional`
-- Добавлено пользовательское поведение для моделей `composite` и `empty`
-- Что-то вроде вики теперь доступно [здесь](https://github.com/Danrus1100/rpf/blob/multiversion/PACK_DEVELOPERS.md)
-- Добавлена система логирования (введите `/rpf_toggle_debug`, чтобы увидеть ее)
+- Добавлен API для упрания вращениями рук. [Узнать, как работать с ним](https://danrus1100.github.io/rtp-rpf-docs/ru/rpt/experimental.html)

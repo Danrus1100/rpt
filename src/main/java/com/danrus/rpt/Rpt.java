@@ -3,12 +3,14 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
+import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplatesManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +28,17 @@ public class Rpt implements ClientModInitializer {
     public void onInitializeClient() {
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-                signedItemModel.rpt$getParams().ifPresent(params -> {
-                    RptItemParamsHolder.class.cast(event.getStack()).rpt$setParams(params);
-                });
+
+//            if (event.getOwner() instanceof CustomArmTransformHolder holder/* && (event.getContext().displayContext() == ItemDisplayContext.THIRD_PERSON_LEFT_HAND || event.getContext().displayContext() == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)*/) {
+//                switch (event.getContext().displayContext()) {
+//                    case THIRD_PERSON_RIGHT_HAND -> holder.rpt$setRightArmTransform(ArmTransform.EMPTY);
+//                    case THIRD_PERSON_LEFT_HAND -> holder.rpt$setLeftArmTransform(ArmTransform.EMPTY);
+//                }
+//            }
+
+            signedItemModel.rpt$getParams().ifPresent(params -> {
+                RptItemParamsHolder.class.cast(event.getStack()).rpt$setParams(params);
+            });
         });
 
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
@@ -38,7 +48,7 @@ public class Rpt implements ClientModInitializer {
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
-                        /*.asLivingEntity()*/
+                        .asLivingEntity()
                         , event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }

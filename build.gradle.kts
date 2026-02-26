@@ -1,6 +1,7 @@
 plugins {
     id("fabric-loom") version "1.13-SNAPSHOT"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("maven-publish")
     id("java")
 }
 
@@ -40,6 +41,11 @@ stonecutter{
         string {
             direction = eval(current.version, ">=1.21.11")
             replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")
+        }
+
+        string {
+            direction = eval(current.version, ">=1.21.10")
+            replace("PlayerRenderState", "AvatarRenderState")
         }
     }
 }
@@ -89,6 +95,8 @@ base {
     archivesName.set(findProperty("mod.id") as String)
 }
 
+val artifactVersion = "${prop("mod.version")}-${minecraft}"
+
 publishMods {
     val modrinthToken = findProperty("modrinth-token")
     val curseforgeToken = findProperty("curseforge-token")
@@ -106,7 +114,7 @@ publishMods {
     val loaders = prop("pub.target.platforms").split(' ')
     loaders.forEach(modLoaders::add)
     displayName = "PRT ${prop("mod.version")} for ${minecraft}"
-    version = "${prop("mod.version")}-${minecraft}"
+    version = artifactVersion
 
     val targets = prop("pub.target.versions").split(' ')
     modrinth {
@@ -134,6 +142,32 @@ publishMods {
         }
     }
 }
+
+publishing {
+
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+
+            groupId = "com.danrus"
+            artifactId = "rpt"
+            version = artifactVersion
+        }
+    }
+
+    repositories {
+        maven {
+            name = "Shlakoblock"
+            url = uri("https://maven.shlakoblock.com/releases")
+
+            credentials {
+                username = project.findProperty("shlakoblock-maven-username")?.toString()
+                password = project.findProperty("shlakoblock-maven-password")?.toString()
+            }
+        }
+    }
+}
+
 
 stonecutter {
 //    constants {

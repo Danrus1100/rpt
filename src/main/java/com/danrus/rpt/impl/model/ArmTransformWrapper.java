@@ -1,0 +1,72 @@
+package com.danrus.rpt.impl.model;
+
+import com.danrus.rpf.api.RpfItemModel;
+import com.danrus.rpf.api.TestsResultCollector;
+import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
+import com.danrus.rpf.core.item.ModelUpdateContext;
+import com.danrus.rpt.core.OwnerHolder;
+import com.danrus.rpt.core.arm.ArmTransform;
+import com.danrus.rpt.duck.CustomArmTransformHolder;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemModels;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
+public class ArmTransformWrapper extends AbstractRpfItemModel {
+
+    private final ArmTransform transform;
+    public final ItemModel model;
+
+    public ArmTransformWrapper(ArmTransform transform, ItemModel model) {
+        this.transform = transform;
+        this.model = model;
+    }
+
+    @Override
+    boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, OwnerHolder owner, @Nullable ItemModel prev, TestsResultCollector collector) {
+        return RpfItemModel.class.cast(model).rpf$doDelegate(context, stack, owner.get(), this, collector);
+    }
+
+    @Override
+    void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
+        if (renderState instanceof CustomArmTransformHolder transformHolder) {
+            switch (displayContext) {
+                case THIRD_PERSON_LEFT_HAND -> transformHolder.rpt$setLeftArmTransform(transform);
+                case THIRD_PERSON_RIGHT_HAND -> transformHolder.rpt$setRightArmTransform(transform);
+            }
+        }
+        model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
+    }
+
+    public static record Unbaked(ItemModel.Unbaked model, ArmTransform transform) implements ItemModel.Unbaked {
+
+        public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::model),
+                ArmTransform.CODEC.optionalFieldOf("transform", ArmTransform.EMPTY).forGetter(Unbaked::transform)
+        ).apply(i, Unbaked::new));
+
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "arm_transform");
+
+        @Override
+        public MapCodec<? extends ItemModel.Unbaked> type() {
+            return RpfModelsCodecsExtends.getInstance().wrap(ID, MAP_CODEC);
+        }
+
+        @Override
+        public ItemModel bake(BakingContext context) {
+            return new ArmTransformWrapper(transform, model.bake(context));
+        }
+
+        @Override
+        public void resolveDependencies(Resolver resolver) {
+            model.resolveDependencies(resolver);
+        }
+    }
+}

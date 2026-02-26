@@ -1,4 +1,1 @@
- - Fixed bugs related with `select` and `conditional` models
- - Added custom behavior for `composite` and `empty` models
- - Something like Wiki is now available [here](https://github.com/Danrus1100/rpf/blob/multiversion/PACK_DEVELOPERS.md)
- - Added logging system (type `/rpf_toggle_debug` to see it)
+- Added API for Arm Rotation. [Learn how to use it](https://danrus1100.github.io/rtp-rpf-docs/rpt/experimental)

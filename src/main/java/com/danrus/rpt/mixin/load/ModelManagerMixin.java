@@ -8,7 +8,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.resources.model.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,18 +27,18 @@ public class ModelManagerMixin {
             method = "reload"
     )
     //? if <=1.21.8 {
-    private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2, Operation<CompletableFuture<Void>> original) {
-    //? } else {
-    /*private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.SharedState sharedState, Executor executor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
+    /*private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2, Operation<CompletableFuture<Void>> original) {
+    *///? } else {
+    private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.SharedState sharedState, Executor executor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
         ResourceManager resourceManager = sharedState.resourceManager();
-    *///?}
+    //?}
         Rpt.rpt$repairFuture = Rpt.getTemplatesManager().prepare(resourceManager, executor);
         return original.call
                 //? if <=1.21.8 {
-                (preparationBarrier, resourceManager, executor, executor2);
-                //? } else {
-                /*(sharedState, executor, preparationBarrier, executor2);
-                *///?}
+                /*(preparationBarrier, resourceManager, executor, executor2);
+                *///? } else {
+                (sharedState, executor, preparationBarrier, executor2);
+                //?}
     }
 
     @WrapOperation(

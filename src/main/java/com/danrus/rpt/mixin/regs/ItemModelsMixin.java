@@ -1,12 +1,13 @@
 package com.danrus.rpt.mixin.regs;
 
+import com.danrus.rpt.impl.model.ArmTransformWrapper;
 import com.danrus.rpt.impl.model.RegexItemModel;
 import com.danrus.rpt.impl.model.TemplateItemModel;
 import com.danrus.rpt.impl.model.VariableBlockModelWrapper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemModelsMixin {
     @Shadow
     @Final
-    public static ExtraCodecs.LateBoundIdMapper<ResourceLocation, MapCodec<? extends ItemModel.Unbaked>> ID_MAPPER;
+    public static ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends ItemModel.Unbaked>> ID_MAPPER;
 
     @Inject(
             method = "bootstrap",
@@ -29,5 +30,6 @@ public class ItemModelsMixin {
         ID_MAPPER.put(TemplateItemModel.Unbaked.ID, TemplateItemModel.Unbaked.MAP_CODEC);
         ID_MAPPER.put(VariableBlockModelWrapper.Unbaked.ID, VariableBlockModelWrapper.Unbaked.MAP_CODEC);
         ID_MAPPER.put(RegexItemModel.Unbaked.ID, RegexItemModel.Unbaked.MAP_CODEC);
+        ID_MAPPER.put(ArmTransformWrapper.Unbaked.ID, ArmTransformWrapper.Unbaked.MAP_CODEC);
     }
 }

@@ -20,6 +20,8 @@
   "mixins": [
     "regs.SelectItemModelPropertiesMixin",
     "render.ItemStackMixin",
-    "rpf.SignedItemModelMixin"
+    "rpf.SignedItemModelMixin",
+    "render.entity.ItemStackRenderStateMixin",
+    "render.entity.HumanoidModelMixin"
   ]
 }
