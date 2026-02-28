@@ -13,7 +13,13 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record MatchCustomNameRegexProperty(String regex) implements ConditionalItemModelProperty {
+import java.util.regex.Pattern;
+
+public record MatchCustomNameRegexProperty(String regex, Pattern pattern) implements ConditionalItemModelProperty {
+
+    public MatchCustomNameRegexProperty(String regex) {
+        this(regex, Pattern.compile(regex));
+    }
 
     public static final MapCodec<MatchCustomNameRegexProperty> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.STRING.fieldOf("regex").forGetter(MatchCustomNameRegexProperty::regex)
@@ -27,10 +33,9 @@ public record MatchCustomNameRegexProperty(String regex) implements ConditionalI
     @Override
     public boolean get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
         Component customNameComponent = stack.get(DataComponents.CUSTOM_NAME);
-        if (customNameComponent == null) {
-            return false;
-        }
+        if (customNameComponent == null) return false;
+
         String customName = customNameComponent.getString();
-        return customName.matches(regex);
+        return pattern.matcher(customName).matches();
     }
 }

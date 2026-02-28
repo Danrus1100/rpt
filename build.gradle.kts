@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.13-SNAPSHOT"
+    id("fabric-loom") version "1.15-SNAPSHOT"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
     id("maven-publish")
     id("java")
@@ -61,6 +61,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
     modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
+    implementation("com.ezylang:EvalEx:3.6.0")
+    include("com.ezylang:EvalEx:3.6.0")
 }
 
 tasks.processResources {
@@ -101,6 +103,7 @@ publishMods {
     val modrinthToken = findProperty("modrinth-token")
     val curseforgeToken = findProperty("curseforge-token")
     val discordWebhookDR = findProperty("discord-webhook")
+    val discordWebhookDRRU = findProperty("discord-webhook-dr-ru")
     val discordWebhookDry = findProperty("discord-webhook-dry")
 
     dryRun = false
@@ -136,9 +139,18 @@ publishMods {
             dryRunWebhookUrl = discordWebhookDry.toString()
 
             username  = prop("mod.name")
-            avatarUrl = "https://github.com/Danrus1100/rpt/blob/main/src/main/resources/assets/rpt/icon.png?raw=true"
+            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
 
             content = changelog.map{ "# " + prop("mod.version") + " version here! \n\n" + rootProject.file("CHANGELOG.md").readText() +"\n\n<@&1426901890582581248>" }
+        }
+        discord ("DR freak mods anonuncement (RU)") {
+            webhookUrl = discordWebhookDRRU.toString()
+            dryRunWebhookUrl = discordWebhookDry.toString()
+
+            username  = prop("mod.name")
+            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpf/icon.png?raw=true"
+
+            content = changelog.map{ "# Версия " + prop("mod.version") + " вышла! \n\n" + rootProject.file("CHANGELOG_RU.md").readText() +"\n\n<@&1426901890582581248>" }
         }
     }
 }

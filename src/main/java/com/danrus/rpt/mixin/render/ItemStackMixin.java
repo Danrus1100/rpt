@@ -25,4 +25,9 @@ public class ItemStackMixin implements RptItemParamsHolder {
     public void rpt$setParams(RptItemParams params) {
         this.rpt$params = params;
     }
+
+    @Override
+    public void rpt$clearParams() {
+        this.rpt$params = RptItemParams.EMPTY;
+    }
 }

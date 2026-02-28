@@ -10,3 +10,5 @@ accessible field net/minecraft/client/renderer/item/SelectItemModel models Lnet/
 
 accessible method net/minecraft/client/renderer/item/RangeSelectItemModel lastIndexLessOrEqual ([FF)I
 accessible class net/minecraft/client/resources/model/ModelBakery$PartCacheImpl
+
+accessible field net/minecraft/world/entity/Entity fluidOnEyes Ljava/util/Set;

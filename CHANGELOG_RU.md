@@ -1,1 +1,3 @@
-- Добавлен API для упрания вращениями рук. [Узнать, как работать с ним](https://danrus1100.github.io/rtp-rpf-docs/ru/rpt/experimental.html)
+- Добавлен API для работы с выражениями. [Узнать, как работать с ним](https://danrus1100.github.io/rtp-rpf-docs/ru/rpt/expressions.html)
+- Добавленные новые `select` и `condition` свойства
+- обновлён API вращения рук

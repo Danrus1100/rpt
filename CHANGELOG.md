@@ -1,1 +1,3 @@
-- Added API for Arm Rotation. [Learn how to use it](https://danrus1100.github.io/rtp-rpf-docs/rpt/experimental)
+ - Added Expressions API. [Learn how to use it here](https://danrus1100.github.io/rtp-rpf-docs/ru/rpt/expressions.html)
+ - Added new `select` and `condition` properties. 
+ - Updated Arm Rotation API.

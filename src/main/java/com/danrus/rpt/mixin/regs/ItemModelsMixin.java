@@ -1,9 +1,6 @@
 package com.danrus.rpt.mixin.regs;
 
-import com.danrus.rpt.impl.model.ArmTransformWrapper;
-import com.danrus.rpt.impl.model.RegexItemModel;
-import com.danrus.rpt.impl.model.TemplateItemModel;
-import com.danrus.rpt.impl.model.VariableBlockModelWrapper;
+import com.danrus.rpt.impl.model.*;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
@@ -31,5 +28,6 @@ public class ItemModelsMixin {
         ID_MAPPER.put(VariableBlockModelWrapper.Unbaked.ID, VariableBlockModelWrapper.Unbaked.MAP_CODEC);
         ID_MAPPER.put(RegexItemModel.Unbaked.ID, RegexItemModel.Unbaked.MAP_CODEC);
         ID_MAPPER.put(ArmTransformWrapper.Unbaked.ID, ArmTransformWrapper.Unbaked.MAP_CODEC);
+        ID_MAPPER.put(ExpressionToExpressionsModel.Unbaked.ID, ExpressionToExpressionsModel.Unbaked.MAP_CODEC);
     }
 }

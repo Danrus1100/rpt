@@ -40,6 +40,9 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             HumanoidModel.ArmPose vanillaPose = transform.getVanillaIfPresent();
             if (vanillaPose != null) {
                 if (!transform.swing()) rightArm.resetPose();
+                //? >=1.21.11
+                //renderState.rightArmPose = vanillaPose;
+
                 original.call(renderState
                         //? <1.21.11
                         , vanillaPose
@@ -49,7 +52,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
             if (!transform.isEmpty()) {
                 transform.rotateModelPart(rightArm, head, true);
-                holder.rpt$setRightArmTransform(ArmTransform.EMPTY);
+//                holder.rpt$setRightArmTransform(ArmTransform.EMPTY);
                 return;
             }
         }
@@ -80,6 +83,9 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             HumanoidModel.ArmPose vanillaPose = transform.getVanillaIfPresent();
             if (vanillaPose != null) {
                 if (!transform.swing()) leftArm.resetPose();
+                //? >= 1.21.11
+                //renderState.rightArmPose = vanillaPose;
+
                 original.call(renderState
                         //? <1.21.11
                         , vanillaPose
@@ -89,7 +95,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
             if (!transform.isEmpty()) {
                 transform.rotateModelPart(leftArm, head, false);
-                holder.rpt$setLeftArmTransform(ArmTransform.EMPTY);
+//                holder.rpt$setLeftArmTransform(ArmTransform.EMPTY);
                 return;
             }
         }

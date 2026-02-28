@@ -24,21 +24,19 @@ public class Rpt implements ClientModInitializer {
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
 
+    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptItemParamsHolder holder) {
+        holder.rpt$clearParams();
+        signedItemModel.rpt$getParams().ifPresent(params -> {
+            holder.rpt$setParams(params);
+        });
+    }
+
     @Override
     public void onInitializeClient() {
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-
-//            if (event.getOwner() instanceof CustomArmTransformHolder holder/* && (event.getContext().displayContext() == ItemDisplayContext.THIRD_PERSON_LEFT_HAND || event.getContext().displayContext() == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)*/) {
-//                switch (event.getContext().displayContext()) {
-//                    case THIRD_PERSON_RIGHT_HAND -> holder.rpt$setRightArmTransform(ArmTransform.EMPTY);
-//                    case THIRD_PERSON_LEFT_HAND -> holder.rpt$setLeftArmTransform(ArmTransform.EMPTY);
-//                }
-//            }
-
-            signedItemModel.rpt$getParams().ifPresent(params -> {
-                RptItemParamsHolder.class.cast(event.getStack()).rpt$setParams(params);
-            });
+            RptItemParamsHolder holder = RptItemParamsHolder.class.cast(event.getStack());
+            prepareModelParams(signedItemModel, holder);
         });
 
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {

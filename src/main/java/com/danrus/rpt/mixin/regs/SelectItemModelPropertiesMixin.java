@@ -1,6 +1,9 @@
 package com.danrus.rpt.mixin.regs;
 
+import com.danrus.rpt.impl.select.BiomeLocationProperty;
+import com.danrus.rpt.impl.select.DifficultyTypeProperty;
 import com.danrus.rpt.impl.select.RptVariableProperty;
+import com.danrus.rpt.impl.select.WeatherTypeProperty;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperties;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.resources.ResourceLocation;
@@ -24,5 +27,8 @@ public class SelectItemModelPropertiesMixin {
     )
     private static void rpt$bootstrap(CallbackInfo ci) {
         ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "variable"), RptVariableProperty.castType());
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "biome"), BiomeLocationProperty.TYPE);
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "weather"), WeatherTypeProperty.TYPE);
+        ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath("rpt", "difficulty"), DifficultyTypeProperty.TYPE);
     }
 }

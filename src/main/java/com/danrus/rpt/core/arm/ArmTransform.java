@@ -1,55 +1,64 @@
 package com.danrus.rpt.core.arm;
 
+import com.danrus.rpt.core.NumberOrString;
 import com.danrus.rpt.duck.CustomArmTransformHolder;
+import com.ezylang.evalex.Expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
-public record ArmTransform(float x, float y, float z, boolean bob, boolean swing, boolean toHead, boolean isEmpty, String ofVanilla) {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    public static ArmTransform EMPTY = new ArmTransform(0, 0 , 0, true, true, false, true, "");
+public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z, boolean bob, boolean swing, String ofVanilla) {
 
-    public ArmTransform(float x, float y, float z, boolean bob, boolean swing, boolean toHead, String ofVanilla) {
-        this(x, y, z, bob, swing, toHead, false, ofVanilla);
+    public static ArmTransform EMPTY = new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, "");
+
+    private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
+
+    public boolean isEmpty() {
+        return x == NumberOrString.ZERO &&
+                y == NumberOrString.ZERO &&
+                z == NumberOrString.ZERO &&
+                bob && swing && ofVanilla.isEmpty();
     }
 
     public static ArmTransform fromVanilla(String name) {
-        return new ArmTransform(0, 0, 0, true, true, false, false, name);
+        return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, name);
     }
-
 
     public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm) {
         if (!swing) arm.resetPose();
 
-        float baseX = (float) Math.toRadians(x);
-        float baseY = (float) Math.toRadians(y);
-        float baseZ = (float) Math.toRadians(z);
+        long time = Minecraft.getInstance().level.getGameTime();
+        Map<String, Double> vars = Map.of(
+                "time", (double) time,
+                "hx", Math.toDegrees(head.xRot),
+                "hy", Math.toDegrees(head.yRot),
+                "hz", Math.toDegrees(head.zRot),
+                "arm", isRightArm ? 1.0 : -1.0
+        );
 
-        if (toHead) {
-            float cosZ = (float) Math.cos(baseZ);
-            float sinZ = (float) Math.sin(baseZ);
+        arm.xRot += (float) Math.toRadians(evaluate(x, vars));
+        arm.yRot += (float) Math.toRadians(evaluate(y, vars));
+        arm.zRot += (float) Math.toRadians(evaluate(z, vars));
+    }
 
-            float cosY = (float) Math.cos(baseY);
+    private static float evaluate(NumberOrString val, Map<String, Double> vars) {
+        String exprStr = val.expression();
+        if (exprStr.isEmpty()) return 0f;
 
-            // vertical
-            arm.xRot += baseX + (head.xRot * cosZ);
-            arm.yRot += baseY - (head.xRot * sinZ);
+        Expression exp = EXPR_CACHE.computeIfAbsent(exprStr, Expression::new);
+        vars.forEach(exp::with);
 
-            // horizontal
-            arm.yRot += (head.yRot * cosZ) * cosY;
-            arm.xRot += (head.yRot * sinZ) * cosY;
-
-            arm.zRot = baseZ;
-        } else {
-            arm.xRot += baseX;
-            arm.yRot += baseY;
-            arm.zRot += baseZ;
+        try {
+            return exp.evaluate().getNumberValue().floatValue();
+        } catch (Exception e) {
+            return 0f;
         }
     }
 
@@ -90,24 +99,28 @@ public record ArmTransform(float x, float y, float z, boolean bob, boolean swing
     }
 
     private static final Codec<ArmTransform> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.FLOAT.optionalFieldOf("x", 0f).forGetter(ArmTransform::x),
-            Codec.FLOAT.optionalFieldOf("y", 0f).forGetter(ArmTransform::y),
-            Codec.FLOAT.optionalFieldOf("z", 0f).forGetter(ArmTransform::z),
+            NumberOrString.CODEC.optionalFieldOf("x", NumberOrString.ZERO).forGetter(ArmTransform::x),
+            NumberOrString.CODEC.optionalFieldOf("y", NumberOrString.ZERO).forGetter(ArmTransform::y),
+            NumberOrString.CODEC.optionalFieldOf("z", NumberOrString.ZERO).forGetter(ArmTransform::z),
             Codec.BOOL.optionalFieldOf("bob", true).forGetter(ArmTransform::bob),
             Codec.BOOL.optionalFieldOf("swing", true).forGetter(ArmTransform::swing),
-                Codec.BOOL.optionalFieldOf("to_head", false).forGetter(ArmTransform::toHead),
             Codec.STRING.optionalFieldOf("type", "").forGetter(ArmTransform::ofVanilla)
     ).apply(instance, ArmTransform::new));
 
     public static final Codec<ArmTransform> CODEC = Codec.either(Codec.STRING, FULL_CODEC).xmap(
             either -> either.map(ArmTransform::fromVanilla, obj -> obj),
             obj -> {
-                // Если это просто ссылка на ванильную позу (координаты 0), пишем строку
-                if (obj.x() == 0 && obj.y() == 0 && obj.z() == 0 && obj.bob() && obj.swing() && !obj.toHead()) {
+                if (
+                    obj.x().expression().isEmpty() &&
+                    obj.y().expression().isEmpty() &&
+                    obj.z().expression().isEmpty() &&
+                    obj.bob() && obj.swing()
+                ) {
                     return Either.left(obj.ofVanilla());
                 }
                 return Either.right(obj);
             }
     );
+
 }
 
