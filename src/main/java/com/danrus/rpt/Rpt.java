@@ -6,10 +6,14 @@ import com.danrus.rpf.api.event.type.*;
 import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplatesManager;
+import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -20,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public class Rpt implements ClientModInitializer {
 
     private static final RptTemplatesManager templatesManager = new RptTemplatesManager();
+    private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
     private static final Logger log = LoggerFactory.getLogger(Rpt.class);
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
@@ -33,6 +38,8 @@ public class Rpt implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
+
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
             RptItemParamsHolder holder = RptItemParamsHolder.class.cast(event.getStack());
@@ -80,4 +87,6 @@ public class Rpt implements ClientModInitializer {
     public static RptTemplatesManager getTemplatesManager() {
         return templatesManager;
     }
+
+    public static TextureSwappersManager getTextureSwappersManager() {return swappersManager;}
 }
