@@ -57,15 +57,16 @@ public class TextureSwappersManager extends SimplePreparableReloadListener<Map<R
 
     public ResourceLocation swap(ResourceLocation original, ItemStack stack, @Nullable LivingEntity entity) {
 
-        String[] paths = original.getPath().replace(".png", ".json").split("/");
-        String fileName = paths[paths.length-1];
+        String path = original.getPath().replace(".png", "");
 
         ResourceLocation swapperLocation = ResourceLocation.fromNamespaceAndPath(
                 original.getNamespace(),
-                fileName
+                path
         );
 
-        List<TextureSwapper> swapperList = swappers.get(swapperLocation);
+        ResourceLocation fileLocation = LISTENER.idToFile(swapperLocation);
+
+        List<TextureSwapper> swapperList = swappers.get(fileLocation);
         if (swapperList == null) return original;
         for (TextureSwapper swapper : swapperList) {
             if (swapper == null) continue;
