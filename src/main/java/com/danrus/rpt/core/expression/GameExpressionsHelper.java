@@ -89,7 +89,6 @@ public class GameExpressionsHelper {
         }
     }
 
-    //TODO: remove RPT update markers
     private static Map<String, Double> generateGameVariables(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         Map<String, Double> vars = new HashMap<>();
 
@@ -106,7 +105,6 @@ public class GameExpressionsHelper {
         vars.put("maxHealth", 20.0);
         vars.put("motionY", 0.0);
 
-        // >=1.3.0 of RPT
         vars.put("motionX", 0.0);
         vars.put("motionZ", 0.0);
         vars.put("speed", 0.0);
@@ -125,7 +123,6 @@ public class GameExpressionsHelper {
         vars.put("hurtTime", 0.0);
         vars.put("deathTime", 0.0);
         vars.put("invulnerableTime", 0.0);
-        // end of 1.3.0 rpt
 
         vars.put("age", 0.0);
         vars.put("lightLevel", 0.0);
@@ -135,14 +132,12 @@ public class GameExpressionsHelper {
         vars.put("experienceLevel", 0.0);
         vars.put("armor", 0.0);
 
-        // start 1.3.0
         vars.put("xpProgress", 0.0);
         vars.put("totalXp", 0.0);
         vars.put("air", 0.0);
         vars.put("maxAir", 0.0);
         vars.put("attackCooldown", 0.0);
         vars.put("sleeping", 0.0);
-        // emd 1.3.0
 
         vars.put("lightSky", 0.0);
         vars.put("lightBlock", 0.0);
@@ -195,14 +190,12 @@ public class GameExpressionsHelper {
                 vars.put("experienceLevel", (double) player.experienceLevel);
                 vars.put("armor", (double) player.getArmorValue());
 
-                // start 1.3.0
                 vars.put("xpProgress", (double) player.experienceProgress);
                 vars.put("totalXp", (double) player.totalExperience);
                 vars.put("air", (double) player.getAirSupply());
                 vars.put("maxAir", (double) player.getMaxAirSupply());
                 vars.put("attackCooldown", (double) player.getAttackStrengthScale(0.0f));
                 vars.put("sleeping", player.isSleeping() ? 1.0 : 0.0);
-                // end 1.3.0
             }
 
             BlockPos entityPos = entity.blockPosition();
