@@ -9,14 +9,16 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z, boolean bob, boolean swing, String ofVanilla) {
+public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z, boolean bob, boolean swing, boolean attack, String ofVanilla) {
 
-    public static ArmTransform EMPTY = new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, "");
+    public static ArmTransform EMPTY = new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, "");
 
     private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
@@ -28,10 +30,10 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
     }
 
     public static ArmTransform fromVanilla(String name) {
-        return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, name);
+        return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, name);
     }
 
-    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm) {
+    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, PlayerRenderState state) {
         if (!swing) arm.resetPose();
 
         long time = Minecraft.getInstance().level.getGameTime();
@@ -40,7 +42,17 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                 "hx", Math.toDegrees(head.xRot),
                 "hy", Math.toDegrees(head.yRot),
                 "hz", Math.toDegrees(head.zRot),
-                "arm", isRightArm ? 1.0 : -1.0
+                "swing", (double) state.attackTime,
+                "swingArm", switch (state.attackArm) {
+                    case RIGHT -> 1.0;
+                    case LEFT -> -1.0;
+                },
+                "useArm", switch (state.useItemHand) {
+                    case MAIN_HAND -> 1.0;
+                    case OFF_HAND -> -1.0;
+                },
+                "useTick", (double) state.useItemRemainingTicks,
+                "holdArm", isRightArm ? 1.0 : -1.0
         );
 
         arm.xRot += (float) Math.toRadians(evaluate(x, vars));
@@ -104,6 +116,7 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
             NumberOrString.CODEC.optionalFieldOf("z", NumberOrString.ZERO).forGetter(ArmTransform::z),
             Codec.BOOL.optionalFieldOf("bob", true).forGetter(ArmTransform::bob),
             Codec.BOOL.optionalFieldOf("swing", true).forGetter(ArmTransform::swing),
+            Codec.BOOL.optionalFieldOf("attack", true).forGetter(ArmTransform::attack),
             Codec.STRING.optionalFieldOf("type", "").forGetter(ArmTransform::ofVanilla)
     ).apply(instance, ArmTransform::new));
 
@@ -114,7 +127,7 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                     obj.x().expression().isEmpty() &&
                     obj.y().expression().isEmpty() &&
                     obj.z().expression().isEmpty() &&
-                    obj.bob() && obj.swing()
+                    obj.bob() && obj.swing() && obj.attack()
                 ) {
                     return Either.left(obj.ofVanilla());
                 }
