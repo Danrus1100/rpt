@@ -51,7 +51,7 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                     case MAIN_HAND -> 1.0;
                     case OFF_HAND -> -1.0;
                 },
-                //? < 1.21.11 {
+                //? < 1.21.10 {
                 "useTick", (double) state.useItemRemainingTicks,
                 //?} else {
                 /*"useTick", (double) state.ticksUsingItem,
