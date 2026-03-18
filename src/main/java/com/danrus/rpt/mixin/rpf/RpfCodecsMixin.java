@@ -36,7 +36,7 @@ public class RpfCodecsMixin {
                 ResourceLocation.CODEC.optionalFieldOf("rpt$patch"),
                 (o, resourceLocation) -> {
                     if (o instanceof PatchInformer informer && resourceLocation.isPresent()) {
-                        informer.rpt$setPatchPath(resourceLocation.get());
+                        informer.rpt$setPatchPath(resourceLocation.orElse(null));
                     }
                 },
                 o -> {

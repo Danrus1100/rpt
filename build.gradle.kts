@@ -174,8 +174,18 @@ publishing {
 
     repositories {
         maven {
-            name = "Shlakoblock"
+            name = "ShlakoblockReleases"
             url = uri("https://maven.shlakoblock.com/releases")
+
+            credentials {
+                username = project.findProperty("shlakoblock-maven-username")?.toString()
+                password = project.findProperty("shlakoblock-maven-password")?.toString()
+            }
+        }
+
+        maven {
+            name = "ShlakoblockSnapshots"
+            url = uri("https://maven.shlakoblock.com/snapshots")
 
             credentials {
                 username = project.findProperty("shlakoblock-maven-username")?.toString()

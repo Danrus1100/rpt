@@ -12,6 +12,9 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+
+import java.util.function.Supplier;
 
 @Mixin(HumanoidModel.class)
 public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
@@ -27,12 +30,8 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         //? >= 1.21.11
         //HumanoidModel.ArmPose pose = renderState.rightArmPose;
 
-        ItemStackRenderState stackState =
-                //? < 1.21.11 {
-                renderState.rightHandItem;
-                 //? } else {
-                /*renderState.rightHandItemState;
-        *///?}
+        ItemStackRenderState stackState = rpt$getRightItem(renderState);
+
 
         if (renderState instanceof PlayerRenderState playerRenderState && stackState instanceof CustomArmTransformHolder holder) {
             ArmTransform transform = holder.rpt$getRightArmTransform();
@@ -69,12 +68,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         //? >= 1.21.11
         //HumanoidModel.ArmPose pose = renderState.leftArmPose;
 
-        ItemStackRenderState stackState =
-                //? < 1.21.11 {
-                renderState.leftHandItem;
-                //? } else {
-                /*renderState.leftHandItemState;
-                *///?}
+        ItemStackRenderState stackState = rpt$getLeftItem(renderState);
 
         if (renderState instanceof PlayerRenderState playerRenderState && stackState instanceof CustomArmTransformHolder holder) {
             ArmTransform transform = holder.rpt$getLeftArmTransform();
@@ -101,5 +95,53 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                 //? <1.21.11
                 , pose
         );
+    }
+
+    @WrapMethod(method = "setupAttackAnimation")
+    private void rpt$wrapAttack(HumanoidRenderState humanoidRenderState,
+                                //<=1.21.10
+                                // float ageInTicks,
+                                Operation<Void> original) {
+        Runnable vanilla = () ->
+                original.call(humanoidRenderState
+                            //<=1.21.10
+                            //, float ageInTicks
+                );
+
+        if (humanoidRenderState instanceof PlayerRenderState playerRenderState) {
+            ArmTransform transform;
+            switch (playerRenderState.attackArm) {
+                case LEFT -> transform = ((CustomArmTransformHolder)rpt$getLeftItem(playerRenderState)).rpt$getLeftArmTransform();
+                case RIGHT -> transform = ((CustomArmTransformHolder)rpt$getRightItem(playerRenderState)).rpt$getRightArmTransform();
+                default -> {
+                    vanilla.run();
+                    return;
+                }
+            }
+            if (!transform.attack()) return;
+            vanilla.run();
+        } else {
+            vanilla.run();
+        }
+    }
+
+    @Unique
+    private static <T extends HumanoidRenderState> ItemStackRenderState rpt$getRightItem(T renderState) {
+        return
+        //? < 1.21.11 {
+        renderState.rightHandItem;
+         //? } else {
+        /*renderState.rightHandItemState;
+        *///?}
+    }
+
+    @Unique
+    private static <T extends HumanoidRenderState> ItemStackRenderState rpt$getLeftItem(T renderState) {
+        return
+        //? < 1.21.11 {
+        renderState.leftHandItem;
+         //? } else {
+        /*renderState.leftHandItemState;
+        *///?}
     }
 }
