@@ -3,18 +3,18 @@ package com.danrus.rpt.core.patch;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public record ItemModelPatch(Identifier template, Map<String, ItemModel.Unbaked> captures) {
+public record ItemModelPatch(ResourceLocation template, Map<String, ItemModel.Unbaked> captures) {
 
     public static final Codec<ItemModelPatch> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            Identifier.CODEC.fieldOf("template").forGetter(ItemModelPatch::template)
+            ResourceLocation.CODEC.fieldOf("template").forGetter(ItemModelPatch::template)
     ).apply(inst, ItemModelPatch::new));
 
-    public ItemModelPatch(Identifier template) {
+    public ItemModelPatch(ResourceLocation template) {
         this(template, new HashMap<>());
     }
 

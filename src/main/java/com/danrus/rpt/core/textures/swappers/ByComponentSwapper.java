@@ -12,7 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public record ByComponentSwapper<T>(
     public static final MapCodec<ByComponentSwapper.Unbaked<?>> MAP_CODEC = Unbaked.MAP_CODEC;
 
     @Override
-    public void swap(ItemStack stack, @Nullable LivingEntity entity, List<Identifier> applier) {
+    public void swap(ItemStack stack, @Nullable LivingEntity entity, List<ResourceLocation> applier) {
         T value = stack.get(componentType);
         TextureSwapper result = valueToTexture.get(value);
         TextureSwapper toSwap = result == null ? fallback : result;

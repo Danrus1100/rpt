@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +70,7 @@ public class RegexItemModel extends AbstractRpfItemModel{
         ).apply(instance, Unbaked::new));
 
 
-        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "regex");
+        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "regex");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

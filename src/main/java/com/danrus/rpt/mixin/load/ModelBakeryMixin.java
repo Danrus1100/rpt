@@ -23,14 +23,14 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     ResolvedModel missingModel;
 
     //? if >= 1.21.10 {
-    @Shadow
+    /*@Shadow
     @Final
     private MaterialSet materials;
 
     @Shadow
     @Final
     private net.minecraft.client.renderer.PlayerSkinRenderCache playerSkinRenderCache;
-    //?}
+    *///?}
 
     @Override
     public ItemModel.BakingContext rpt$createBakingContext(ModelBaker baker) {
@@ -38,10 +38,10 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
                 baker,
                 entityModelSet,
                 //? if >= 1.21.10
-                materials, playerSkinRenderCache,
+                //materials, playerSkinRenderCache,
                 ModelBakery.MissingModels.bake(missingModel, baker.sprites()
                         //? if >=1.21.11
-                        , PartCacheImplInvoker.rpt$create()
+                        //, PartCacheImplInvoker.rpt$create()
                 ).item(),
                 null
         );
@@ -50,14 +50,14 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     @Override
     public ModelBaker rpt$createModelBaker(SpriteGetter spriteGetter) {
         //? if >= 1.21.11
-        ModelBakery.PartCacheImpl parts = PartCacheImplInvoker.rpt$create();
+        //ModelBakery.PartCacheImpl parts = PartCacheImplInvoker.rpt$create();
         return ModelBakerImplInvoker.rpt$create(
                 (ModelBakery) (Object) this,
                 spriteGetter
                 //? >= 1.21.11 {
-                , parts,
+                /*, parts,
                 ModelBakery.MissingModels.bake(this.missingModel, spriteGetter, parts)
-                //? }
+                *///? }
         );
     }
 }

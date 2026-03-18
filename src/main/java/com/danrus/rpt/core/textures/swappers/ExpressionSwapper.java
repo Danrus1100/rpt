@@ -9,7 +9,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public record ExpressionSwapper(String main, List<ExpressionsCase<TextureSwapper>> cases, TextureSwapper fallback) implements TextureSwapper {
     @Override
-    public void swap(ItemStack stack, @Nullable LivingEntity entity, List<Identifier> pendingSwapperApply) {
+    public void swap(ItemStack stack, @Nullable LivingEntity entity, List<ResourceLocation> pendingSwapperApply) {
         Level level = entity != null ? entity.level() : null;
         ClientLevel clientLevel = level != null && level.isClientSide() ? (ClientLevel) level : null;
 

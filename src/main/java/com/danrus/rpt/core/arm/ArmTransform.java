@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
         return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, name);
     }
 
-    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, AvatarRenderState state) {
+    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, PlayerRenderState state) {
         if (!swing) arm.resetPose();
 
         long time = Minecraft.getInstance().level.getGameTime();
@@ -52,10 +52,10 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                     case OFF_HAND -> -1.0;
                 },
                 //? < 1.21.11 {
-                /*"useTick", (double) state.useItemRemainingTicks,
-                *///?} else {
-                "useTick", (double) state.ticksUsingItem,
-                //?}
+                "useTick", (double) state.useItemRemainingTicks,
+                //?} else {
+                /*"useTick", (double) state.ticksUsingItem,
+                *///?}
                 "holdArm", isRightArm ? 1.0 : -1.0
         );
 
@@ -100,16 +100,16 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
             case "bow_and_arrow" -> HumanoidModel.ArmPose.BOW_AND_ARROW;
             case "throw_trident" ->
                     //? <= 1.21.10
-                    //HumanoidModel.ArmPose.THROW_SPEAR;
+                    HumanoidModel.ArmPose.THROW_SPEAR;
                     //? >= 1.21.11
-                    HumanoidModel.ArmPose.THROW_TRIDENT;
+                    //HumanoidModel.ArmPose.THROW_TRIDENT;
             case "crossbow_charge" -> HumanoidModel.ArmPose.CROSSBOW_CHARGE;
             case "crossbow_hold" -> HumanoidModel.ArmPose.CROSSBOW_HOLD;
             case "spyglass" -> HumanoidModel.ArmPose.SPYGLASS;
             case "toot_horn" -> HumanoidModel.ArmPose.TOOT_HORN;
             case "brush" -> HumanoidModel.ArmPose.BRUSH;
             //? >= 1.21.11
-            case "spear" -> HumanoidModel.ArmPose.SPEAR;
+            //case "spear" -> HumanoidModel.ArmPose.SPEAR;
             default -> null;
         };
     }

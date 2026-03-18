@@ -12,7 +12,7 @@ import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +53,7 @@ public class Rpt implements ClientModInitializer {
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
-                        .asLivingEntity()
+                        //.asLivingEntity()
                         , event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }

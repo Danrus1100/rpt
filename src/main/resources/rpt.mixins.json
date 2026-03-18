@@ -22,7 +22,8 @@
     "render.entity.LivingEntityHolderMixins",
     "render.entity.HumanoidMobRendererMixin",
     "render.entity.HumanoidArmorLayerMixin",
-    "rpf.RpfCodecsMixin"
+    "rpf.RpfCodecsMixin",
+    "ItemModelMixin"
   ],
   "mixins": [
     "regs.SelectItemModelPropertiesMixin",

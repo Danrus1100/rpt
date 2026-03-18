@@ -1,8 +1,8 @@
 package com.danrus.rpt.core.textures;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 @FunctionalInterface
 public interface SwapApplier {
-    void apply(Identifier location);
+    void apply(ResourceLocation location);
 }

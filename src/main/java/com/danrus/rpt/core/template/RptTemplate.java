@@ -13,7 +13,7 @@ public record RptTemplate(ItemModel model, RptItemParams params, boolean needReb
 
     public static record Unbaked(ItemModel.Unbaked unbaked, RptItemParams params) {
         public static final Codec<Unbaked> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ItemModels.CODEC.fieldOf("value").forGetter(Unbaked::unbaked),
+                ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::unbaked),
                 RptItemParams.CODEC.optionalFieldOf("rpt", RptItemParams.EMPTY).forGetter(Unbaked::params)
         ).apply(instance, Unbaked::new));
 

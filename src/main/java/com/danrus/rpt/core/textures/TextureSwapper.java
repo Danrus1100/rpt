@@ -1,7 +1,7 @@
 package com.danrus.rpt.core.textures;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +15,7 @@ public interface TextureSwapper {
      * @param entity related entity
      * @param pendingSwapperApply texture location applier list. if you want to apply location, you should to add applier to list
      */
-    void swap(ItemStack stack, @Nullable LivingEntity entity, List<Identifier> pendingSwapperApply);
+    void swap(ItemStack stack, @Nullable LivingEntity entity, List<ResourceLocation> pendingSwapperApply);
 
     public interface Unbaked {
         TextureSwapper bake();

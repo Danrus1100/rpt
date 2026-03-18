@@ -12,9 +12,9 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 //? >=1.21.11 {
-import net.minecraft.world.attribute.EnvironmentAttribute;
+/*import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-//? }
+*///? }
 
 import org.jetbrains.annotations.Nullable;
 
@@ -211,12 +211,12 @@ public class GameExpressionsHelper {
                 vars.put("biomeTemp", (double) biome.getBaseTemperature());
 
                 //? <=1.21.10 {
-                /*vars.put("moonPhase", (double) level.getMoonPhase());
+                vars.put("moonPhase", (double) level.getMoonPhase());
                 vars.put("sunAngle", (double) level.getSunAngle(1.0f));
-                *///?} else {
-                vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
+                //?} else {
+                /*vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
                 vars.put("sunAngle", level.environmentAttributes().getDimensionValue(EnvironmentAttributes.SUN_ANGLE).doubleValue());
-                //?}
+                *///?}
             }
         }
 
