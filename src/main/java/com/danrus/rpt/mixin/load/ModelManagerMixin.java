@@ -32,7 +32,7 @@ public class ModelManagerMixin {
     /*private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.SharedState sharedState, Executor executor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
         ResourceManager resourceManager = sharedState.resourceManager();
     *///?}
-        Rpt.rpt$repairFuture = Rpt.getTemplatesManager().prepare(resourceManager, executor);
+        Rpt.rpt$repairFuture = Rpt.getReloadManager().prepare(resourceManager, executor);
         return original.call
                 //? if <=1.21.8 {
                 (preparationBarrier, resourceManager, executor, executor2);
@@ -46,7 +46,7 @@ public class ModelManagerMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;bakeModels(Lnet/minecraft/client/resources/model/SpriteGetter;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;")
     )
     private static CompletableFuture<ModelBakery.BakingResult> rpt$wrapLoadModels(ModelBakery instance, SpriteGetter sprites, Executor executor, Operation<CompletableFuture<ModelBakery.BakingResult>> original) {
-        return Rpt.getTemplatesManager().bake(
+        return Rpt.getReloadManager().bake(
                 (BakingContextSource) instance,
                 ((ModelBakerSource)instance).rpt$createModelBaker(sprites),
                 executor

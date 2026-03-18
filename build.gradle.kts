@@ -51,6 +51,11 @@ stonecutter{
 }
 
 dependencies {
+    fun implementationAndInclude(dependencyNotation: Any) {
+        implementation(dependencyNotation)
+        include(dependencyNotation)
+    }
+
     minecraft("com.mojang:minecraft:${findProperty("deps.mc")}")
     mappings(loom.layered() {
         officialMojangMappings()
@@ -61,8 +66,9 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
     modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
-    implementation("com.ezylang:EvalEx:3.6.0")
-    include("com.ezylang:EvalEx:3.6.0")
+
+    implementationAndInclude("com.ezylang:EvalEx:3.6.0")
+    implementationAndInclude("com.danrus:bb4j:1.0")
 }
 
 tasks.processResources {

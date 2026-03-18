@@ -4,6 +4,8 @@ import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
 import com.danrus.rpt.core.arm.ArmTransform;
+import com.danrus.rpt.core.bake.RptModelBakeReloadManager;
+import com.danrus.rpt.core.bbmodel.RptBbModelManager;
 import com.danrus.rpt.core.item.RptItemParams;
 import com.danrus.rpt.core.template.RptTemplatesManager;
 import com.danrus.rpt.duck.*;
@@ -20,6 +22,10 @@ import java.util.concurrent.CompletableFuture;
 public class Rpt implements ClientModInitializer {
 
     private static final RptTemplatesManager templatesManager = new RptTemplatesManager();
+    private static final RptBbModelManager bbmodelsManager = new RptBbModelManager();
+
+    private static final RptModelBakeReloadManager reloadManager = new RptModelBakeReloadManager();
+
     private static final Logger log = LoggerFactory.getLogger(Rpt.class);
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
@@ -33,6 +39,8 @@ public class Rpt implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        reloadManager.add(templatesManager);
+        reloadManager.add(bbmodelsManager);
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
             RptItemParamsHolder holder = RptItemParamsHolder.class.cast(event.getStack());
@@ -79,5 +87,13 @@ public class Rpt implements ClientModInitializer {
 
     public static RptTemplatesManager getTemplatesManager() {
         return templatesManager;
+    }
+
+    public static RptBbModelManager getBbmodelsManager() {
+        return bbmodelsManager;
+    }
+
+    public static RptModelBakeReloadManager getReloadManager() {
+        return reloadManager;
     }
 }
