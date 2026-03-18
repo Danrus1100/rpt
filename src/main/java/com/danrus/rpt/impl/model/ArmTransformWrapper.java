@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +52,7 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
                 ArmTransform.CODEC.optionalFieldOf("transform", ArmTransform.EMPTY).forGetter(Unbaked::transform)
         ).apply(i, Unbaked::new));
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "arm_transform");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "arm_transform");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

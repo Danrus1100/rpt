@@ -12,7 +12,7 @@ import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +53,7 @@ public class Rpt implements ClientModInitializer {
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
-                        //.asLivingEntity()
+                        .asLivingEntity()
                         , event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }
@@ -62,7 +62,7 @@ public class Rpt implements ClientModInitializer {
         Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {
             if (event.getStage() == AbstractStagedEvent.Stage.PRE) {
                 if (Rpt.rpt$repairFuture == null) {
-                    log.error("Templates were not prepared in time for model discovery. it shouldn't happen!");
+                    log.error("Templates were not prepared in time for value discovery. it shouldn't happen!");
                     return;
                 }
                 Rpt.rpt$repairFuture.join();

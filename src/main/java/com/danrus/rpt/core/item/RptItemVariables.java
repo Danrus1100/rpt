@@ -3,28 +3,43 @@ package com.danrus.rpt.core.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
+import static com.danrus.rpt.core.expression.GameExpressionsHelper.RESERVED_VARIABLE_NAME;
+
+public record RptItemVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, Identifier> models) {
 
     public static final Codec<RptItemVariables> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.STRING)
                     .optionalFieldOf("strings", Map.of())
+                    .validate(RptItemVariables::validateNames)
                     .forGetter(RptItemVariables::strings),
             Codec.unboundedMap(Codec.STRING, Codec.DOUBLE)
                     .optionalFieldOf("numbers", Map.of())
+                    .validate(RptItemVariables::validateNames)
                     .forGetter(RptItemVariables::numbers),
             Codec.unboundedMap(Codec.STRING, Codec.BOOL)
                     .optionalFieldOf("flags", Map.of())
+                    .validate(RptItemVariables::validateNames)
                     .forGetter(RptItemVariables::flags),
-            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
+            Codec.unboundedMap(Codec.STRING, Identifier.CODEC)
                     .optionalFieldOf("models", Map.of())
+                    .validate(RptItemVariables::validateNames)
                     .forGetter(RptItemVariables::models)
     ).apply(instance, RptItemVariables::new));
+
+    private static <T> DataResult<Map<String, T>> validateNames(Map<String, T> candidates) {
+        for (String str : candidates.keySet()) {
+            if (RESERVED_VARIABLE_NAME.equals(str)) {
+                return DataResult.error(() -> RESERVED_VARIABLE_NAME + " is reserved variable name and can't be used!");
+            }
+        }
+        return DataResult.success(candidates);
+    }
 
     public static final RptItemVariables EMPTY = new RptItemVariables(Map.of(), Map.of(), Map.of(), Map.of());
 
@@ -51,7 +66,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         Map<String, Boolean> newFlags = new HashMap<>(this.flags);
         newFlags.putAll(other.flags);
 
-        Map<String, ResourceLocation> newModels = new HashMap<>(this.models);
+        Map<String, Identifier> newModels = new HashMap<>(this.models);
         newModels.putAll(other.models);
 
         return new RptItemVariables(
@@ -73,7 +88,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
                 case "string" -> STRING;
                 case "number" -> NUMBER;
                 case "flag" -> FLAG;
-                case "model" -> MODEL;
+                case "value" -> MODEL;
                 default -> throw new IllegalArgumentException("Unknown variable type:" + name);
             };
         }
@@ -83,7 +98,7 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
                 case "string" -> Codec.STRING;
                 case "number" -> Codec.DOUBLE;
                 case "flag" -> Codec.BOOL;
-                case "model" -> ResourceLocation.CODEC;
+                case "value" -> Identifier.CODEC;
                 default -> throw new IllegalArgumentException("Unknown variable type:" + this);
             };
         }
@@ -106,6 +121,6 @@ public record RptItemVariables(Map<String, String> strings, Map<String, Double> 
         public static final Type<String> STRING = new Type<>(String.class, "string");
         public static final Type<Double> NUMBER = new Type<>(Double.class, "number");
         public static final Type<Boolean> FLAG = new Type<>(Boolean.class, "flag");
-        public static final Type<ResourceLocation> MODEL = new Type<>(ResourceLocation.class, "model");
+        public static final Type<Identifier> MODEL = new Type<>(Identifier.class, "value");
     }
 }

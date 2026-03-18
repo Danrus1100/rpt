@@ -18,7 +18,10 @@
     "regs.ConditionalItemModelPropertiesMixin",
     "regs.ItemModelsMixin",
     "render.GuiMixin",
-    "render.entity.EquipmentLayerRendererMixin"
+    "render.entity.EquipmentLayerRendererMixin",
+    "render.entity.LivingEntityHolderMixins",
+    "render.entity.HumanoidMobRendererMixin",
+    "render.entity.HumanoidArmorLayerMixin"
   ],
   "mixins": [
     "regs.SelectItemModelPropertiesMixin",
