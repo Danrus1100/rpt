@@ -48,7 +48,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
         RptItemVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptItemParams.EMPTY).variables();
         return  ((RpfItemModel)selectModelToUpdate(vars, context.level(), owner.get() == null ? null : owner.get()
                 //? >=1.21.10
-                // .asLivingEntity()
+                 .asLivingEntity()
                 , context.seed()
         )).rpf$doDelegate(context, stack, owner.get(), prev, collector);
     }
@@ -56,9 +56,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
         RptItemVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptItemParams.EMPTY).variables();
-        selectModelToUpdate(vars, level, owner.get() == null ? null : owner.get()
-                //? >=1.21.10
-                //.asLivingEntity()
+        selectModelToUpdate(vars, level, owner.get() == null ? null : owner.asLivingEntity()
                 , seed).update(
                 renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed
         );

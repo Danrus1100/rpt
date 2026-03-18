@@ -26,4 +26,11 @@ public class OwnerHolder {
      *///? } else {
     @Nullable public net.minecraft.world.entity.ItemOwner get() {return owner;}
     //? }
+
+    @Nullable
+    public LivingEntity asLivingEntity() {
+        return get()
+        //? >=1.21.10
+        .asLivingEntity();
+    }
 }

@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
         return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, name);
     }
 
-    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, PlayerRenderState state) {
+    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, AvatarRenderState state) {
         if (!swing) arm.resetPose();
 
         long time = Minecraft.getInstance().level.getGameTime();
@@ -51,7 +51,11 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                     case MAIN_HAND -> 1.0;
                     case OFF_HAND -> -1.0;
                 },
-                "useTick", (double) state.useItemRemainingTicks,
+                //? < 1.21.11 {
+                /*"useTick", (double) state.useItemRemainingTicks,
+                *///?} else {
+                "useTick", (double) state.ticksUsingItem,
+                //?}
                 "holdArm", isRightArm ? 1.0 : -1.0
         );
 
