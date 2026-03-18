@@ -1,6 +1,6 @@
 package com.danrus.rpt.core.arm;
 
-import com.danrus.rpt.core.NumberOrString;
+import com.danrus.rpt.core.expression.NumberOrString;
 import com.danrus.rpt.duck.CustomArmTransformHolder;
 import com.ezylang.evalex.Expression;
 import com.mojang.datafixers.util.Either;
@@ -96,16 +96,16 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
             case "bow_and_arrow" -> HumanoidModel.ArmPose.BOW_AND_ARROW;
             case "throw_trident" ->
                     //? <= 1.21.10
-                    HumanoidModel.ArmPose.THROW_SPEAR;
+                    //HumanoidModel.ArmPose.THROW_SPEAR;
                     //? >= 1.21.11
-                    //HumanoidModel.ArmPose.THROW_TRIDENT;
+                    HumanoidModel.ArmPose.THROW_TRIDENT;
             case "crossbow_charge" -> HumanoidModel.ArmPose.CROSSBOW_CHARGE;
             case "crossbow_hold" -> HumanoidModel.ArmPose.CROSSBOW_HOLD;
             case "spyglass" -> HumanoidModel.ArmPose.SPYGLASS;
             case "toot_horn" -> HumanoidModel.ArmPose.TOOT_HORN;
             case "brush" -> HumanoidModel.ArmPose.BRUSH;
             //? >= 1.21.11
-            //case "spear" -> HumanoidModel.ArmPose.SPEAR;
+            case "spear" -> HumanoidModel.ArmPose.SPEAR;
             default -> null;
         };
     }

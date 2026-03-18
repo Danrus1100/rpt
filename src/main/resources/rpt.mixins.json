@@ -8,20 +8,26 @@
   },
   "client": [
     "accessor.ModelBakerImplInvoker",
+    "item.select.SelectItemModelMixin",
+    "item.select.UnbakedMixin",
     "load.BakingContextMixin",
+    "load.ClientBootstrapsMixin",
     "load.ClientItemMixin",
     "load.ModelBakeryMixin",
     "load.ModelManagerMixin",
     "regs.ConditionalItemModelPropertiesMixin",
     "regs.ItemModelsMixin",
-    "item.select.SelectItemModelMixin",
-    "item.select.UnbakedMixin"
+    "render.GuiMixin",
+    "render.entity.EquipmentLayerRendererMixin",
+    "render.entity.LivingEntityHolderMixins",
+    "render.entity.HumanoidMobRendererMixin",
+    "render.entity.HumanoidArmorLayerMixin"
   ],
   "mixins": [
     "regs.SelectItemModelPropertiesMixin",
     "render.ItemStackMixin",
-    "rpf.SignedItemModelMixin",
+    "render.entity.HumanoidModelMixin",
     "render.entity.ItemStackRenderStateMixin",
-    "render.entity.HumanoidModelMixin"
+    "rpf.SignedItemModelMixin"
   ]
 }

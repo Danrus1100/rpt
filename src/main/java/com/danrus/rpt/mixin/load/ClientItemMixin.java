@@ -36,7 +36,7 @@ public class ClientItemMixin implements RptClientItem {
     )
     private static Codec<ClientItem> rpt$modifyCodec(java.util.function.Function<RecordCodecBuilder.Instance<ClientItem>, ? extends com.mojang.datafixers.kinds.App<RecordCodecBuilder.Mu<ClientItem>, ClientItem>> builder) {
         return RecordCodecBuilder.create(instance -> instance.group(
-                ItemModels.CODEC.fieldOf("model").forGetter(ClientItem::model),
+            ItemModels.CODEC.fieldOf("model").forGetter(ClientItem::model),
                 ClientItem.Properties.MAP_CODEC.forGetter(ClientItem::properties),
                 RptItemParams.CODEC.optionalFieldOf("rpt").forGetter(item -> RptClientItem.class.cast(item).rpt$getParams())
         ).apply(instance, (unbaked, properties, rptItemParams) -> {

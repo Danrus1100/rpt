@@ -31,6 +31,11 @@ loom {
     accessWidenerPath = project.file("src/main/resources/rpt.accesswidener")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 stonecutter{
     replacements {
         string {
