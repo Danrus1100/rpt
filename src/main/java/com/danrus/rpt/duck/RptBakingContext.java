@@ -1,8 +1,8 @@
 package com.danrus.rpt.duck;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 
 public interface RptBakingContext {
-    RptItemParams rpt$getParams();
-    void rpt$addParams(RptItemParams... params);
+    RptField rpt$getParams();
+    void rpt$addParams(RptField... params);
 }

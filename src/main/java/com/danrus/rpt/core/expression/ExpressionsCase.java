@@ -8,17 +8,17 @@ import java.util.Objects;
 
 public abstract class ExpressionsCase<T> {
 
-    private final List<NumberOrString> when;
+    private final List<NumericExpression> when;
     private final T value;
     private final boolean requireAll;
 
-    protected ExpressionsCase(List<NumberOrString> when, T value, boolean requireAll) {
+    protected ExpressionsCase(List<NumericExpression> when, T value, boolean requireAll) {
         this.when = List.copyOf(Objects.requireNonNull(when, "when"));
         this.value = Objects.requireNonNull(value, "value");
         this.requireAll = requireAll;
     }
 
-    public List<NumberOrString> when() {
+    public List<NumericExpression> when() {
         return when;
     }
 
@@ -37,7 +37,7 @@ public abstract class ExpressionsCase<T> {
 
     public static <T> Codec<ExpressionsCase<T>> codec(Codec<T> valueCodec, String valueFieldName) {
         return RecordCodecBuilder.create(instance -> instance.group(
-                NumberOrString.LIST_CODEC.fieldOf("when").forGetter(ExpressionsCase::when),
+                NumericExpression.LIST_CODEC.fieldOf("when").forGetter(ExpressionsCase::when),
                 valueCodec.fieldOf(valueFieldName).forGetter(ExpressionsCase::value),
                 Codec.BOOL.optionalFieldOf("all", false).forGetter(ExpressionsCase::requireAll)
         ).apply(instance, ExpressionsCase.Impl::new));
@@ -50,7 +50,7 @@ public abstract class ExpressionsCase<T> {
     protected abstract Codec<T> createValueCodec();
 
     private static final class Impl<T> extends ExpressionsCase<T> {
-        private Impl(List<NumberOrString> when, T value, boolean requireAll) {
+        private Impl(List<NumericExpression> when, T value, boolean requireAll) {
             super(when, value, requireAll);
         }
 

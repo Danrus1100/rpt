@@ -1,11 +1,11 @@
 package com.danrus.rpt.duck;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public interface RptClientItem {
-    Optional<RptItemParams> rpt$getParams();
-    void rpt$setParams(@Nullable RptItemParams params);
+    Optional<RptField> rpt$getParams();
+    void rpt$setParams(@Nullable RptField params);
 }

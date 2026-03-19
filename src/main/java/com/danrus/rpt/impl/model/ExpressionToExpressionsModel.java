@@ -6,10 +6,10 @@ import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.expression.ExpressionsCase;
 import com.danrus.rpt.core.expression.GameExpressionsHelper;
-import com.danrus.rpt.core.expression.NumberOrString;
+import com.danrus.rpt.core.expression.NumericExpression;
 import com.danrus.rpt.core.OwnerHolder;
-import com.danrus.rpt.core.item.RptItemParams;
-import com.danrus.rpt.core.item.RptItemVariables;
+import com.danrus.rpt.core.item.RptField;
+import com.danrus.rpt.core.item.RptVariables;
 import com.danrus.rpt.duck.RptItemParamsHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -45,7 +45,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
             collector.hit(ExpressionToExpressionsModel.class, "force cancel delegation");
             return false;
         }
-        RptItemVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptItemParams.EMPTY).variables();
+        RptVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
         return  ((RpfItemModel)selectModelToUpdate(vars, context.level(), owner.get() == null ? null : owner.get()
                 //? >=1.21.10
                  //.asLivingEntity()
@@ -55,14 +55,14 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
 
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
-        RptItemVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptItemParams.EMPTY).variables();
+        RptVariables vars = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
         selectModelToUpdate(vars, level, owner.get() == null ? null : owner.asLivingEntity()
                 , seed).update(
                 renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed
         );
     }
 
-    private ItemModel selectModelToUpdate(RptItemVariables vars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+    private ItemModel selectModelToUpdate(RptVariables vars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         return GameExpressionsHelper.selectValueFromCases(modelExpressions, main, vars.numbers(), level, entity, seed, fallback);
     }
 
@@ -102,7 +102,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
     }
 
     public static class BakedModelExpressionsCase extends ExpressionsCase<ItemModel>{
-        protected BakedModelExpressionsCase(List<NumberOrString> when, ItemModel value, boolean requireAll) {
+        protected BakedModelExpressionsCase(List<NumericExpression> when, ItemModel value, boolean requireAll) {
             super(when, value, requireAll);
         }
 

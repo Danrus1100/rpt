@@ -9,42 +9,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record RptItemParams(List<String> customFlags, RptItemVariables variables) {
-    public static final Codec<RptItemParams> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+public record RptField(List<String> customFlags, RptVariables variables) {
+    public static final Codec<RptField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.list(Codec.STRING)
                     .optionalFieldOf("custom_flags", List.of())
-                    .forGetter(RptItemParams::customFlags),
-            RptItemVariables.CODEC
-                    .optionalFieldOf("variables", RptItemVariables.EMPTY)
-                    .forGetter(RptItemParams::variables)
-    ).apply(instance, RptItemParams::new));
+                    .forGetter(RptField::customFlags),
+            RptVariables.CODEC
+                    .optionalFieldOf("variables", RptVariables.EMPTY)
+                    .forGetter(RptField::variables)
+    ).apply(instance, RptField::new));
 
-    public static final RptItemParams EMPTY = new RptItemParams(List.of(), RptItemVariables.EMPTY);
+    public static final RptField EMPTY = new RptField(List.of(), RptVariables.EMPTY);
 
-    public RptItemParams merge(RptItemParams other) {
+    public RptField merge(RptField other) {
         List<String> newFlags = new ArrayList<>(this.customFlags);
         newFlags.addAll(other.customFlags);
 
-        RptItemVariables newVariables = this.variables.merge(other.variables);
+        RptVariables newVariables = this.variables.merge(other.variables);
 
-        return new RptItemParams(List.copyOf(newFlags), newVariables);
+        return new RptField(List.copyOf(newFlags), newVariables);
     }
 
-    public static RptItemParams merge(RptItemParams target, RptItemParams source) {
+    public static RptField merge(RptField target, RptField source) {
         return target.merge(source);
     }
 
-    public static RptItemParams fromItemStack(ItemStack stack) {
+    public static RptField fromItemStack(ItemStack stack) {
         try {
             RptItemParamsHolder holder = RptItemParamsHolder.class.cast(stack);
-            Optional<RptItemParams> paramsOpt = holder.rpt$getParams();
+            Optional<RptField> paramsOpt = holder.rpt$getParams();
             return paramsOpt.orElse(EMPTY);
         } catch (ClassCastException e) {
             return EMPTY;
         }
     }
 
-    public static void putToItemStack(ItemStack stack, RptItemParams params) {
+    public static void putToItemStack(ItemStack stack, RptField params) {
         try {
             RptItemParamsHolder holder = RptItemParamsHolder.class.cast(stack);
             holder.rpt$setParams(params);

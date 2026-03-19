@@ -6,6 +6,7 @@ import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
 import com.danrus.rpt.core.arm.ArmTransform;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.CustomArmTransformHolder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -36,10 +37,11 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
 
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
+        ArmTransform withVars = new ArmTransform(transform, RptField.fromItemStack(stack));
         if (renderState instanceof CustomArmTransformHolder transformHolder) {
             switch (displayContext) {
-                case THIRD_PERSON_LEFT_HAND -> transformHolder.rpt$setLeftArmTransform(transform);
-                case THIRD_PERSON_RIGHT_HAND -> transformHolder.rpt$setRightArmTransform(transform);
+                case THIRD_PERSON_LEFT_HAND -> transformHolder.rpt$setLeftArmTransform(withVars);
+                case THIRD_PERSON_RIGHT_HAND -> transformHolder.rpt$setRightArmTransform(withVars);
             }
         }
         model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);

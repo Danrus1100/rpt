@@ -1,44 +1,62 @@
 package com.danrus.rpt.core.arm;
 
-import com.danrus.rpt.core.expression.NumberOrString;
+import com.danrus.rpt.core.expression.NumericExpression;
+import com.danrus.rpt.core.item.RptField;
+import com.danrus.rpt.core.item.RptVariables;
 import com.danrus.rpt.duck.CustomArmTransformHolder;
 import com.ezylang.evalex.Expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z, boolean bob, boolean swing, boolean attack, String ofVanilla) {
+public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla, RptVariables variables) {
 
-    public static ArmTransform EMPTY = new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, "");
+    public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla) {
+        this(x, y, z, bob, swing, attack, ofVanilla, RptVariables.EMPTY);
+    }
+
+    public ArmTransform(ArmTransform other, RptField field) {
+        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.ofVanilla, field.variables());
+    }
+
+    public static ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, "");
 
     private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
     public boolean isEmpty() {
-        return x == NumberOrString.ZERO &&
-                y == NumberOrString.ZERO &&
-                z == NumberOrString.ZERO &&
+        return x == NumericExpression.ZERO &&
+                y == NumericExpression.ZERO &&
+                z == NumericExpression.ZERO &&
                 bob && swing && ofVanilla.isEmpty();
     }
 
     public static ArmTransform fromVanilla(String name) {
-        return new ArmTransform(NumberOrString.ZERO, NumberOrString.ZERO, NumberOrString.ZERO, true, true, true, name);
+        return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, name);
     }
 
     public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, PlayerRenderState state) {
         if (!swing) arm.resetPose();
 
-        long time = Minecraft.getInstance().level.getGameTime();
-        Map<String, Double> vars = Map.of(
+        DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
+        float delta = state.isFullyFrozen ? 1.0f : deltaTracker.getGameTimeDeltaPartialTick(true);
+
+        long time = Minecraft.getInstance().level != null ? Minecraft.getInstance().level.getGameTime() : 0;
+
+        Map<String, Double> vars = new HashMap<>();
+
+        Map<String, Double> varsGame = Map.of(
                 "time", (double) time,
+                "delta", (double) delta,
                 "hx", Math.toDegrees(head.xRot),
                 "hy", Math.toDegrees(head.yRot),
                 "hz", Math.toDegrees(head.zRot),
@@ -59,12 +77,15 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
                 "holdArm", isRightArm ? 1.0 : -1.0
         );
 
+        vars.putAll(varsGame);
+        vars.putAll(variables.numbers());
+
         arm.xRot += (float) Math.toRadians(evaluate(x, vars));
         arm.yRot += (float) Math.toRadians(evaluate(y, vars));
         arm.zRot += (float) Math.toRadians(evaluate(z, vars));
     }
 
-    private static float evaluate(NumberOrString val, Map<String, Double> vars) {
+    private static float evaluate(NumericExpression val, Map<String, Double> vars) {
         String exprStr = val.expression();
         if (exprStr.isEmpty()) return 0f;
 
@@ -115,9 +136,9 @@ public record ArmTransform(NumberOrString x, NumberOrString y, NumberOrString z,
     }
 
     private static final Codec<ArmTransform> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NumberOrString.CODEC.optionalFieldOf("x", NumberOrString.ZERO).forGetter(ArmTransform::x),
-            NumberOrString.CODEC.optionalFieldOf("y", NumberOrString.ZERO).forGetter(ArmTransform::y),
-            NumberOrString.CODEC.optionalFieldOf("z", NumberOrString.ZERO).forGetter(ArmTransform::z),
+            NumericExpression.CODEC.optionalFieldOf("x", NumericExpression.ZERO).forGetter(ArmTransform::x),
+            NumericExpression.CODEC.optionalFieldOf("y", NumericExpression.ZERO).forGetter(ArmTransform::y),
+            NumericExpression.CODEC.optionalFieldOf("z", NumericExpression.ZERO).forGetter(ArmTransform::z),
             Codec.BOOL.optionalFieldOf("bob", true).forGetter(ArmTransform::bob),
             Codec.BOOL.optionalFieldOf("swing", true).forGetter(ArmTransform::swing),
             Codec.BOOL.optionalFieldOf("attack", true).forGetter(ArmTransform::attack),

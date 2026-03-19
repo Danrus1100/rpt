@@ -3,7 +3,6 @@ package com.danrus.rpt.core.template;
 import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.resources.FileToIdConverter;
@@ -19,10 +18,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-public class RptTemplatesManager {
+public class TemplatesManager {
 
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
-    private static final Logger log = LoggerFactory.getLogger(RptTemplatesManager.class);
+    private static final Logger log = LoggerFactory.getLogger(TemplatesManager.class);
 
     private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
     private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();

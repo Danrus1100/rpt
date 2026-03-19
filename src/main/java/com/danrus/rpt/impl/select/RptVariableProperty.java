@@ -1,7 +1,7 @@
 package com.danrus.rpt.impl.select;
 
-import com.danrus.rpt.core.item.RptItemParams;
-import com.danrus.rpt.core.item.RptItemVariables;
+import com.danrus.rpt.core.item.RptField;
+import com.danrus.rpt.core.item.RptVariables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public record RptVariableProperty<T>(RptItemVariables.Type<T> varType, String varName) implements RptSelectItemModelProperty<T> {
+public record RptVariableProperty<T>(RptVariables.Type<T> varType, String varName) implements RptSelectItemModelProperty<T> {
 
     public static final SelectItemModelProperty.Type<RptVariableProperty<?>, ?> TYPE = createType();
 
@@ -29,11 +29,11 @@ public record RptVariableProperty<T>(RptItemVariables.Type<T> varType, String va
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T> SelectItemModelProperty.Type<RptVariableProperty<T>, T> createTyped() {
-        MapCodec<SelectItemModel.UnbakedSwitch<RptVariableProperty<T>, T>> mapCodec = RptItemVariables.Type.CODEC.dispatchMap(
+        MapCodec<SelectItemModel.UnbakedSwitch<RptVariableProperty<T>, T>> mapCodec = RptVariables.Type.CODEC.dispatchMap(
                 "var_type",
                 unbakedSwitch -> ((RptVariableProperty<T>) unbakedSwitch.property()).varType(),
                 typeRaw -> {
-                    RptItemVariables.Type<T> type = (RptItemVariables.Type<T>) typeRaw;
+                    RptVariables.Type<T> type = (RptVariables.Type<T>) typeRaw;
                     return RecordCodecBuilder.mapCodec(instance -> instance.group(
                             Codec.STRING.fieldOf("var_name").forGetter(unbaked -> ((RptVariableProperty<T>) unbaked.property()).varName()),
                             SelectItemModelProperty.Type.createCasesFieldCodec((Codec<T>) type.codecOrThrow()).forGetter(unbaked -> unbaked.cases())
@@ -45,7 +45,7 @@ public record RptVariableProperty<T>(RptItemVariables.Type<T> varType, String va
     }
 
     @Override
-    public @Nullable T get(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i, ItemDisplayContext itemDisplayContext, RptItemParams params) {
+    public @Nullable T get(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i, ItemDisplayContext itemDisplayContext, RptField params) {
         return params.variables().get(varType, varName);
     }
 

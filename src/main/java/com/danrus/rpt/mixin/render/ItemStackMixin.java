@@ -1,6 +1,6 @@
 package com.danrus.rpt.mixin.render;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptItemParamsHolder;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -14,20 +14,20 @@ public class ItemStackMixin implements RptItemParamsHolder {
 
     @Nullable
     @Unique
-    private RptItemParams rpt$params;
+    private RptField rpt$params;
 
     @Override
-    public Optional<RptItemParams> rpt$getParams() {
+    public Optional<RptField> rpt$getParams() {
         return Optional.ofNullable(this.rpt$params);
     }
 
     @Override
-    public void rpt$setParams(RptItemParams params) {
+    public void rpt$setParams(RptField params) {
         this.rpt$params = params;
     }
 
     @Override
     public void rpt$clearParams() {
-        this.rpt$params = RptItemParams.EMPTY;
+        this.rpt$params = RptField.EMPTY;
     }
 }

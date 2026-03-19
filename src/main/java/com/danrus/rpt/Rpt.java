@@ -3,18 +3,15 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
-import com.danrus.rpt.core.arm.ArmTransform;
-import com.danrus.rpt.core.item.RptItemParams;
-import com.danrus.rpt.core.template.RptTemplatesManager;
+import com.danrus.rpt.core.item.RptField;
+import com.danrus.rpt.core.template.TemplatesManager;
 import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Rpt implements ClientModInitializer {
 
-    private static final RptTemplatesManager templatesManager = new RptTemplatesManager();
+    private static final TemplatesManager templatesManager = new TemplatesManager();
     private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
     private static final Logger log = LoggerFactory.getLogger(Rpt.class);
     @Nullable
@@ -49,7 +46,7 @@ public class Rpt implements ClientModInitializer {
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
             SelectItemModelProperty property = event.getProperty();
             if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptItemParams params = RptItemParamsHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getParams());
+                RptField params = RptItemParamsHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getParams());
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
@@ -72,7 +69,7 @@ public class Rpt implements ClientModInitializer {
         });
 
         Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext()).rpt$addParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptItemParams.EMPTY));
+            RptBakingContext.class.cast(event.getBakingContext()).rpt$addParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptField.EMPTY));
         });
 
         Rpf.getEventBus().register(PostBakeEvent.class, event -> {
@@ -84,7 +81,7 @@ public class Rpt implements ClientModInitializer {
         });
     }
 
-    public static RptTemplatesManager getTemplatesManager() {
+    public static TemplatesManager getTemplatesManager() {
         return templatesManager;
     }
 

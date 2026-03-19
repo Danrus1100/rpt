@@ -1,13 +1,15 @@
 package com.danrus.rpt.core.expression;
 
-import com.danrus.rpt.impl.model.ExpressionToExpressionsModel;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,7 +36,7 @@ public class GameExpressionsHelper {
 
         for (ExpressionsCase<T> entry : cases) {
             int req = 0;
-            for (NumberOrString nos : entry.when()) {
+            for (NumericExpression nos : entry.when()) {
                 String exprStr = nos.expression().trim();
 
                 if (exprStr.startsWith(">") || exprStr.startsWith("<") || exprStr.startsWith("=") || exprStr.startsWith("!")) {
@@ -92,8 +94,14 @@ public class GameExpressionsHelper {
     private static Map<String, Double> generateGameVariables(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         Map<String, Double> vars = new HashMap<>();
 
+        DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
+        float delta = (entity != null && level != null && level.tickRateManager().isEntityFrozen(entity))
+                ? 1.0F
+                : deltaTracker.getGameTimeDeltaPartialTick(true);
+
         vars.put("gameTime", (double) (level != null ? level.getGameTime() : 0));
         vars.put("dayTime", (double) (level != null ? level.getLevelData().getDayTime() : 0));
+        vars.put("delta", (double) delta);
         vars.put("seed", (double) seed);
 
         vars.put("holderX", 0.0);
@@ -194,8 +202,16 @@ public class GameExpressionsHelper {
                 vars.put("totalXp", (double) player.totalExperience);
                 vars.put("air", (double) player.getAirSupply());
                 vars.put("maxAir", (double) player.getMaxAirSupply());
-                vars.put("attackCooldown", (double) player.getAttackStrengthScale(0.0f));
+                vars.put("attackCooldown", (double) player.getAttackStrengthScale(delta));
                 vars.put("sleeping", player.isSleeping() ? 1.0 : 0.0);
+
+                // 1.3.0 start
+                vars.put("attackProgress", (double) player.getAttackAnim(delta));
+                float currUsageTime = player.getUseItemRemainingTicks() - delta + 1.0F;
+                @Nullable
+                ItemStack itemStack = player.getUseItem();
+                vars.put("usageProgress", itemStack.isEmpty() ? 0.0 : currUsageTime / itemStack.getUseDuration(player));
+                // 1.3.0 end
             }
 
             BlockPos entityPos = entity.blockPosition();
@@ -212,7 +228,7 @@ public class GameExpressionsHelper {
 
                 //? <=1.21.10 {
                 vars.put("moonPhase", (double) level.getMoonPhase());
-                vars.put("sunAngle", (double) level.getSunAngle(1.0f));
+                vars.put("sunAngle", (double) level.getSunAngle(delta));
                 //?} else {
                 /*vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
                 vars.put("sunAngle", level.environmentAttributes().getDimensionValue(EnvironmentAttributes.SUN_ANGLE).doubleValue());

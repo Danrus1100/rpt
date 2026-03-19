@@ -1,6 +1,6 @@
 package com.danrus.rpt.mixin.item.select;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptItemParamsHolder;
 import com.danrus.rpt.duck.RptSelectItemModel;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
@@ -20,15 +20,15 @@ import org.spongepowered.asm.mixin.injection.At;
 public class SelectItemModelMixin<T> implements RptSelectItemModel {
 
     @Unique
-    private RptItemParams rpt$params;
+    private RptField rpt$params;
 
     @Override
-    public void rpt$setParams(RptItemParams params) {
+    public void rpt$setParams(RptField params) {
         this.rpt$params = params;
     }
 
     @Override
-    public RptItemParams rpt$getParams() {
+    public RptField rpt$getParams() {
         return rpt$params;
     }
 
@@ -38,7 +38,7 @@ public class SelectItemModelMixin<T> implements RptSelectItemModel {
     )
     private T rpt$wrapGet(SelectItemModelProperty<T> instance, ItemStack stack, ClientLevel level, LivingEntity entity, int i, ItemDisplayContext itemDisplayContext, Operation<T> original) {
         if (instance instanceof RptSelectItemModelProperty<T> rptProperty) {
-            RptItemParams params = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(rpt$params);
+            RptField params = RptItemParamsHolder.class.cast(stack).rpt$getParams().orElse(rpt$params);
             return rptProperty.get(stack, level, entity, i, itemDisplayContext, rpt$params.merge(params));
         }
         return original.call(instance, stack, level, entity, i, itemDisplayContext);

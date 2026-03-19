@@ -1,8 +1,8 @@
 package com.danrus.rpt.duck;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 
 public interface RptSelectItemModel {
-    void rpt$setParams(RptItemParams params);
-    RptItemParams rpt$getParams();
+    void rpt$setParams(RptField params);
+    RptField rpt$getParams();
 }

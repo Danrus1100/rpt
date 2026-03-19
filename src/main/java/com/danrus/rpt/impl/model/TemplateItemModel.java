@@ -6,7 +6,7 @@ import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.Rpt;
 import com.danrus.rpt.core.OwnerHolder;
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -36,8 +36,8 @@ public class TemplateItemModel extends AbstractRpfItemModel {
 
     @Override
     public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner,int seed) {
-        RptItemParams merged = RptItemParams.merge(template.params(), RptItemParams.fromItemStack(stack));
-        RptItemParams.putToItemStack(stack, merged);
+        RptField merged = RptField.merge(template.params(), RptField.fromItemStack(stack));
+        RptField.putToItemStack(stack, merged);
         template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 

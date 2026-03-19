@@ -5,7 +5,7 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpf.core.item.SignedItemModel;
 import com.danrus.rpt.Rpt;
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptItemParamsHolder;
 import com.danrus.rpt.duck.RptSignedItemModel;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -25,15 +25,15 @@ public class SignedItemModelMixin implements RptSignedItemModel {
 
     @Unique
     @Nullable
-    private RptItemParams rpt$params;
+    private RptField rpt$params;
 
     @Override
-    public Optional<RptItemParams> rpt$getParams() {
+    public Optional<RptField> rpt$getParams() {
         return Optional.ofNullable(this.rpt$params);
     }
 
     @Override
-    public void rpt$setParams(@Nullable RptItemParams params) {
+    public void rpt$setParams(@Nullable RptField params) {
         this.rpt$params = params;
     }
 

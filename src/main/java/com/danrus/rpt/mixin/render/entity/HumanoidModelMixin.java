@@ -99,13 +99,13 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
     @WrapMethod(method = "setupAttackAnimation")
     private void rpt$wrapAttack(HumanoidRenderState humanoidRenderState,
-                                //<=1.21.10
-                                // float ageInTicks,
+                                //? <=1.21.10
+                                 float ageInTicks,
                                 Operation<Void> original) {
         Runnable vanilla = () ->
                 original.call(humanoidRenderState
-                            //<=1.21.10
-                            //, float ageInTicks
+                            //? <=1.21.10
+                            , ageInTicks
                 );
 
         if (humanoidRenderState instanceof PlayerRenderState playerRenderState) {

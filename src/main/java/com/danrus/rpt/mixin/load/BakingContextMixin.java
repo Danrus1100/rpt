@@ -1,6 +1,6 @@
 package com.danrus.rpt.mixin.load;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptBakingContext;
 import net.minecraft.client.renderer.item.ItemModel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,13 +14,13 @@ import java.util.List;
 public class BakingContextMixin implements RptBakingContext {
 
     @Unique
-    private List<RptItemParams> rpt$params = new ArrayList<>();
+    private List<RptField> rpt$params = new ArrayList<>();
 
     @Override
-    public RptItemParams rpt$getParams() {
-        if (rpt$params.isEmpty()) return RptItemParams.EMPTY;
+    public RptField rpt$getParams() {
+        if (rpt$params.isEmpty()) return RptField.EMPTY;
 
-        RptItemParams initial = rpt$params.getFirst();
+        RptField initial = rpt$params.getFirst();
 
         if (rpt$params.size() == 1) {
             return initial;
@@ -33,7 +33,7 @@ public class BakingContextMixin implements RptBakingContext {
     }
 
     @Override
-    public void rpt$addParams(RptItemParams... params) {
+    public void rpt$addParams(RptField... params) {
         this.rpt$params.addAll(Arrays.asList(params));
     }
 }
