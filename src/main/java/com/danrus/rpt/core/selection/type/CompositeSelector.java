@@ -26,7 +26,7 @@ public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements 
         @SuppressWarnings("unchecked")
         public static synchronized <T> MapCodec<Unbaked<T>> codec(Codec<T> valueCodec) {
             return RecordCodecBuilder.mapCodec(unbakedInstance -> unbakedInstance.group(
-                    NestedSelectors.codec(valueCodec).listOf().fieldOf("swappers").forGetter(Unbaked::swappers)
+                    NestedSelectors.codec(valueCodec).listOf().fieldOf("children").forGetter(Unbaked::swappers)
             ).apply(unbakedInstance, Unbaked::new));
         }
 

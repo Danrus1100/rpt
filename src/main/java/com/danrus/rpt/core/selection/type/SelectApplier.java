@@ -14,7 +14,7 @@ public record SelectApplier<T>(T value) implements NestedSelector<T>, NestedSele
 
     public static synchronized <T> MapCodec<SelectApplier<T>> codec(Codec<T> valueCodec) {
         return RecordCodecBuilder.mapCodec(i -> i.group(
-                valueCodec.fieldOf("texture").forGetter(applier -> applier.value())
+                valueCodec.fieldOf("value").forGetter(applier -> applier.value())
         ).apply(i, SelectApplier::new));
     }
 
