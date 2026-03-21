@@ -57,6 +57,9 @@ public class TemplateItemModel extends AbstractRpfItemModel {
         @Override
         public @NotNull ItemModel bake(BakingContext context) {
             RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, templateId);
+            if (template == null) {
+                throw new IllegalStateException("can't find template " + templateId);
+            }
             return new TemplateItemModel(template);
         }
 

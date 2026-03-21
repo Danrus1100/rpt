@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.Util;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -16,7 +17,7 @@ public record Vector3Expression(NumericExpression x, NumericExpression y, Numeri
     public static Vector3Expression ZERO = new Vector3Expression(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO);
     public static Vector3Expression ONE = new Vector3Expression(new NumericExpression(1f), new NumericExpression(1f), new NumericExpression(1f));
 
-    public static final Codec<Vector3Expression> CODEC = NumericExpression.LIST_CODEC
+    public static final Codec<Vector3Expression> CODEC = NumericExpression.CODEC.listOf()
             .comapFlatMap(
                     input -> Util.fixedSize(input, 3).map(
                             nos -> new Vector3Expression(
@@ -38,5 +39,10 @@ public record Vector3Expression(NumericExpression x, NumericExpression y, Numeri
                 (float) GameExpressionsHelper.evaluate(y.expression(), additionalVars, level, entity, seed),
                 (float) GameExpressionsHelper.evaluate(z.expression(), additionalVars, level, entity, seed)
         );
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return "Vector3Expression[" + x.toString() + ", " + y.toString() + ", " + z.toString() + "]";
     }
 }

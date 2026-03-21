@@ -9,6 +9,7 @@ import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StrictJsonParser;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,13 +59,17 @@ public class TemplatesManager {
         }, executor);
     }
 
+    @Nullable
     public RptTemplate tryBakeAgain(
             ItemModel.BakingContext context,
             ResourceLocation location
     ) {
-        return unbakedTemplates.get(location).bake(context);
+        var a = unbakedTemplates.get(location);
+        if (a == null) return null;
+        return a.bake(context);
     }
 
+    @Nullable
     public RptTemplate getTemplate(ItemModel.BakingContext context, ResourceLocation id) {
         RptTemplate candidate = templates.get(id);
         if (candidate == null || candidate.needRebake()) {

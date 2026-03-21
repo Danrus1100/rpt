@@ -2,6 +2,7 @@ package com.danrus.rpt.core.selection.type;
 
 import com.danrus.rpt.core.selection.NestedSelector;
 import com.danrus.rpt.core.selection.NestedSelectors;
+import com.danrus.rpt.core.selection.SelectionContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -16,11 +17,11 @@ import java.util.function.Consumer;
 
 public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements NestedSelector<T> {
     @Override
-    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, Consumer<T> callback) {
-        swappers.forEach(selector -> selector.resolveSelect(stack, entity, callback));
+    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, SelectionContext<T> context) {
+        swappers.forEach(selector -> selector.resolveSelect(stack, entity, context));
     }
 
-    public static record Unbaked<T>(List<NestedSelector.Unbaked<T>> swappers) implements NestedSelector.Unbaked<T> {
+    public static record Unbaked<T>(List<NestedSelector.Unbaked<T>> swappers) implements NestedSelector.SimpleUnbaked<T> {
         private static final Map<Codec<?>, MapCodec<?>> CODECS = new IdentityHashMap<>();
 
         @SuppressWarnings("unchecked")
@@ -32,7 +33,7 @@ public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements 
 
         @Override
         public NestedSelector<T> bake() {
-            return new CompositeSelector<>(swappers.stream().map(NestedSelector.Unbaked::bake).toList());
+            return new CompositeSelector<>(swappers.stream().map(r -> r.bakeResult().selector()).toList());
         }
 
         @Override

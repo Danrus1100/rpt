@@ -17,7 +17,7 @@ public class BakingContextMixin implements RptBakingContext {
     private List<RptField> rpt$params = new ArrayList<>();
 
     @Override
-    public RptField rpt$getParams() {
+    public RptField rpt$getField() {
         if (rpt$params.isEmpty()) return RptField.EMPTY;
 
         RptField initial = rpt$params.getFirst();
@@ -33,7 +33,7 @@ public class BakingContextMixin implements RptBakingContext {
     }
 
     @Override
-    public void rpt$addParams(RptField... params) {
+    public void rpt$addFields(RptField... params) {
         this.rpt$params.addAll(Arrays.asList(params));
     }
 }

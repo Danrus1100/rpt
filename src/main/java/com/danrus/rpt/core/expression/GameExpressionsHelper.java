@@ -1,11 +1,15 @@
 package com.danrus.rpt.core.expression;
 
+import com.danrus.rpt.core.selection.SelectResult;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,20 +22,32 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 *///? }
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
-public class GameExpressionsHelper {
+public class GameExpressionsHelper implements IdentifiableResourceReloadListener {
 
     private static final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
+    private static final List<String> alreadyLogged = new ArrayList<>();
 
     public static final String RESERVED_VARIABLE_NAME = "_val";
+    private static final Logger log = LoggerFactory.getLogger(GameExpressionsHelper.class);
 
     public static <T> T selectValueFromCases(List<? extends ExpressionsCase<T>> cases, String expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, T fallback) {
+        return selectResultFromCases(cases, expression, additionalVars, level, entity, seed, fallback).result();
+    }
+
+    public static <T> SelectResult<T> selectResultFromCases(List<? extends ExpressionsCase<T>> cases, String expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, T fallback) {
         double mainEval = evaluate(expression, additionalVars, level, entity, seed);
 
         for (ExpressionsCase<T> entry : cases) {
@@ -42,20 +58,26 @@ public class GameExpressionsHelper {
                 if (exprStr.startsWith(">") || exprStr.startsWith("<") || exprStr.startsWith("=") || exprStr.startsWith("!")) {
                     if (evaluateCondition(exprStr, mainEval, additionalVars, level, entity, seed)) {
                         if (entry.requireAll()) req++;
-                        else return entry.value();
+                        else return SelectResult.ok(entry.value());
                     }
                 } else {
                     if (mainEval == evaluate(exprStr, additionalVars, level, entity, seed)) {
-                        return entry.value();
+                        return SelectResult.ok(entry.value());
                     }
                 }
 
                 if (entry.requireAll() && req == entry.when().size()) {
-                    return entry.value();
+                    return SelectResult.ok(entry.value());
                 }
             }
         }
-        return fallback;
+        return SelectResult.fallback(fallback);
+    }
+
+    private static void logError(String expression, Exception e) {
+        if (alreadyLogged.contains(expression)) return;
+        log.error("Failed to evaluate expression {}", expression, e);
+        alreadyLogged.add(expression);
     }
 
     public static boolean evaluateCondition(String condition, double mainValue, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
@@ -70,8 +92,14 @@ public class GameExpressionsHelper {
         try {
             return expr.evaluate().getBooleanValue();
         } catch (Exception e) {
+            logError(condition, e);
             return false;
         }
+    }
+
+    public static void onReload() {
+        expressionCache.clear();
+        alreadyLogged.clear();
     }
 
     public static double evaluate(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
@@ -87,6 +115,7 @@ public class GameExpressionsHelper {
             }
             return result.getNumberValue().doubleValue();
         } catch (Exception e) {
+            logError(expressionStr, e);
             return 0.0;
         }
     }
@@ -146,6 +175,7 @@ public class GameExpressionsHelper {
         vars.put("maxAir", 0.0);
         vars.put("attackCooldown", 0.0);
         vars.put("sleeping", 0.0);
+        vars.put("attackProgress", 0.0);
 
         vars.put("lightSky", 0.0);
         vars.put("lightBlock", 0.0);
@@ -239,4 +269,14 @@ public class GameExpressionsHelper {
         return vars;
     }
 
+    @Override
+    public @NotNull CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
+        onReload();
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ResourceLocation.fromNamespaceAndPath("rpt", "expressions_helper");
+    }
 }

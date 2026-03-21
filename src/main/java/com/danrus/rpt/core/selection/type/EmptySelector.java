@@ -1,6 +1,7 @@
 package com.danrus.rpt.core.selection.type;
 
 import com.danrus.rpt.core.selection.NestedSelector;
+import com.danrus.rpt.core.selection.SelectionContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class EmptySelector<T> implements NestedSelector<T>, NestedSelector.Unbaked<T> {
+public class EmptySelector<T> implements NestedSelector<T>, NestedSelector.SimpleUnbaked<T> {
 
     private static final EmptySelector<?> INSTANCE = new EmptySelector<>();
 
@@ -23,7 +24,7 @@ public class EmptySelector<T> implements NestedSelector<T>, NestedSelector.Unbak
     }
 
     @Override
-    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, Consumer<T> callback) {}
+    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, SelectionContext<T> callback) {}
 
     @Override
     public NestedSelector<T> bake() {

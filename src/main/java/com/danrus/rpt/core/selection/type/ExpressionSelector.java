@@ -5,6 +5,8 @@ import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import com.danrus.rpt.core.expression.NumericExpression;
 import com.danrus.rpt.core.selection.NestedSelector;
 import com.danrus.rpt.core.selection.NestedSelectors;
+import com.danrus.rpt.core.selection.SelectResult;
+import com.danrus.rpt.core.selection.SelectionContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -18,16 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public record ExpressionSelector<T>(String main, List<ExpressionsCase<NestedSelector<T>>> cases, NestedSelector<T> fallback) implements NestedSelector<T> {
     @Override
-    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, Consumer<T> callback) {
+    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, SelectionContext<T> context) {
         Level level = entity != null ? entity.level() : null;
         ClientLevel clientLevel = level != null && level.isClientSide() ? (ClientLevel) level : null;
 
-        GameExpressionsHelper.selectValueFromCases(cases, main, Map.of(), clientLevel, entity, entity != null ? entity.getId() : 0, fallback)
-                .resolveSelect(stack, entity, callback);
+        SelectResult<NestedSelector<T>> result =  GameExpressionsHelper.selectResultFromCases(cases, main, Map.of(), clientLevel, entity, entity != null ? entity.getId() : 0, fallback);
+        // ignore fallback if it ignored
+        if  (!result.isFallback() || context.allowFallbacks()) {
+            result.result().resolveSelect(stack, entity, context);
+        }
     }
 
     public static record Unbaked<T>(NumericExpression main, List<ExpressionsCase<NestedSelector.Unbaked<T>>> cases, Optional<NestedSelector.Unbaked<T>> fallback) implements NestedSelector.Unbaked<T> {
@@ -42,13 +46,13 @@ public record ExpressionSelector<T>(String main, List<ExpressionsCase<NestedSele
         }
 
         @Override
-        public NestedSelector<T> bake() {
+        public BakeResult<T> bakeResult() {
             List<ExpressionsCase<NestedSelector<T>>> baked = new ArrayList<>(cases.size());
             for (ExpressionsCase<NestedSelector.Unbaked<T>> entry : cases) {
-                baked.add(new BakedExpressionsCase(entry.when(), entry.value().bake(), entry.requireAll()));
+                baked.add(new BakedExpressionsCase(entry.when(), entry.value().bakeResult().selector(), entry.requireAll()));
             }
-            NestedSelector<T> bakedFallback = fallback.isPresent() ? fallback.get().bake() : EmptySelector.instance();
-            return new ExpressionSelector<>(main.expression(), baked, bakedFallback);
+            NestedSelector<T> bakedFallback = fallback.isPresent() ? fallback.get().bakeResult().selector() : EmptySelector.instance();
+            return new BakeResult<>(new ExpressionSelector<>(main.expression(), baked, bakedFallback), fallback.isPresent());
         }
 
         @Override

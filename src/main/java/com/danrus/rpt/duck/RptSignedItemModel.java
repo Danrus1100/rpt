@@ -6,6 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public interface RptSignedItemModel {
-    Optional<RptField> rpt$getParams();
-     void rpt$setParams(@Nullable RptField params);
+    Optional<RptField> rpt$getField();
+     void rpt$setField(@Nullable RptField params);
 }

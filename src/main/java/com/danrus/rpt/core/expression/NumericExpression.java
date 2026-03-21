@@ -2,6 +2,7 @@ package com.danrus.rpt.core.expression;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -58,5 +59,10 @@ public record NumericExpression(String expression) {
     @Override
     public int hashCode() {
         return Objects.hashCode(expression);
+    }
+
+    @Override
+    public @NotNull String toString() {
+        return "NumericExpression[" + expression + "]";
     }
 }

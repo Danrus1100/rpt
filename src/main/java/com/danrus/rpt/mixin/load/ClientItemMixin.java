@@ -21,12 +21,12 @@ public class ClientItemMixin implements RptClientItem {
     private RptField rpt$params;
 
     @Override
-    public Optional<RptField> rpt$getParams() {
+    public Optional<RptField> rpt$getField() {
         return Optional.ofNullable(this.rpt$params);
     }
 
     @Override
-    public void rpt$setParams(@Nullable RptField params) {
+    public void rpt$setField(@Nullable RptField params) {
         this.rpt$params = params;
     }
 
@@ -38,10 +38,10 @@ public class ClientItemMixin implements RptClientItem {
         return RecordCodecBuilder.create(instance -> instance.group(
             ItemModels.CODEC.fieldOf("model").forGetter(ClientItem::model),
                 ClientItem.Properties.MAP_CODEC.forGetter(ClientItem::properties),
-                RptField.CODEC.optionalFieldOf("rpt").forGetter(item -> RptClientItem.class.cast(item).rpt$getParams())
+                RptField.CODEC.optionalFieldOf("rpt").forGetter(item -> RptClientItem.class.cast(item).rpt$getField())
         ).apply(instance, (unbaked, properties, rptItemParams) -> {
             ClientItem item = new ClientItem(unbaked, properties);
-            RptClientItem.class.cast(item).rpt$setParams(rptItemParams.orElse(null));
+            RptClientItem.class.cast(item).rpt$setField(rptItemParams.orElse(null));
             return item;
         }));
     }

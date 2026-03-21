@@ -1,89 +1,57 @@
 package com.danrus.rpt.core.textures;
 
+import com.danrus.rpt.core.AbstractNestedSelectorItemsReloadListener;
 import com.danrus.rpt.core.selection.NestedSelector;
-import com.danrus.rpt.core.selection.NestedSelectors;
-import com.danrus.rpt.core.selection.type.EmptySelector;
-import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
-import net.minecraft.util.StrictJsonParser;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class TextureSwappersManager extends SimplePreparableReloadListener<Map<ResourceLocation, List<NestedSelector<ResourceLocation>>>> implements IdentifiableResourceReloadListener {
-    private static final Logger log = LoggerFactory.getLogger(TextureSwappersManager.class);
-    private Map<ResourceLocation, List<NestedSelector<ResourceLocation>>> swappers = new HashMap<>();
-    private final FileToIdConverter LISTENER = FileToIdConverter.json("rpt/swappers");
+public class TextureSwappersManager
+        extends AbstractNestedSelectorItemsReloadListener<ResourceLocation>
+        implements IdentifiableResourceReloadListener {
 
-    @Override
-    protected @NotNull Map<ResourceLocation, List<NestedSelector<ResourceLocation>>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-        Map<ResourceLocation, List<NestedSelector<ResourceLocation>>> map = new HashMap<>();
-        for (Map.Entry<ResourceLocation, List<Resource>> entry : LISTENER.listMatchingResourceStacks(resourceManager).entrySet()) {
-            List<NestedSelector<ResourceLocation>> list = new ArrayList<>(entry.getValue().size());
-            for (Resource resource : entry.getValue()) {
-                list.add(parseResource(entry.getKey(), resource));
-            }
-            map.put(entry.getKey(), list);
-        }
-        return map;
-    }
+    private static final FileToIdConverter LISTENER = FileToIdConverter.json("rpt/swappers");
 
-
-    private NestedSelector<ResourceLocation> parseResource(ResourceLocation location, Resource resource) {
-        try (Reader reader = resource.openAsReader()) {
-            return NestedSelectors.codec(ResourceLocation.CODEC).parse(JsonOps.INSTANCE, StrictJsonParser.parse(reader)).getOrThrow().bake();
-        } catch (Exception e) {
-            log.error("Can't read swapper {} from {}: {}", location, resource.sourcePackId(), e);
-            return EmptySelector.instance();
-        }
+    public TextureSwappersManager() {
+        super(
+                LISTENER,
+                ResourceLocation.CODEC,
+                true
+        );
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, List<NestedSelector<ResourceLocation>>> object, ResourceManager resourceManager, ProfilerFiller profiler) {
-        swappers = object;
+    protected String getNameOfObjective() {
+        return "Swapper";
     }
 
-    public void swap(ResourceLocation original, ItemStack stack, @Nullable LivingEntity entity, SwapApplier applier) {
-
-        String path = original.getPath().replace(".png", "");
+    @Override
+    protected ResourceLocation prepareLocation(ResourceLocation rawLocation) {
+        String path = rawLocation.getPath().replace(".png", "");
 
         ResourceLocation swapperLocation = ResourceLocation.fromNamespaceAndPath(
-                original.getNamespace(),
+                rawLocation.getNamespace(),
                 path
         );
 
-        ResourceLocation fileLocation = LISTENER.idToFile(swapperLocation);
+        return LISTENER.idToFile(swapperLocation);
+    }
 
-        List<NestedSelector<ResourceLocation>> swapperList = swappers.get(fileLocation);
-        if (swapperList == null) {
-            applier.apply(original);
-            return;
-        }
-        for (NestedSelector<ResourceLocation> selector : swapperList) {
-            if (selector == null) continue;
-            List<ResourceLocation> pending = new ArrayList<>();
-            selector.resolveSelect(stack, entity, pending::add);
-            if (!pending.isEmpty()) {
-                pending.forEach(applier::apply);
-                return;
-            }
-        }
-        applier.apply(original);
+
+    public void swap(ResourceLocation original, ItemStack stack, @Nullable LivingEntity entity, SwapApplier applier) {
+
+        callback(
+                original,
+                stack,
+                entity,
+                original,
+                applier::apply
+        );
     }
 
     @Override

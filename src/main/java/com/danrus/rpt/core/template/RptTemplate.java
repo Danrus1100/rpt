@@ -20,8 +20,8 @@ public record RptTemplate(ItemModel model, RptField params, boolean needRebake) 
         public RptTemplate bake(ItemModel.BakingContext context) {
             // adding params to context to include current params to children's params
             RptBakingContext rptContext = RptBakingContext.class.cast(context);
-            rptContext.rpt$addParams(params);
-            RptField merged = rptContext.rpt$getParams();
+            rptContext.rpt$addFields(params);
+            RptField merged = rptContext.rpt$getField();
 
             boolean needRebake = false;
             ItemModel model;

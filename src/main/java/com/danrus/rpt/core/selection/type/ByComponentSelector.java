@@ -2,6 +2,7 @@ package com.danrus.rpt.core.selection.type;
 
 import com.danrus.rpt.core.selection.NestedSelector;
 import com.danrus.rpt.core.selection.NestedSelectors;
+import com.danrus.rpt.core.selection.SelectionContext;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.mojang.serialization.Codec;
@@ -36,11 +37,14 @@ public record ByComponentSelector<C, T>(
     }
 
     @Override
-    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, Consumer<T> callback) {
+    public void resolveSelect(ItemStack stack, @Nullable LivingEntity entity, SelectionContext<T> context) {
         C value = stack.get(componentType);
         NestedSelector<T> result = valueToTexture.get(value);
-        NestedSelector<T> toSwap = result == null ? fallback : result;
-        toSwap.resolveSelect(stack, entity, callback);
+        if (result != null) {
+            result.resolveSelect(stack, entity, context);
+        } else if (context.allowFallbacks()) {
+            fallback.resolveSelect(stack, entity, context);
+        }
     }
 
     public static record Unbaked<C, T>(
@@ -56,15 +60,16 @@ public record ByComponentSelector<C, T>(
         }
 
         @Override
-        public NestedSelector<T> bake() {
+        public BakeResult<T> bakeResult() {
             Object2ObjectMap<C, NestedSelector<T>> bakedMap = new Object2ObjectOpenHashMap<>();
-            valueToSelector.object2ObjectEntrySet().forEach(e -> bakedMap.put(e.getKey(), e.getValue().bake()));
+            valueToSelector.object2ObjectEntrySet().forEach(e -> bakedMap.put(e.getKey(), e.getValue().bakeResult().selector()));
 
             NestedSelector<T> bakedFallback = fallback
-                .map(NestedSelector.Unbaked::bake)
-                .orElse((stack, entity, callback) -> {});
+                .map(NestedSelector.Unbaked::bakeResult)
+                .orElse(new BakeResult<>((a,b,c)-> {}, false))
+                .selector();
 
-            return new ByComponentSelector<>(componentType, bakedMap, bakedFallback);
+            return new BakeResult<>(new ByComponentSelector<>(componentType, bakedMap, bakedFallback), fallback.isPresent());
         }
 
         @Override

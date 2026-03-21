@@ -3,6 +3,8 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
+import com.danrus.rpt.core.expression.GameExpressionsHelper;
+import com.danrus.rpt.core.fpa.FirstPersonAnimManager;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.TemplatesManager;
 import com.danrus.rpt.core.textures.TextureSwappersManager;
@@ -22,13 +24,14 @@ public class Rpt implements ClientModInitializer {
 
     private static final TemplatesManager templatesManager = new TemplatesManager();
     private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
+    private static final FirstPersonAnimManager fpaManager = new FirstPersonAnimManager();
     private static final Logger log = LoggerFactory.getLogger(Rpt.class);
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
 
-    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptItemParamsHolder holder) {
+    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptFieldHolder holder) {
         holder.rpt$clearParams();
-        signedItemModel.rpt$getParams().ifPresent(params -> {
+        signedItemModel.rpt$getField().ifPresent(params -> {
             holder.rpt$setParams(params);
         });
     }
@@ -36,17 +39,19 @@ public class Rpt implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
+//        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
 
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-            RptItemParamsHolder holder = RptItemParamsHolder.class.cast(event.getStack());
+            RptFieldHolder holder = RptFieldHolder.class.cast(event.getStack());
             prepareModelParams(signedItemModel, holder);
         });
 
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
             SelectItemModelProperty property = event.getProperty();
             if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptField params = RptItemParamsHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getParams());
+                RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
@@ -69,14 +74,14 @@ public class Rpt implements ClientModInitializer {
         });
 
         Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext()).rpt$addParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptField.EMPTY));
+            RptBakingContext.class.cast(event.getBakingContext()).rpt$addFields(RptClientItem.class.cast(event.getClientItem()).rpt$getField().orElse(RptField.EMPTY));
         });
 
         Rpf.getEventBus().register(PostBakeEvent.class, event -> {
             RptSignedItemModel signed = RptSignedItemModel.class.cast(event.getResult());
             RptClientItem clientItem = RptClientItem.class.cast(event.getClientItem());
-            clientItem.rpt$getParams().ifPresent(params -> {
-                signed.rpt$setParams(params);
+            clientItem.rpt$getField().ifPresent(params -> {
+                signed.rpt$setField(params);
             });
         });
     }
@@ -86,4 +91,8 @@ public class Rpt implements ClientModInitializer {
     }
 
     public static TextureSwappersManager getTextureSwappersManager() {return swappersManager;}
+
+    public static FirstPersonAnimManager getFpaManager() {
+        return fpaManager;
+    }
 }

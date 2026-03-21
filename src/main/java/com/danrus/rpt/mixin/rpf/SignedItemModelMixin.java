@@ -6,7 +6,7 @@ import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpf.core.item.SignedItemModel;
 import com.danrus.rpt.Rpt;
 import com.danrus.rpt.core.item.RptField;
-import com.danrus.rpt.duck.RptItemParamsHolder;
+import com.danrus.rpt.duck.RptFieldHolder;
 import com.danrus.rpt.duck.RptSignedItemModel;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -28,12 +28,12 @@ public class SignedItemModelMixin implements RptSignedItemModel {
     private RptField rpt$params;
 
     @Override
-    public Optional<RptField> rpt$getParams() {
+    public Optional<RptField> rpt$getField() {
         return Optional.ofNullable(this.rpt$params);
     }
 
     @Override
-    public void rpt$setParams(@Nullable RptField params) {
+    public void rpt$setField(@Nullable RptField params) {
         this.rpt$params = params;
     }
 
@@ -56,7 +56,7 @@ public class SignedItemModelMixin implements RptSignedItemModel {
                                      //?}
                                      ItemModel prev, TestsResultCollector collector, Operation<Boolean> original) {
         RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(this);
-        RptItemParamsHolder holder = RptItemParamsHolder.class.cast(stack);
+        RptFieldHolder holder = RptFieldHolder.class.cast(stack);
         Rpt.prepareModelParams(signedItemModel, holder);
         boolean result = original.call(instance, context, stack, owner, prev, collector);
         holder.rpt$clearParams();

@@ -18,7 +18,7 @@ public class UnbakedMixin {
     private ItemModel rpt$wrapSelectModel(SelectItemModel.UnbakedSwitch instance, ItemModel.BakingContext bakingContext, ItemModel itemModel, Operation<ItemModel> original) {
         ItemModel originalModel = original.call(instance, bakingContext, itemModel);
         if (originalModel instanceof SelectItemModel selectItemModel) {
-            RptSelectItemModel.class.cast(selectItemModel).rpt$setParams(RptBakingContext.class.cast(bakingContext).rpt$getParams());
+            RptSelectItemModel.class.cast(selectItemModel).rpt$setField(RptBakingContext.class.cast(bakingContext).rpt$getField());
         }
         return originalModel;
     }

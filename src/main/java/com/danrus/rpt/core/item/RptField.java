@@ -1,6 +1,6 @@
 package com.danrus.rpt.core.item;
 
-import com.danrus.rpt.duck.RptItemParamsHolder;
+import com.danrus.rpt.duck.RptFieldHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +36,7 @@ public record RptField(List<String> customFlags, RptVariables variables) {
 
     public static RptField fromItemStack(ItemStack stack) {
         try {
-            RptItemParamsHolder holder = RptItemParamsHolder.class.cast(stack);
+            RptFieldHolder holder = RptFieldHolder.class.cast(stack);
             Optional<RptField> paramsOpt = holder.rpt$getParams();
             return paramsOpt.orElse(EMPTY);
         } catch (ClassCastException e) {
@@ -46,7 +46,7 @@ public record RptField(List<String> customFlags, RptVariables variables) {
 
     public static void putToItemStack(ItemStack stack, RptField params) {
         try {
-            RptItemParamsHolder holder = RptItemParamsHolder.class.cast(stack);
+            RptFieldHolder holder = RptFieldHolder.class.cast(stack);
             holder.rpt$setParams(params);
         } catch (ClassCastException e) {
             // Ignore

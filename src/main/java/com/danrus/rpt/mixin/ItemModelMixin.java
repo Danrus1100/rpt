@@ -1,6 +1,7 @@
 package com.danrus.rpt.mixin;
 
 import com.danrus.rpt.Rpt;
+import com.danrus.rpt.core.template.RptTemplate;
 import com.danrus.rpt.duck.PatchInformer;
 import com.danrus.rpt.impl.model.PatchCapturedItemModel;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
@@ -41,6 +42,10 @@ public class ItemModelMixin implements PatchInformer {
         if (rpt$patch == null) {
             return original.call(context);
         }
-        return new PatchCapturedItemModel(Rpt.getTemplatesManager().getTemplate(context, rpt$patch));
+        RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, rpt$patch);
+        if (template == null) {
+            throw new IllegalStateException("Unable to find tempalte" + rpt$patch + " for patch model!");
+        }
+        return new PatchCapturedItemModel(template);
     }
 }
