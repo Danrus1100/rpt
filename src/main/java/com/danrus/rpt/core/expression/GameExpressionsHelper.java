@@ -120,7 +120,7 @@ public class GameExpressionsHelper {
         }
     }
 
-    private static Map<String, Double> generateGameVariables(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+    public static Map<String, Double> generateGameVariables(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         Map<String, Double> vars = new HashMap<>();
 
         DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();

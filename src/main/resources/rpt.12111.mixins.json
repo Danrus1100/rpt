@@ -9,5 +9,8 @@
   },
   "client": [
     "accessor.PartCacheImplInvoker"
-  ]
+  ],
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  }
 }

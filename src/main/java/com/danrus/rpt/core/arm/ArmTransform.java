@@ -45,7 +45,8 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
         return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, name);
     }
 
-    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, HumanoidRenderState state) {
+    public void rotateModelPart(@Nullable ModelPart arm, @Nullable ModelPart head, boolean isRightArm, HumanoidRenderState state) {
+        if (arm == null || head == null) return;
         if (!swing) arm.resetPose();
 
         DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
@@ -119,7 +120,7 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
     }
 
     @Nullable
-    public HumanoidModel.ArmPose getVanillaIfPresent() {
+    public HumanoidModel.ArmPose getVanillaOrNull() {
         return switch (ofVanilla) {
             case "empty" -> HumanoidModel.ArmPose.EMPTY;
             case "item"  -> HumanoidModel.ArmPose.ITEM;

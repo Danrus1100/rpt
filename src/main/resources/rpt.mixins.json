@@ -22,6 +22,7 @@
     "render.entity.LivingEntityHolderMixins",
     "render.entity.HumanoidMobRendererMixin",
     "render.entity.HumanoidArmorLayerMixin",
+    "render.entity.CustomTransformsDispatchedStateMixin",
     "render.entity.ArmorStandModelMixin",
     "render.fpa.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
@@ -33,5 +34,8 @@
     "render.entity.HumanoidModelMixin",
     "render.entity.ItemStackRenderStateMixin",
     "rpf.SignedItemModelMixin"
-  ]
+  ],
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  }
 }
