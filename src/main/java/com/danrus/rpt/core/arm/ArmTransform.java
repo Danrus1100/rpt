@@ -12,6 +12,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,17 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla, RptVariables variables) {
+public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla, RptVariables variables) {
 
-    public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla) {
-        this(x, y, z, bob, swing, attack, ofVanilla, RptVariables.EMPTY);
+    public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla) {
+        this(x, y, z, bob, swing, attack, armorStands, ofVanilla, RptVariables.EMPTY);
     }
 
     public ArmTransform(ArmTransform other, RptField field) {
-        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.ofVanilla, field.variables());
+        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.armorStands(), other.ofVanilla, field.variables());
     }
 
-    public static ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, "");
+    public static ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, "");
 
     private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
@@ -41,10 +42,10 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
     }
 
     public static ArmTransform fromVanilla(String name) {
-        return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, name);
+        return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, name);
     }
 
-    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, PlayerRenderState state) {
+    public void rotateModelPart(ModelPart arm, ModelPart head, boolean isRightArm, HumanoidRenderState state) {
         if (!swing) arm.resetPose();
 
         DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
@@ -68,17 +69,22 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
                 "useArm", switch (state.useItemHand) {
                     case MAIN_HAND -> 1.0;
                     case OFF_HAND -> -1.0;
-                },
-                //? < 1.21.10 {
-                "useTick", (double) state.useItemRemainingTicks,
-                //?} else {
-                /*"useTick", (double) state.ticksUsingItem,
-                *///?}
-                "holdArm", isRightArm ? 1.0 : -1.0
+                }
         );
 
         vars.putAll(varsGame);
         vars.putAll(variables.numbers());
+
+        if (state instanceof PlayerRenderState playerRenderState) {
+            vars.putAll(Map.of(
+                    //? < 1.21.10 {
+                    "useTick", (double) playerRenderState.useItemRemainingTicks,
+                    //?} else {
+                    /*"useTick", (double) playerRenderState.ticksUsingItem,
+                     *///?}
+                    "holdArm", isRightArm ? 1.0 : -1.0
+            ));
+        }
 
         arm.xRot += (float) Math.toRadians(evaluate(x, vars));
         arm.yRot += (float) Math.toRadians(evaluate(y, vars));
@@ -142,6 +148,7 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
             Codec.BOOL.optionalFieldOf("bob", true).forGetter(ArmTransform::bob),
             Codec.BOOL.optionalFieldOf("swing", true).forGetter(ArmTransform::swing),
             Codec.BOOL.optionalFieldOf("attack", true).forGetter(ArmTransform::attack),
+            Codec.BOOL.optionalFieldOf("enable_armorstands_custom_defrmations_secret", false).forGetter(ArmTransform::armorStands),
             Codec.STRING.optionalFieldOf("type", "").forGetter(ArmTransform::ofVanilla)
     ).apply(instance, ArmTransform::new));
 

@@ -1,6 +1,7 @@
 package com.danrus.rpt.mixin.render.entity;
 
 import com.danrus.rpt.core.arm.ArmTransform;
+import com.danrus.rpt.core.arm.ArmTransformsHelper;
 import com.danrus.rpt.duck.CustomArmTransformHolder;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -27,10 +28,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                                       //? <1.21.11
                                       HumanoidModel.ArmPose pose,
                                       Operation<Void> original) {
-        //? >= 1.21.11
-        //HumanoidModel.ArmPose pose = renderState.rightArmPose;
-
-        ItemStackRenderState stackState = rpt$getRightItem(renderState);
+        ItemStackRenderState stackState = ArmTransformsHelper.getRightItem(renderState);
 
 
         if (renderState instanceof PlayerRenderState playerRenderState && stackState instanceof CustomArmTransformHolder holder) {
@@ -65,10 +63,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                                      //? <1.21.11
                                      HumanoidModel.ArmPose pose,
                                      Operation<Void> original) {
-        //? >= 1.21.11
-        //HumanoidModel.ArmPose pose = renderState.leftArmPose;
-
-        ItemStackRenderState stackState = rpt$getLeftItem(renderState);
+        ItemStackRenderState stackState = ArmTransformsHelper.getLeftItem(renderState);
 
         if (renderState instanceof PlayerRenderState playerRenderState && stackState instanceof CustomArmTransformHolder holder) {
             ArmTransform transform = holder.rpt$getLeftArmTransform();
@@ -111,8 +106,8 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         if (humanoidRenderState instanceof PlayerRenderState playerRenderState) {
             ArmTransform transform;
             switch (playerRenderState.attackArm) {
-                case LEFT -> transform = ((CustomArmTransformHolder)rpt$getLeftItem(playerRenderState)).rpt$getLeftArmTransform();
-                case RIGHT -> transform = ((CustomArmTransformHolder)rpt$getRightItem(playerRenderState)).rpt$getRightArmTransform();
+                case LEFT -> transform = ((CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(playerRenderState)).rpt$getLeftArmTransform();
+                case RIGHT -> transform = ((CustomArmTransformHolder) ArmTransformsHelper.getRightItem(playerRenderState)).rpt$getRightArmTransform();
                 default -> {
                     vanilla.run();
                     return;
@@ -123,25 +118,5 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         } else {
             vanilla.run();
         }
-    }
-
-    @Unique
-    private static <T extends HumanoidRenderState> ItemStackRenderState rpt$getRightItem(T renderState) {
-        return
-        //? < 1.21.11 {
-        renderState.rightHandItem;
-         //? } else {
-        /*renderState.rightHandItemState;
-        *///?}
-    }
-
-    @Unique
-    private static <T extends HumanoidRenderState> ItemStackRenderState rpt$getLeftItem(T renderState) {
-        return
-        //? < 1.21.11 {
-        renderState.leftHandItem;
-         //? } else {
-        /*renderState.leftHandItemState;
-        *///?}
     }
 }

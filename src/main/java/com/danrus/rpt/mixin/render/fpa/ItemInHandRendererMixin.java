@@ -18,14 +18,24 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin {
 
+    //? <=1.21.8 {
     @Shadow
     public abstract void renderItem(LivingEntity par1, ItemStack par2, ItemDisplayContext par3, PoseStack par4, MultiBufferSource par5, int par6);
+    //?} else {
+    /*@Shadow
+    public abstract void renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector nodeCollector, int packedLight);
+    *///?}
 
     @WrapMethod(
             method = "renderArmWithItem"
     )
+    //? <=1.21.8 {
     private void rpt$renderArmWithItem(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, Operation<Void> original) {
         Runnable orig = () -> original.call(player, partialTicks, pitch, hand, swingProgress, stack, equippedProgress, poseStack, buffer, combinedLight);
+    //?} else {
+    /*private void rpt$renderArmWithItem(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector buffer, int combinedLight, Operation<Void> original) {
+        Runnable orig = () -> original.call(player, partialTicks, pitch, hand, swingProgress, stack, equippedProgress, poseStack, buffer, combinedLight);
+    *///?}
         var transform = Rpt.getFpaManager().getTransforms(stack);
         if (transform.isDefault()) {
             orig.run();

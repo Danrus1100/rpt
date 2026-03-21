@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-public class GameExpressionsHelper implements IdentifiableResourceReloadListener {
+public class GameExpressionsHelper {
 
     private static final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
     private static final List<String> alreadyLogged = new ArrayList<>();
@@ -267,16 +267,5 @@ public class GameExpressionsHelper implements IdentifiableResourceReloadListener
         }
 
         return vars;
-    }
-
-    @Override
-    public @NotNull CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor) {
-        onReload();
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath("rpt", "expressions_helper");
     }
 }

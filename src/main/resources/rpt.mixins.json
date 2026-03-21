@@ -22,6 +22,7 @@
     "render.entity.LivingEntityHolderMixins",
     "render.entity.HumanoidMobRendererMixin",
     "render.entity.HumanoidArmorLayerMixin",
+    "render.entity.ArmorStandModelMixin",
     "render.fpa.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "ItemModelMixin"

@@ -40,6 +40,14 @@ stonecutter{
     replacements {
         string {
             direction = eval(current.version, ">=1.21.11")
+            replace(
+                "import net.minecraft.client.model.ArmorStandModel;",
+                "import net.minecraft.client.model.object.armorstand.ArmorStandModel;"
+            )
+        }
+
+        string {
+            direction = eval(current.version, ">=1.21.11")
             replace("ResourceLocation", "Identifier")
         }
 
