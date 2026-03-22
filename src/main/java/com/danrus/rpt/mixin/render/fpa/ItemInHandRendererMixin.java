@@ -26,6 +26,9 @@ public abstract class ItemInHandRendererMixin {
     public abstract void renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector nodeCollector, int packedLight);
     *///?}
 
+    @Shadow
+    protected abstract void swingArm(float swingProgress, float equippedProgress, PoseStack poseStack, int direction, HumanoidArm arm);
+
     @WrapMethod(
             method = "renderArmWithItem"
     )
@@ -45,10 +48,15 @@ public abstract class ItemInHandRendererMixin {
         HumanoidArm humanoidArm = isHandMain ? player.getMainArm() : player.getMainArm().getOpposite();
         boolean isHandRight = humanoidArm == HumanoidArm.RIGHT;
         poseStack.pushPose();
-        if (!transform.applyToPose(player, hand, isHandRight, equippedProgress, poseStack)) {
+        if (!transform.applyToPose(player, hand, !isHandRight, equippedProgress, poseStack)) {
             orig.run();
             poseStack.popPose();
             return;
+        }
+        if (transform.vanilla()) {
+            int i = isHandRight ? 1 : -1;
+            if (isHandRight) poseStack.translate(1, 0, 0); // FIXME: подобрал на глазок
+            this.swingArm(swingProgress, equippedProgress, poseStack, i, humanoidArm);
         }
         this.renderItem(player, stack, isHandRight ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, combinedLight);
         poseStack.popPose();

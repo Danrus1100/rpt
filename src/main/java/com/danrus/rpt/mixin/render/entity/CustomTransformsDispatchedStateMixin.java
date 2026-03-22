@@ -23,6 +23,12 @@ public class CustomTransformsDispatchedStateMixin implements CustomTransformsDis
     }
 
     @Override
+    public void rpt$reset() {
+        rpt$isLeftAlreadyTransformed = false;
+        rpt$isRightAlreadyTransformed = false;
+    }
+
+    @Override
     public boolean rpt$isAlreadyTransformed(HumanoidArm arm) {
         return switch (arm) {
             case LEFT -> rpt$isLeftAlreadyTransformed;

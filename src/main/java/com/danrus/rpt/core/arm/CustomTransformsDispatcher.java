@@ -83,13 +83,13 @@ public class CustomTransformsDispatcher {
 
         if (transform == null) return false;
 
-        return transform.attack();
+        return !transform.attack();
     }
 
     public boolean shouldCancelBob(HumanoidRenderState state, HumanoidArm arm) {
         ArmTransform transform = getPlayerTransform(state, arm);
         if (transform == null) return false;
-        return transform.bob();
+        return !transform.bob();
     }
 
     @Nullable

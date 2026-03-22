@@ -18,31 +18,29 @@ import java.util.Optional;
 public record CustomFirstPersonTransforms(
         Optional<ItemTransformDefinition> main,
         Optional<ItemTransformDefinition> offhand,
-        boolean attack,
-        boolean use
+        boolean vanilla
 ) {
 
-    public static final CustomFirstPersonTransforms DEFAULT = CustomFirstPersonTransforms.single(ItemTransformDefinition.NONE, true, true);
+    public static final CustomFirstPersonTransforms DEFAULT = CustomFirstPersonTransforms.single(ItemTransformDefinition.NONE, true);
 
-    public CustomFirstPersonTransforms(ItemTransformDefinition main, ItemTransformDefinition offhand, boolean attack, boolean use) {
-        this(Optional.of(main), Optional.of(offhand), attack, use);
+    public CustomFirstPersonTransforms(ItemTransformDefinition main, ItemTransformDefinition offhand, boolean vanilla) {
+        this(Optional.of(main), Optional.of(offhand), vanilla);
     }
 
-    public static CustomFirstPersonTransforms single(ItemTransformDefinition def, boolean attack, boolean use) {
-        return new CustomFirstPersonTransforms(def, def, attack, use);
+    public static CustomFirstPersonTransforms single(ItemTransformDefinition def, boolean vanilla) {
+        return new CustomFirstPersonTransforms(def, def, vanilla);
     }
 
     private static final Codec<CustomFirstPersonTransforms> FULL_CODEC = RecordCodecBuilder.create(i -> i.group(
             ItemTransformDefinition.CODEC.optionalFieldOf("main").forGetter(CustomFirstPersonTransforms::main),
             ItemTransformDefinition.CODEC.optionalFieldOf("offhand").forGetter(CustomFirstPersonTransforms::offhand),
-            Codec.BOOL.optionalFieldOf("attack", true).forGetter(CustomFirstPersonTransforms::attack),
-            Codec.BOOL.optionalFieldOf("use", true).forGetter(CustomFirstPersonTransforms::use)
+            Codec.BOOL.optionalFieldOf("vanilla", true).forGetter(CustomFirstPersonTransforms::vanilla)
     ).apply(i, CustomFirstPersonTransforms::new));
 
     public static final Codec<CustomFirstPersonTransforms> CODEC = Codec.either(FULL_CODEC, ItemTransformDefinition.CODEC).xmap(
             either -> either.map(
                     fpt -> fpt,
-                    def -> CustomFirstPersonTransforms.single(def, false, false)
+                    def -> CustomFirstPersonTransforms.single(def, true)
             ),
             fpt -> {
                 if (fpt.main.isPresent() && fpt.main.equals(fpt.offhand)) {
@@ -67,7 +65,7 @@ public record CustomFirstPersonTransforms(
     }
 
     public boolean isDefault() {
-        return getMain().isDefault() && getOffhand().isDefault() && attack && use;
+        return getMain().isDefault() && getOffhand().isDefault() && vanilla;
     }
 
     public ItemTransformDefinition getMain() {
@@ -96,7 +94,7 @@ public record CustomFirstPersonTransforms(
                 player,
                 player.getId()
             );
-        transform.apply(false, poseStack.last());
+        transform.apply(leftHand, poseStack.last());
         return true;
     }
 }

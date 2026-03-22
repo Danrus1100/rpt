@@ -58,6 +58,16 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         }
     }
 
+    @Inject(
+            method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V",
+            at = @At("RETURN")
+    )
+    private void rpt$injectEnd(T renderState, CallbackInfo ci) {
+        if (renderState instanceof CustomTransformsDispatchedState state && dispatcher != null) {
+            state.rpt$reset();
+        }
+    }
+
     @WrapMethod(method = "poseRightArm")
     private void rpt$wrapPoseRightArm(T renderState,
                                       //? <1.21.11
