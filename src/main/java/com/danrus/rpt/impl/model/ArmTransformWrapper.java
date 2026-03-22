@@ -42,13 +42,25 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
         if (renderState instanceof CustomArmTransformHolder holder) {
+            ArmTransform primary = new ArmTransform(transform, RptField.fromItemStack(stack));
 
-            switch (displayContext) {
-                case THIRD_PERSON_RIGHT_HAND -> {
-                    holder.rpt$setRightArmTransform(resolveForHand(true, stack));
+            if (otherTransform.isEmpty()) {
+                switch (displayContext) {
+                    case THIRD_PERSON_RIGHT_HAND -> holder.rpt$setRightArmTransform(primary);
+                    case THIRD_PERSON_LEFT_HAND -> holder.rpt$setLeftArmTransform(primary);
                 }
-                case THIRD_PERSON_LEFT_HAND -> {
-                    holder.rpt$setLeftArmTransform(resolveForHand(false, stack));
+            } else {
+                ArmTransform secondary = new ArmTransform(otherTransform.get(), RptField.fromItemStack(stack));
+
+                switch (displayContext) {
+                    case THIRD_PERSON_RIGHT_HAND -> {
+                        holder.rpt$setRightArmTransform(primary);
+                        holder.rpt$setLeftArmTransform(secondary);
+                    }
+                    case THIRD_PERSON_LEFT_HAND -> {
+                        holder.rpt$setLeftArmTransform(primary);
+                        holder.rpt$setRightArmTransform(secondary);
+                    }
                 }
             }
         }
@@ -56,23 +68,11 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
         model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
-    private ArmTransform resolveForHand(boolean rightHand, ItemStack stack) {
-        ArmTransform primary = new ArmTransform(transform, RptField.fromItemStack(stack));
-
-        if (otherTransform.isEmpty()) {
-            return primary;
-        }
-
-        ArmTransform secondary = new ArmTransform(otherTransform.get(), RptField.fromItemStack(stack));
-
-        return rightHand ? primary : secondary;
-    }
-
     public static record Unbaked(ItemModel.Unbaked model, Optional<ArmTransform> otherTransform, ArmTransform transform) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::model),
-                ArmTransform.CODEC.optionalFieldOf("second_arm").forGetter(Unbaked::otherTransform),
+                ArmTransform.CODEC.optionalFieldOf("opposite").forGetter(Unbaked::otherTransform),
                 ArmTransform.CODEC.optionalFieldOf("transform", ArmTransform.EMPTY).forGetter(Unbaked::transform)
         ).apply(i, Unbaked::new));
 

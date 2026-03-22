@@ -18,11 +18,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ArmorStandModelMixin extends HumanoidModel {
 
     @Unique
-    private final CustomTransformsDispatcher dispatcher = new CustomTransformsDispatcher(rightArm, leftArm, head);
+    private CustomTransformsDispatcher dispatcher = null;
 
     public ArmorStandModelMixin(ModelPart root) {
         super(root);
     }
+
+    @Inject(
+            method = "<init>",
+            at = @At("RETURN")
+    )
+    private void rpt$injectInit(ModelPart root, CallbackInfo ci) {
+        dispatcher = new CustomTransformsDispatcher(rightArm, leftArm, head);
+    }
+
 
     @Inject(
             method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/ArmorStandRenderState;)V",
@@ -39,7 +48,9 @@ public abstract class ArmorStandModelMixin extends HumanoidModel {
 //            leftArmTransform.rotateModelPart(leftArm, head, false, renderState);
 //        }
 
-        dispatcher.dispatch(renderState);
+        if (dispatcher != null) {
+            dispatcher.dispatch(renderState);
+        }
 
     }
 }

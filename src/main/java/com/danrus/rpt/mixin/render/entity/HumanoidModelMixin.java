@@ -9,6 +9,7 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -24,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.Function;
+
 @Mixin(HumanoidModel.class)
 public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
     @Shadow @Final public ModelPart rightArm;
@@ -31,7 +34,15 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
     @Shadow @Final public ModelPart head;
 
     @Unique
-    private final CustomTransformsDispatcher dispatcher = new CustomTransformsDispatcher(rightArm, leftArm, head);
+    private CustomTransformsDispatcher dispatcher = null;
+
+    @Inject(
+            method = "<init>(Lnet/minecraft/client/model/geom/ModelPart;Ljava/util/function/Function;)V",
+            at = @At("RETURN")
+    )
+    private void rpt$injectInit(ModelPart root, Function renderType, CallbackInfo ci) {
+        dispatcher = new CustomTransformsDispatcher(rightArm, leftArm, head);
+    }
 
     @Definition(id = "mainArm", field = "Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;mainArm:Lnet/minecraft/world/entity/HumanoidArm;")
     @Definition(id = "renderState", local = @Local(argsOnly = true, type = HumanoidRenderState.class))
@@ -42,7 +53,9 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             at = @At("MIXINEXTRAS:EXPRESSION")
     )
     private void rpt$injectHui(T renderState, CallbackInfo ci) {
-        dispatcher.dispatch(renderState);
+        if (renderState instanceof PlayerRenderState && dispatcher != null) {
+            dispatcher.dispatch(renderState);
+        }
     }
 
     @WrapMethod(method = "poseRightArm")
@@ -50,26 +63,28 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                                       //? <1.21.11
                                       HumanoidModel.ArmPose pose,
                                       Operation<Void> original) {
-        if (renderState instanceof CustomTransformsDispatchedState dispatchedState) {
+        if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.RIGHT)) {
                 return;
             }
 
-            ItemStackRenderState stackState = ArmTransformsHelper.getRightItem(renderState);
-            if (stackState instanceof CustomArmTransformHolder holder) {
-                ArmTransform transform = holder.rpt$getRightArmTransform();
+            HumanoidModel.ArmPose armPose = dispatcher.getVanilla(renderState, HumanoidArm.RIGHT);
 
-                if (!transform.isEmpty() && transform.getVanillaOrNull() != null) {
-                    //? <1.21.11 {
-                    original.call(renderState
-                            , transform.getVanillaOrNull()
-                    );
-                    //?} else {
-                    /*renderState.leftArmPose = transform.getVanillaOrNull();
-                    original.call(renderState);
-                    *///}
-                    return;
-                }
+            if (armPose != null) {
+                //? <1.21.11 {
+                original.call(renderState
+                        , armPose
+                );
+                //?} else {
+                /*renderState.rightArmPose = armPose;
+                original.call(renderState);
+                *///?}
+                return;
+            } else {
+                original.call(renderState
+                        //? <1.21.11
+                        , pose
+                );
             }
         }
 
@@ -84,26 +99,28 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                                      //? <1.21.11
                                      HumanoidModel.ArmPose pose,
                                      Operation<Void> original) {
-        if (renderState instanceof CustomTransformsDispatchedState dispatchedState) {
+        if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.LEFT)) {
                 return;
             }
 
-            ItemStackRenderState stackState = ArmTransformsHelper.getLeftItem(renderState);
-            if (stackState instanceof CustomArmTransformHolder holder) {
-                ArmTransform transform = holder.rpt$getLeftArmTransform();
+            HumanoidModel.ArmPose armPose = dispatcher.getVanilla(renderState, HumanoidArm.LEFT);
 
-                if (!transform.isEmpty() && transform.getVanillaOrNull() != null) {
-                    //? <1.21.11 {
-                    original.call(renderState
-                            , transform.getVanillaOrNull()
-                    );
-                    //?} else {
-                    /*renderState.rightArmPose = transform.getVanillaOrNull();
-                    original.call(renderState);
-                    *///}
-                    return;
-                }
+            if (armPose != null) {
+                //? <1.21.11 {
+                original.call(renderState
+                        , armPose
+                );
+                //?} else {
+                /*renderState.leftArmPose = armPose;
+                original.call(renderState);
+                *///?}
+                return;
+            } else {
+                original.call(renderState
+                        //? <1.21.11
+                        , pose
+                );
             }
         }
 
@@ -129,5 +146,16 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         }
 
         vanilla.run();
+    }
+
+    @WrapOperation(
+            method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/AnimationUtils;bobModelPart(Lnet/minecraft/client/model/geom/ModelPart;FF)V")
+    )
+    private void rpt$bobModel(ModelPart modelPart, float ageInTicks, float multiplier, Operation<Void> original, @Local(argsOnly = true) T renderState) {
+        HumanoidArm arm = modelPart == rightArm ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
+        if (!dispatcher.shouldCancelBob(renderState, arm)) {
+            original.call(modelPart, ageInTicks, multiplier);
+        }
     }
 }

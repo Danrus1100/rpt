@@ -6,7 +6,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +22,10 @@ public class CustomTransformsDispatcher {
     }
 
     public void dispatch(HumanoidRenderState state) {
+        if (rightArm == null || leftArm == null || head == null) {
+            return;
+        }
+
         if (!(state instanceof CustomTransformsDispatchedState dispatchedState)) {
             throw new IllegalStateException(state + " is not CustomTransformsDispatchedState");
         }
@@ -33,25 +36,38 @@ public class CustomTransformsDispatcher {
         ArmTransform offTransform = getTransform(ctx.offhand(), ctx.offArm());
 
         if (shouldApply(mainTransform)) {
-            applyTransform(mainTransform, ctx.mainArm(), InteractionHand.MAIN_HAND, state, dispatchedState);
+            applyTransform(mainTransform, ctx.mainArm(), state, dispatchedState);
+
+            tryApplyCompanionFromSameHolder(
+                ctx.main(),
+                ctx.offArm(),
+                state,
+                dispatchedState
+            );
 
             tryApplyOtherHand(
                     ctx.offhand(),
                     ctx.offArm(),
                     ctx.mainArm(),
-                    InteractionHand.OFF_HAND,
                     state,
                     dispatchedState
             );
 
-        } else if (shouldApply(offTransform)) {
-            applyTransform(offTransform, ctx.offArm(), InteractionHand.OFF_HAND, state, dispatchedState);
+        }
+        if (shouldApply(offTransform)) {
+            applyTransform(offTransform, ctx.offArm(), state, dispatchedState);
+
+            tryApplyCompanionFromSameHolder(
+                ctx.offhand(),
+                ctx.mainArm(),
+                state,
+                dispatchedState
+            );
 
             tryApplyOtherHand(
-                    ctx.offhand(),
+                    ctx.main(),
                     ctx.mainArm(),
                     ctx.offArm(),
-                    InteractionHand.MAIN_HAND,
                     state,
                     dispatchedState
             );
@@ -62,19 +78,29 @@ public class CustomTransformsDispatcher {
         if (!(state instanceof PlayerRenderState player)) {
             return false;
         }
-
         HumanoidArm attackArm = player.attackArm;
-
-        CustomArmTransformHolder holder = switch (attackArm) {
-            case LEFT -> (CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(state);
-            case RIGHT -> (CustomArmTransformHolder) ArmTransformsHelper.getRightItem(state);
-        };
-
-        ArmTransform transform = getTransform(holder, attackArm);
+        ArmTransform transform = getPlayerTransform(state, attackArm);
 
         if (transform == null) return false;
 
         return transform.attack();
+    }
+
+    public boolean shouldCancelBob(HumanoidRenderState state, HumanoidArm arm) {
+        ArmTransform transform = getPlayerTransform(state, arm);
+        if (transform == null) return false;
+        return transform.bob();
+    }
+
+    @Nullable
+    private ArmTransform getPlayerTransform(HumanoidRenderState state, HumanoidArm arm) {
+        if (!(state instanceof PlayerRenderState player)) {
+            return null;
+        }
+
+        CustomArmTransformHolder holder = getHolder(state, arm);
+
+        return getTransform(holder, arm);
     }
 
     @Nullable
@@ -121,12 +147,11 @@ public class CustomTransformsDispatcher {
     private void applyTransform(
             ArmTransform transform,
             HumanoidArm arm,
-            InteractionHand hand,
             HumanoidRenderState state,
             CustomTransformsDispatchedState dispatchedState
     ) {
         transform.rotateModelPart(
-                selectArmPart(arm, hand),
+            selectArmPart(arm),
                 head,
                 arm == HumanoidArm.RIGHT,
                 state
@@ -139,27 +164,33 @@ public class CustomTransformsDispatcher {
             CustomArmTransformHolder otherHolder,
             HumanoidArm otherArm,
             HumanoidArm sourceArm,
-            InteractionHand hand,
             HumanoidRenderState state,
             CustomTransformsDispatchedState dispatchedState
     ) {
         ArmTransform otherTransform = getTransform(otherHolder, otherArm);
 
         if (otherHolder.isBothHandsAvailable(sourceArm) && shouldApply(otherTransform)) {
-            applyTransform(otherTransform, otherArm, hand, state, dispatchedState);
+            applyTransform(otherTransform, otherArm, state, dispatchedState);
         }
     }
 
-    private ModelPart selectArmPart(HumanoidArm mainHand, InteractionHand wanted) {
-        return switch (wanted) {
-            case MAIN_HAND -> switch (mainHand) {
-                case RIGHT -> rightArm;
-                case LEFT -> leftArm;
-            };
-            case OFF_HAND -> switch (mainHand) {
-                case RIGHT -> leftArm;
-                case LEFT -> rightArm;
-            };
+    private void tryApplyCompanionFromSameHolder(
+            CustomArmTransformHolder holder,
+            HumanoidArm otherArm,
+            HumanoidRenderState state,
+            CustomTransformsDispatchedState dispatchedState
+    ) {
+        ArmTransform otherTransform = getTransform(holder, otherArm);
+
+        if (shouldApply(otherTransform)) {
+            applyTransform(otherTransform, otherArm, state, dispatchedState);
+        }
+    }
+
+    private ModelPart selectArmPart(HumanoidArm arm) {
+        return switch (arm) {
+            case RIGHT -> rightArm;
+            case LEFT -> leftArm;
         };
     }
 
@@ -174,7 +205,7 @@ public class CustomTransformsDispatcher {
 
     private record HolderPair(CustomArmTransformHolder main, CustomArmTransformHolder offhand) {}
 
-    public record ArmContext(
+    private record ArmContext(
             HumanoidArm mainArm,
             HumanoidArm offArm,
             CustomArmTransformHolder main,
