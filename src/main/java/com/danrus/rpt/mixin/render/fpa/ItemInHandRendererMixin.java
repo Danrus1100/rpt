@@ -31,7 +31,7 @@ public abstract class ItemInHandRendererMixin {
     protected abstract void swingArm(float swingProgress, float equippedProgress, PoseStack poseStack, int direction, HumanoidArm arm);
     //?} else {
     /*@Shadow
-    protected abstract void swingArm(float swingProgress, PoseStack poseStack, int direction, HumanoidArm humanoidArm);
+    protected abstract void swingArm(float swingProgress, PoseStack poseStack, int direction, HumanoidArm arm) ;
     *///?}
 
     @Shadow
@@ -62,14 +62,26 @@ public abstract class ItemInHandRendererMixin {
             return;
         }
         if (transform.vanilla()) {
-            int i = isHandRight ? 1 : -1;
+            int dir = isHandRight ? 1 : -1;
             if (isHandRight) poseStack.translate(1, 0, 0); // FIXME: подобрал на глазок
+            //? <= 1.21.10 {
             this.swingArm(swingProgress,
                     //? <=1.21.10
                     equippedProgress,
-                    poseStack, i, humanoidArm);
-            //? >=1.21.11
-            //applyItemArmTransform(poseStack, humanoidArm, equippedProgress);
+                    poseStack, dir, humanoidArm);
+            //?} else {
+            /*applyItemArmTransform(poseStack, humanoidArm, equippedProgress);
+            switch (stack.getSwingAnimation().type()) {
+                case NONE:
+                default:
+                    break;
+                case WHACK:
+                    this.swingArm(swingProgress, poseStack, dir, humanoidArm);
+                    break;
+                case STAB:
+                    net.minecraft.client.model.effects.SpearAnimations.firstPersonAttack(swingProgress, poseStack, dir, humanoidArm);
+            }
+            *///?}
         }
         this.renderItem(player, stack, isHandRight ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, combinedLight);
         poseStack.popPose();
