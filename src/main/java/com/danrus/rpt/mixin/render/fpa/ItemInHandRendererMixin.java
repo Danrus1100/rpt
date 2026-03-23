@@ -26,8 +26,16 @@ public abstract class ItemInHandRendererMixin {
     public abstract void renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector nodeCollector, int packedLight);
     *///?}
 
+    //? <=1.21.10 {
     @Shadow
     protected abstract void swingArm(float swingProgress, float equippedProgress, PoseStack poseStack, int direction, HumanoidArm arm);
+    //?} else {
+    /*@Shadow
+    protected abstract void swingArm(float swingProgress, PoseStack poseStack, int direction, HumanoidArm humanoidArm);
+    *///?}
+
+    @Shadow
+    protected abstract void applyItemArmTransform(PoseStack poseStack, HumanoidArm hand, float equippedProg);
 
     @WrapMethod(
             method = "renderArmWithItem"
@@ -56,7 +64,12 @@ public abstract class ItemInHandRendererMixin {
         if (transform.vanilla()) {
             int i = isHandRight ? 1 : -1;
             if (isHandRight) poseStack.translate(1, 0, 0); // FIXME: подобрал на глазок
-            this.swingArm(swingProgress, equippedProgress, poseStack, i, humanoidArm);
+            this.swingArm(swingProgress,
+                    //? <=1.21.10
+                    equippedProgress,
+                    poseStack, i, humanoidArm);
+            //? >=1.21.11
+            //applyItemArmTransform(poseStack, humanoidArm, equippedProgress);
         }
         this.renderItem(player, stack, isHandRight ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, combinedLight);
         poseStack.popPose();

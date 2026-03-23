@@ -24,6 +24,8 @@
     "render.entity.HumanoidArmorLayerMixin",
     "render.entity.CustomTransformsDispatchedStateMixin",
     "render.entity.ArmorStandModelMixin",
+    "render.entity.CustomAnchorApplicableModelMixin",
+    "render.entity.ItemInHandLayerMixin",
     "render.fpa.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "ItemModelMixin"

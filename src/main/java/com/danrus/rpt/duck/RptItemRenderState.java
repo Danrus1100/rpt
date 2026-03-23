@@ -1,14 +1,19 @@
 package com.danrus.rpt.duck;
 
+import com.danrus.rpt.core.anchor.AnchorType;
 import com.danrus.rpt.core.arm.ArmTransform;
 import net.minecraft.world.entity.HumanoidArm;
+import org.jetbrains.annotations.Nullable;
 
-public interface CustomArmTransformHolder {
+public interface RptItemRenderState {
     void rpt$setLeftArmTransform(ArmTransform transform);
     void rpt$setRightArmTransform(ArmTransform transform);
 
     ArmTransform rpt$getLeftArmTransform();
     ArmTransform rpt$getRightArmTransform();
+
+    @Nullable AnchorType rpt$getAnchorType();
+    void rpt$setAnchorType(@Nullable AnchorType type);
 
     default ArmTransform getForArm(HumanoidArm arm) {
         return switch (arm) {

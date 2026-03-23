@@ -7,7 +7,7 @@ import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
 import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.item.RptField;
-import com.danrus.rpt.duck.CustomArmTransformHolder;
+import com.danrus.rpt.duck.RptItemRenderState;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -41,7 +41,7 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
 
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
-        if (renderState instanceof CustomArmTransformHolder holder) {
+        if (renderState instanceof RptItemRenderState holder) {
             ArmTransform primary = new ArmTransform(transform, RptField.fromItemStack(stack));
 
             if (otherTransform.isEmpty()) {

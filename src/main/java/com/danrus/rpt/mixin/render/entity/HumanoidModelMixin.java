@@ -1,9 +1,6 @@
 package com.danrus.rpt.mixin.render.entity;
 
-import com.danrus.rpt.core.arm.ArmTransform;
-import com.danrus.rpt.core.arm.ArmTransformsHelper;
 import com.danrus.rpt.core.arm.CustomTransformsDispatcher;
-import com.danrus.rpt.duck.CustomArmTransformHolder;
 import com.danrus.rpt.duck.CustomTransformsDispatchedState;
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
@@ -15,7 +12,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

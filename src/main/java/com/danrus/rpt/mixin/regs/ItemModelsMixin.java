@@ -29,5 +29,6 @@ public class ItemModelsMixin {
         ID_MAPPER.put(RegexItemModel.Unbaked.ID, RegexItemModel.Unbaked.MAP_CODEC);
         ID_MAPPER.put(ArmTransformWrapper.Unbaked.ID, ArmTransformWrapper.Unbaked.MAP_CODEC);
         ID_MAPPER.put(ExpressionToExpressionsModel.Unbaked.ID, ExpressionToExpressionsModel.Unbaked.MAP_CODEC);
+        ID_MAPPER.put(CustomAnchorWrapper.Unbaked.ID, CustomAnchorWrapper.Unbaked.MAP_CODEC);
     }
 }

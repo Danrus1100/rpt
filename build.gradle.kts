@@ -44,6 +44,10 @@ stonecutter{
                 "import net.minecraft.client.model.ArmorStandModel;",
                 "import net.minecraft.client.model.object.armorstand.ArmorStandModel;"
             )
+            replace(
+                "import net.minecraft.client.model.PlayerModel;",
+                "import net.minecraft.client.model.player.PlayerModel;"
+            )
         }
 
         string {

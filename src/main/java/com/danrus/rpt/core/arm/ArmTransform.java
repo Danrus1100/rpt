@@ -3,7 +3,7 @@ package com.danrus.rpt.core.arm;
 import com.danrus.rpt.core.expression.NumericExpression;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.item.RptVariables;
-import com.danrus.rpt.duck.CustomArmTransformHolder;
+import com.danrus.rpt.duck.RptItemRenderState;
 import com.ezylang.evalex.Expression;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -106,15 +106,15 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
         }
     }
 
-    public static void resetState(CustomArmTransformHolder holder){
+    public static void resetState(RptItemRenderState holder){
         resetState(holder, true, true);
     }
 
-    public static void resetState(CustomArmTransformHolder holder, boolean rightArm){
+    public static void resetState(RptItemRenderState holder, boolean rightArm){
         resetState(holder, rightArm, !rightArm);
     }
 
-    public static void resetState(CustomArmTransformHolder holder, boolean rightArm, boolean leftArm) {
+    public static void resetState(RptItemRenderState holder, boolean rightArm, boolean leftArm) {
         if (rightArm) holder.rpt$setRightArmTransform(EMPTY);
         if (leftArm) holder.rpt$setLeftArmTransform(EMPTY);
     }

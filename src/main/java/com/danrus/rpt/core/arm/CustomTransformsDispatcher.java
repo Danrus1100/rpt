@@ -1,6 +1,6 @@
 package com.danrus.rpt.core.arm;
 
-import com.danrus.rpt.duck.CustomArmTransformHolder;
+import com.danrus.rpt.duck.RptItemRenderState;
 import com.danrus.rpt.duck.CustomTransformsDispatchedState;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -98,7 +98,7 @@ public class CustomTransformsDispatcher {
             return null;
         }
 
-        CustomArmTransformHolder holder = getHolder(state, arm);
+        RptItemRenderState holder = getHolder(state, arm);
 
         return getTransform(holder, arm);
     }
@@ -110,33 +110,33 @@ public class CustomTransformsDispatcher {
 
     @Nullable
     private HumanoidModel.ArmPose getVanilla(ArmContext ctx, HumanoidArm arm) {
-        CustomArmTransformHolder holder =
+        RptItemRenderState holder =
                 (arm == ctx.mainArm()) ? ctx.main() : ctx.offhand();
 
         return getTransform(holder, arm).getVanillaOrNull();
     }
 
-    private CustomArmTransformHolder getHolder(HumanoidRenderState state, HumanoidArm arm) {
+    private RptItemRenderState getHolder(HumanoidRenderState state, HumanoidArm arm) {
         return switch (arm) {
-            case RIGHT -> (CustomArmTransformHolder) ArmTransformsHelper.getRightItem(state);
-            case LEFT -> (CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(state);
+            case RIGHT -> (RptItemRenderState) ArmTransformsHelper.getRightItem(state);
+            case LEFT -> (RptItemRenderState) ArmTransformsHelper.getLeftItem(state);
         };
     }
 
     private HolderPair resolveHolders(HumanoidRenderState state, HumanoidArm mainHand) {
         return switch (mainHand) {
             case RIGHT -> new HolderPair(
-                    (CustomArmTransformHolder) ArmTransformsHelper.getRightItem(state),
-                    (CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(state)
+                    (RptItemRenderState) ArmTransformsHelper.getRightItem(state),
+                    (RptItemRenderState) ArmTransformsHelper.getLeftItem(state)
             );
             case LEFT -> new HolderPair(
-                    (CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(state),
-                    (CustomArmTransformHolder) ArmTransformsHelper.getRightItem(state)
+                    (RptItemRenderState) ArmTransformsHelper.getLeftItem(state),
+                    (RptItemRenderState) ArmTransformsHelper.getRightItem(state)
             );
         };
     }
 
-    private ArmTransform getTransform(CustomArmTransformHolder holder, HumanoidArm arm) {
+    private ArmTransform getTransform(RptItemRenderState holder, HumanoidArm arm) {
         return holder.getForArm(arm);
     }
 
@@ -161,7 +161,7 @@ public class CustomTransformsDispatcher {
     }
 
     private void tryApplyOtherHand(
-            CustomArmTransformHolder otherHolder,
+            RptItemRenderState otherHolder,
             HumanoidArm otherArm,
             HumanoidArm sourceArm,
             HumanoidRenderState state,
@@ -175,7 +175,7 @@ public class CustomTransformsDispatcher {
     }
 
     private void tryApplyCompanionFromSameHolder(
-            CustomArmTransformHolder holder,
+            RptItemRenderState holder,
             HumanoidArm otherArm,
             HumanoidRenderState state,
             CustomTransformsDispatchedState dispatchedState
@@ -203,12 +203,12 @@ public class CustomTransformsDispatcher {
         return new ArmContext(main, off, pair.main(), pair.offhand());
     }
 
-    private record HolderPair(CustomArmTransformHolder main, CustomArmTransformHolder offhand) {}
+    private record HolderPair(RptItemRenderState main, RptItemRenderState offhand) {}
 
     private record ArmContext(
             HumanoidArm mainArm,
             HumanoidArm offArm,
-            CustomArmTransformHolder main,
-            CustomArmTransformHolder offhand
+            RptItemRenderState main,
+            RptItemRenderState offhand
     ) {}
 }
