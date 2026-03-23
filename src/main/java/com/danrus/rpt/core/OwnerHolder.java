@@ -3,6 +3,7 @@ package com.danrus.rpt.core;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
+// TODO: move this to RPF
 public class OwnerHolder {
         //? if <=1.21.8 {
         private final @Nullable LivingEntity owner;
@@ -25,4 +26,12 @@ public class OwnerHolder {
      //? } else {
     /*@Nullable public net.minecraft.world.entity.ItemOwner get() {return owner;}
     *///? }
+
+    @Nullable
+    public LivingEntity asLivingEntity() {
+        return get()
+        //? >=1.21.10
+        //.asLivingEntity()
+        ;
+    }
 }

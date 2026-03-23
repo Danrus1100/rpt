@@ -1,3 +1,2 @@
- - Added Expressions API. [Learn how to use it here](https://danrus1100.github.io/rtp-rpf-docs/ru/rpt/expressions.html)
- - Added new `select` and `condition` properties. 
- - Updated Arm Rotation API.
+- Fixed a critical bug that prevented the game from launching on versions 1.21.10-11
+- Added a new item model `rpt:anchor`. With it, you can change which body part the item's position and rotation will be attached to

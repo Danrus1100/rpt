@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class RptTemplatesManager implements RptModelBakeReloadListener {
 
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
-    private static final Logger log = LoggerFactory.getLogger(RptTemplatesManager.class);
+    private static final Logger log = LoggerFactory.getLogger(TemplatesManager.class);
 
     private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
     private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();
@@ -61,13 +61,17 @@ public class RptTemplatesManager implements RptModelBakeReloadListener {
         }, executor);
     }
 
+    @Nullable
     public RptTemplate tryBakeAgain(
             ItemModel.BakingContext context,
             ResourceLocation location
     ) {
-        return unbakedTemplates.get(location).bake(context);
+        var a = unbakedTemplates.get(location);
+        if (a == null) return null;
+        return a.bake(context);
     }
 
+    @Nullable
     public RptTemplate getTemplate(ItemModel.BakingContext context, ResourceLocation id) {
         RptTemplate candidate = templates.get(id);
         if (candidate == null || candidate.needRebake()) {

@@ -1,7 +1,7 @@
 package com.danrus.rpt.mixin.load;
 
 import com.danrus.rpt.duck.RptClientItem;
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.item.ClientItem;
@@ -18,15 +18,15 @@ import java.util.Optional;
 public class ClientItemMixin implements RptClientItem {
     @Unique
     @Nullable
-    private RptItemParams rpt$params;
+    private RptField rpt$params;
 
     @Override
-    public Optional<RptItemParams> rpt$getParams() {
+    public Optional<RptField> rpt$getField() {
         return Optional.ofNullable(this.rpt$params);
     }
 
     @Override
-    public void rpt$setParams(@Nullable RptItemParams params) {
+    public void rpt$setField(@Nullable RptField params) {
         this.rpt$params = params;
     }
 
@@ -36,12 +36,12 @@ public class ClientItemMixin implements RptClientItem {
     )
     private static Codec<ClientItem> rpt$modifyCodec(java.util.function.Function<RecordCodecBuilder.Instance<ClientItem>, ? extends com.mojang.datafixers.kinds.App<RecordCodecBuilder.Mu<ClientItem>, ClientItem>> builder) {
         return RecordCodecBuilder.create(instance -> instance.group(
-                ItemModels.CODEC.fieldOf("model").forGetter(ClientItem::model),
+            ItemModels.CODEC.fieldOf("model").forGetter(ClientItem::model),
                 ClientItem.Properties.MAP_CODEC.forGetter(ClientItem::properties),
-                RptItemParams.CODEC.optionalFieldOf("rpt").forGetter(item -> RptClientItem.class.cast(item).rpt$getParams())
+                RptField.CODEC.optionalFieldOf("rpt").forGetter(item -> RptClientItem.class.cast(item).rpt$getField())
         ).apply(instance, (unbaked, properties, rptItemParams) -> {
             ClientItem item = new ClientItem(unbaked, properties);
-            RptClientItem.class.cast(item).rpt$setParams(rptItemParams.orElse(null));
+            RptClientItem.class.cast(item).rpt$setField(rptItemParams.orElse(null));
             return item;
         }));
     }

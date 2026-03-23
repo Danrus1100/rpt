@@ -1,6 +1,6 @@
 package com.danrus.rpt.impl.model;
 
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class RptSelectItemModel<T> extends SelectItemModel<T> {
 
-    private final RptItemParams params;
+    private final RptField params;
 
-    public RptSelectItemModel(SelectItemModelProperty<T> selectItemModelProperty, ModelSelector<T> modelSelector, RptItemParams params) {
+    public RptSelectItemModel(SelectItemModelProperty<T> selectItemModelProperty, ModelSelector<T> modelSelector, RptField params) {
         super(selectItemModelProperty, modelSelector);
         this.params = params;
     }

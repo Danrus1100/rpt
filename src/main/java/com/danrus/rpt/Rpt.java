@@ -11,8 +11,9 @@ import com.danrus.rpt.core.template.RptTemplatesManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,27 +31,31 @@ public class Rpt implements ClientModInitializer {
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
 
-    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptItemParamsHolder holder) {
+    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptFieldHolder holder) {
         holder.rpt$clearParams();
-        signedItemModel.rpt$getParams().ifPresent(params -> {
+        signedItemModel.rpt$getField().ifPresent(params -> {
             holder.rpt$setParams(params);
         });
     }
 
     @Override
     public void onInitializeClient() {
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
+//        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
+
         reloadManager.add(templatesManager);
         reloadManager.add(bbmodelsManager);
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-            RptItemParamsHolder holder = RptItemParamsHolder.class.cast(event.getStack());
+            RptFieldHolder holder = RptFieldHolder.class.cast(event.getStack());
             prepareModelParams(signedItemModel, holder);
         });
 
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
             SelectItemModelProperty property = event.getProperty();
             if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptItemParams params = RptItemParamsHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getParams());
+                RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
@@ -73,20 +78,26 @@ public class Rpt implements ClientModInitializer {
         });
 
         Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext()).rpt$addParams(RptClientItem.class.cast(event.getClientItem()).rpt$getParams().orElse(RptItemParams.EMPTY));
+            RptBakingContext.class.cast(event.getBakingContext()).rpt$addFields(RptClientItem.class.cast(event.getClientItem()).rpt$getField().orElse(RptField.EMPTY));
         });
 
         Rpf.getEventBus().register(PostBakeEvent.class, event -> {
             RptSignedItemModel signed = RptSignedItemModel.class.cast(event.getResult());
             RptClientItem clientItem = RptClientItem.class.cast(event.getClientItem());
-            clientItem.rpt$getParams().ifPresent(params -> {
-                signed.rpt$setParams(params);
+            clientItem.rpt$getField().ifPresent(params -> {
+                signed.rpt$setField(params);
             });
         });
     }
 
-    public static RptTemplatesManager getTemplatesManager() {
+    public static TemplatesManager getTemplatesManager() {
         return templatesManager;
+    }
+
+    public static TextureSwappersManager getTextureSwappersManager() {return swappersManager;}
+
+    public static FirstPersonAnimManager getFpaManager() {
+        return fpaManager;
     }
 
     public static RptBbModelManager getBbmodelsManager() {

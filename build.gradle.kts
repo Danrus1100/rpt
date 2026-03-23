@@ -31,8 +31,25 @@ loom {
     accessWidenerPath = project.file("src/main/resources/rpt.accesswidener")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 stonecutter{
     replacements {
+        string {
+            direction = eval(current.version, ">=1.21.11")
+            replace(
+                "import net.minecraft.client.model.ArmorStandModel;",
+                "import net.minecraft.client.model.object.armorstand.ArmorStandModel;"
+            )
+            replace(
+                "import net.minecraft.client.model.PlayerModel;",
+                "import net.minecraft.client.model.player.PlayerModel;"
+            )
+        }
+
         string {
             direction = eval(current.version, ">=1.21.11")
             replace("ResourceLocation", "Identifier")
@@ -175,8 +192,18 @@ publishing {
 
     repositories {
         maven {
-            name = "Shlakoblock"
+            name = "ShlakoblockReleases"
             url = uri("https://maven.shlakoblock.com/releases")
+
+            credentials {
+                username = project.findProperty("shlakoblock-maven-username")?.toString()
+                password = project.findProperty("shlakoblock-maven-password")?.toString()
+            }
+        }
+
+        maven {
+            name = "ShlakoblockSnapshots"
+            url = uri("https://maven.shlakoblock.com/snapshots")
 
             credentials {
                 username = project.findProperty("shlakoblock-maven-username")?.toString()
