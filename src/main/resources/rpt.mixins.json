@@ -8,6 +8,7 @@
   },
   "client": [
     "accessor.ModelBakerImplInvoker",
+    "input.MinecraftInteractionMixin",
     "item.select.SelectItemModelMixin",
     "item.select.UnbakedMixin",
     "load.BakingContextMixin",
@@ -25,8 +26,12 @@
     "render.entity.CustomTransformsDispatchedStateMixin",
     "render.entity.ArmorStandModelMixin",
     "render.entity.CustomAnchorApplicableModelMixin",
+    "render.entity.HumanoidModelMixin",
     "render.entity.ItemInHandLayerMixin",
     "render.fpa.ItemInHandRendererMixin",
+    "render.bb.GameRendererMixin",
+    "render.bb.SpecialModelWrapperMixin",
+    "render.bb.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "ItemModelMixin"
   ],

@@ -3,11 +3,12 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
-import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.bake.RptModelBakeReloadManager;
 import com.danrus.rpt.core.bbmodel.RptBbModelManager;
-import com.danrus.rpt.core.item.RptItemParams;
+import com.danrus.rpt.core.fpa.FirstPersonAnimManager;
+import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplatesManager;
+import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.fabricmc.api.ClientModInitializer;
@@ -24,6 +25,9 @@ public class Rpt implements ClientModInitializer {
 
     private static final RptTemplatesManager templatesManager = new RptTemplatesManager();
     private static final RptBbModelManager bbmodelsManager = new RptBbModelManager();
+
+    private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
+    private static final FirstPersonAnimManager fpaManager = new FirstPersonAnimManager();
 
     private static final RptModelBakeReloadManager reloadManager = new RptModelBakeReloadManager();
 
@@ -90,7 +94,7 @@ public class Rpt implements ClientModInitializer {
         });
     }
 
-    public static TemplatesManager getTemplatesManager() {
+    public static RptTemplatesManager getTemplatesManager() {
         return templatesManager;
     }
 

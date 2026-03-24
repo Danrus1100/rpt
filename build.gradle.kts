@@ -21,6 +21,7 @@ val minecraft = property("deps.mc") as String
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven("https://maven.fabricmc.net/")
     maven("https://maven.parchmentmc.org")
     maven("https://api.modrinth.com/maven")
@@ -82,10 +83,12 @@ dependencies {
     })
     modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
-    modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
+    modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}") {
+        exclude(group = "maven.modrinth", module = "my_totem_doll")
+    }
 
     implementationAndInclude("com.ezylang:EvalEx:3.6.0")
-    implementationAndInclude("com.danrus:bb4j:1.0")
+    implementationAndInclude("com.danrus:bb4j:1.1-SNAPSHOT")
 }
 
 tasks.processResources {

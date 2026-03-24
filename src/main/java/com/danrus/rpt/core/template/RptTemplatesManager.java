@@ -10,6 +10,7 @@ import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StrictJsonParser;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
 public class RptTemplatesManager implements RptModelBakeReloadListener {
 
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
-    private static final Logger log = LoggerFactory.getLogger(TemplatesManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RptTemplatesManager.class);
 
     private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
     private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();
