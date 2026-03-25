@@ -47,7 +47,10 @@ public class RptBbModelUtils implements BbModelRenderer {
     private static final Logger log = LoggerFactory.getLogger(RptBbModelUtils.class);
     private static final Map<Identifier, TextureUtils.AlphaMode> TEXTURE_ALPHA_MODES = new ConcurrentHashMap<>();
     private final Map<BbModelDocument, com.danrus.rpt.core.bbmodel.baked.BakedModelData> BAKED_MODEL_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
-    private final ThreadLocal<HashMap<String, TextureRenderData>> TEXTURE_RENDER_DATA_CACHE = ThreadLocal.withInitial(HashMap::new);
+
+    public static void clearCaches() {
+        TEXTURE_ALPHA_MODES.clear();
+    }
 
     @Override
     public void renderToBuffer(BbModelDocument model, MultiBufferSource bufferSource, PoseStack poseStack, int packedLight, int packedOverlay) {
@@ -65,7 +68,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.render(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), holder instanceof LocalPlayer player ? player.getSkin().body().texturePath() : null)
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), holder instanceof LocalPlayer player ? player.getSkin().body().texturePath() : null)
         );
     }
 
@@ -88,7 +91,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), location),
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), location),
                 animatedTransforms
         );
     }
@@ -113,7 +116,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), location),
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), location),
                 animatedTransforms
         );
     }
@@ -136,7 +139,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), playerSkin),
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin),
                 animatedTransforms
         );
     }
@@ -152,7 +155,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.render(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), playerSkin)
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin)
         );
     }
 
@@ -167,7 +170,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderOpaque(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, TEXTURE_RENDER_DATA_CACHE.get(), playerSkin),
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin),
                 outTranslucent
         );
     }

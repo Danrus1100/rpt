@@ -18,29 +18,31 @@ import java.util.Optional;
 public record CustomFirstPersonTransforms(
         Optional<ItemTransformDefinition> main,
         Optional<ItemTransformDefinition> offhand,
-        boolean vanilla
+        boolean swing,
+        boolean draw
 ) {
 
-    public static final CustomFirstPersonTransforms DEFAULT = CustomFirstPersonTransforms.single(ItemTransformDefinition.NONE, true);
+    public static final CustomFirstPersonTransforms DEFAULT = CustomFirstPersonTransforms.single(ItemTransformDefinition.NONE, true, true);
 
-    public CustomFirstPersonTransforms(ItemTransformDefinition main, ItemTransformDefinition offhand, boolean vanilla) {
-        this(Optional.of(main), Optional.of(offhand), vanilla);
+    public CustomFirstPersonTransforms(ItemTransformDefinition main, ItemTransformDefinition offhand, boolean swing, boolean draw) {
+        this(Optional.of(main), Optional.of(offhand), swing, draw);
     }
 
-    public static CustomFirstPersonTransforms single(ItemTransformDefinition def, boolean vanilla) {
-        return new CustomFirstPersonTransforms(def, def, vanilla);
+    public static CustomFirstPersonTransforms single(ItemTransformDefinition def, boolean swing, boolean draw) {
+        return new CustomFirstPersonTransforms(def, def, swing, draw);
     }
 
     private static final Codec<CustomFirstPersonTransforms> FULL_CODEC = RecordCodecBuilder.create(i -> i.group(
             ItemTransformDefinition.CODEC.optionalFieldOf("main").forGetter(CustomFirstPersonTransforms::main),
             ItemTransformDefinition.CODEC.optionalFieldOf("offhand").forGetter(CustomFirstPersonTransforms::offhand),
-            Codec.BOOL.optionalFieldOf("vanilla", true).forGetter(CustomFirstPersonTransforms::vanilla)
+            Codec.BOOL.optionalFieldOf("swing", true).forGetter(CustomFirstPersonTransforms::swing),
+            Codec.BOOL.optionalFieldOf("draw", true).forGetter(CustomFirstPersonTransforms::draw)
     ).apply(i, CustomFirstPersonTransforms::new));
 
     public static final Codec<CustomFirstPersonTransforms> CODEC = Codec.either(FULL_CODEC, ItemTransformDefinition.CODEC).xmap(
             either -> either.map(
                     fpt -> fpt,
-                    def -> CustomFirstPersonTransforms.single(def, true)
+                    def -> CustomFirstPersonTransforms.single(def, true, true)
             ),
             fpt -> {
                 if (fpt.main.isPresent() && fpt.main.equals(fpt.offhand)) {
@@ -65,7 +67,7 @@ public record CustomFirstPersonTransforms(
     }
 
     public boolean isDefault() {
-        return getMain().isDefault() && getOffhand().isDefault() && vanilla;
+        return getMain().isDefault() && getOffhand().isDefault() && swing && draw;
     }
 
     public ItemTransformDefinition getMain() {

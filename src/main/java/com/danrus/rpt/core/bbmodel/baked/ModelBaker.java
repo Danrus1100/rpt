@@ -30,6 +30,19 @@ public class ModelBaker {
             quads.add(bakeFace(face, mesh.getTextureUuid()));
         }
         
+        List<RptBakedMesh.BakedTransformStep> steps = new ArrayList<>();
+        if (mesh.getTransformSteps() != null) {
+            for (RenderUtils.RenderableMesh.TransformStep s : mesh.getTransformSteps()) {
+                steps.add(new RptBakedMesh.BakedTransformStep(
+                        s.getUuid(),
+                        (float)(s.getOrigin()[0] / 16.0), (float)(s.getOrigin()[1] / 16.0), (float)(s.getOrigin()[2] / 16.0),
+                        (float)(s.getPosition()[0] / 16.0), (float)(s.getPosition()[1] / 16.0), (float)(s.getPosition()[2] / 16.0),
+                        (float)s.getRotation()[0], (float)s.getRotation()[1], (float)s.getRotation()[2],
+                        (float)s.getScale()[0], (float)s.getScale()[1], (float)s.getScale()[2]
+                ));
+            }
+        }
+        
         return new RptBakedMesh(
                 (float)(pos[0] / 16.0), (float)(pos[1] / 16.0), (float)(pos[2] / 16.0),
                 (float)(origin[0] / 16.0), (float)(origin[1] / 16.0), (float)(origin[2] / 16.0),
@@ -37,7 +50,8 @@ public class ModelBaker {
                 (float)scale[0], (float)scale[1], (float)scale[2],
                 hasRot, hasScale,
                 quads,
-                mesh.getHierarchy()
+                mesh.getHierarchy(),
+                steps
         );
     }
     

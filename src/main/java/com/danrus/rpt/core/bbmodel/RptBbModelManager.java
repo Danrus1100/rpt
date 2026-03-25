@@ -95,6 +95,7 @@ public class RptBbModelManager implements RptModelBakeReloadListener {
     @Override
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         models.clear();
+        RptBbModelUtils.clearCaches();
         controllers.clear();
         return CompletableFuture.runAsync(() -> {
             FSM_LISTENER.listMatchingResources(resourceManager).forEach((location, resource) -> {

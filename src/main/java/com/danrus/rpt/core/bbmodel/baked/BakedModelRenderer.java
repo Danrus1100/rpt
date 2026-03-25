@@ -147,61 +147,118 @@ public class BakedModelRenderer {
         
         for (RptBakedMesh mesh : modelData.staticMeshes()) {
             poseStack.pushPose();
-            
-            float animX = 0, animY = 0, animZ = 0;
-            float animRotX = 0, animRotY = 0, animRotZ = 0;
-            float animScaleX = 1, animScaleY = 1, animScaleZ = 1;
-            
-            if (mesh.hierarchy() != null && animatedTransforms != null) {
-                for (String uuid : mesh.hierarchy()) {
-                    com.danrus.bb4j.api.utils.TransformUtils.Transform t = animatedTransforms.get(uuid);
-                    if (t != null) {
-                        animX += t.getX();
-                        animY += t.getY();
-                        animZ += t.getZ();
-                        animRotX += t.getRotX();
-                        animRotY += t.getRotY();
-                        animRotZ += t.getRotZ();
-                        animScaleX *= t.getScaleX();
-                        animScaleY *= t.getScaleY();
-                        animScaleZ *= t.getScaleZ();
+
+            if (mesh.transformSteps() != null && !mesh.transformSteps().isEmpty()) {
+                for (RptBakedMesh.BakedTransformStep step : mesh.transformSteps()) {
+                    float animX = 0, animY = 0, animZ = 0;
+                    float animRotX = 0, animRotY = 0, animRotZ = 0;
+                    float animScaleX = 1, animScaleY = 1, animScaleZ = 1;
+
+                    if (animatedTransforms != null) {
+                        com.danrus.bb4j.api.utils.TransformUtils.Transform t = animatedTransforms.get(step.uuid());
+                        if (t != null) {
+                            animX = (float) t.getX() / 16.0f;
+                            animY = (float) t.getY() / 16.0f;
+                            animZ = (float) t.getZ() / 16.0f;
+                            animRotX = (float) t.getRotX();
+                            animRotY = (float) t.getRotY();
+                            animRotZ = (float) t.getRotZ();
+                            animScaleX = (float) t.getScaleX();
+                            animScaleY = (float) t.getScaleY();
+                            animScaleZ = (float) t.getScaleZ();
+                        }
+                    }
+
+                    float finalPosX = step.posX() + animX;
+                    float finalPosY = step.posY() + animY;
+                    float finalPosZ = step.posZ() + animZ;
+
+                    float finalRotX = step.rotX() + animRotX;
+                    float finalRotY = step.rotY() + animRotY;
+                    float finalRotZ = step.rotZ() + animRotZ;
+
+                    float finalScaleX = step.scaleX() * animScaleX;
+                    float finalScaleY = step.scaleY() * animScaleY;
+                    float finalScaleZ = step.scaleZ() * animScaleZ;
+
+                    poseStack.translate(finalPosX, finalPosY, finalPosZ);
+
+                    boolean hasAnyRot = Math.abs(finalRotX) > 0.0001f || Math.abs(finalRotY) > 0.0001f || Math.abs(finalRotZ) > 0.0001f;
+                    boolean hasAnyScale = Math.abs(finalScaleX - 1.0f) > 0.0001f || Math.abs(finalScaleY - 1.0f) > 0.0001f || Math.abs(finalScaleZ - 1.0f) > 0.0001f;
+
+                    if (hasAnyRot || hasAnyScale) {
+                        poseStack.translate(step.originX(), step.originY(), step.originZ());
+
+                        if (hasAnyRot) {
+                            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(finalRotZ));
+                            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(finalRotY));
+                            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(finalRotX));
+                        }
+
+                        if (hasAnyScale) {
+                            poseStack.scale(finalScaleX, finalScaleY, finalScaleZ);
+                        }
+
+                        poseStack.translate(-step.originX(), -step.originY(), -step.originZ());
                     }
                 }
-            }
-            
-            float finalPosX = mesh.posX() + (animX / 16.0f);
-            float finalPosY = mesh.posY() + (animY / 16.0f);
-            float finalPosZ = mesh.posZ() + (animZ / 16.0f);
-            
-            float finalRotX = mesh.rotX() + animRotX;
-            float finalRotY = mesh.rotY() + animRotY;
-            float finalRotZ = mesh.rotZ() + animRotZ;
-            
-            float finalScaleX = mesh.scaleX() * animScaleX;
-            float finalScaleY = mesh.scaleY() * animScaleY;
-            float finalScaleZ = mesh.scaleZ() * animScaleZ;
-            
-            poseStack.translate(finalPosX, finalPosY, finalPosZ);
-            
-            boolean hasAnyRot = Math.abs(finalRotX) > 0.0001f || Math.abs(finalRotY) > 0.0001f || Math.abs(finalRotZ) > 0.0001f;
-            boolean hasAnyScale = Math.abs(finalScaleX - 1.0f) > 0.0001f || Math.abs(finalScaleY - 1.0f) > 0.0001f || Math.abs(finalScaleZ - 1.0f) > 0.0001f;
-            
-            if (hasAnyRot || hasAnyScale) {
-                poseStack.translate(mesh.originX(), mesh.originY(), mesh.originZ());
-                
-                if (hasAnyRot) {
-                    poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(finalRotZ));
-                    poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(finalRotY));
-                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(finalRotX));
+            } else {
+                // Fallback for models without transform steps (should not happen with new baker)
+                float animX = 0, animY = 0, animZ = 0;
+                float animRotX = 0, animRotY = 0, animRotZ = 0;
+                float animScaleX = 1, animScaleY = 1, animScaleZ = 1;
+
+                if (mesh.hierarchy() != null && animatedTransforms != null) {
+                    for (String uuid : mesh.hierarchy()) {
+                        com.danrus.bb4j.api.utils.TransformUtils.Transform t = animatedTransforms.get(uuid);
+                        if (t != null) {
+                            animX += t.getX() / 16.0f;
+                            animY += t.getY() / 16.0f;
+                            animZ += t.getZ() / 16.0f;
+                            animRotX += t.getRotX();
+                            animRotY += t.getRotY();
+                            animRotZ += t.getRotZ();
+                            animScaleX *= t.getScaleX();
+                            animScaleY *= t.getScaleY();
+                            animScaleZ *= t.getScaleZ();
+                        }
+                    }
                 }
-                
-                if (hasAnyScale) {
-                    poseStack.scale(finalScaleX, finalScaleY, finalScaleZ);
+
+                float finalPosX = mesh.posX() + animX;
+                float finalPosY = mesh.posY() + animY;
+                float finalPosZ = mesh.posZ() + animZ;
+
+                float finalRotX = mesh.rotX() + animRotX;
+                float finalRotY = mesh.rotY() + animRotY;
+                float finalRotZ = mesh.rotZ() + animRotZ;
+
+                float finalScaleX = mesh.scaleX() * animScaleX;
+                float finalScaleY = mesh.scaleY() * animScaleY;
+                float finalScaleZ = mesh.scaleZ() * animScaleZ;
+
+                poseStack.translate(finalPosX, finalPosY, finalPosZ);
+
+                boolean hasAnyRot = Math.abs(finalRotX) > 0.0001f || Math.abs(finalRotY) > 0.0001f || Math.abs(finalRotZ) > 0.0001f;
+                boolean hasAnyScale = Math.abs(finalScaleX - 1.0f) > 0.0001f || Math.abs(finalScaleY - 1.0f) > 0.0001f || Math.abs(finalScaleZ - 1.0f) > 0.0001f;
+
+                if (hasAnyRot || hasAnyScale) {
+                    poseStack.translate(mesh.originX(), mesh.originY(), mesh.originZ());
+
+                    if (hasAnyRot) {
+                        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(finalRotZ));
+                        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(finalRotY));
+                        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(finalRotX));
+                    }
+
+                    if (hasAnyScale) {
+                        poseStack.scale(finalScaleX, finalScaleY, finalScaleZ);
+                    }
+
+                    poseStack.translate(-mesh.originX(), -mesh.originY(), -mesh.originZ());
                 }
-                
-                poseStack.translate(-mesh.originX(), -mesh.originY(), -mesh.originZ());
             }
-            
+
             Matrix4f matrix4f = poseStack.last().pose();
             Matrix3f normalMatrix = poseStack.last().normal();
             Matrix4f translucentPoseMatrix = null;

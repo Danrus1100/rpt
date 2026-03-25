@@ -7,12 +7,14 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
@@ -175,6 +177,7 @@ public class GameExpressionsHelper {
         vars.put("maxAir", 0.0);
         vars.put("attackCooldown", 0.0);
         vars.put("sleeping", 0.0);
+        vars.put("isSlim", 0.0 );
         vars.put("attackProgress", 0.0);
 
         vars.put("lightSky", 0.0);
@@ -222,7 +225,7 @@ public class GameExpressionsHelper {
                 vars.put("age", (double) mob.getAge());
             }
 
-            if (entity instanceof Player player) {
+            if (entity instanceof LocalPlayer player) {
                 vars.put("food", (double) player.getFoodData().getFoodLevel());
                 vars.put("saturation", (double) player.getFoodData().getSaturationLevel());
                 vars.put("experienceLevel", (double) player.experienceLevel);
@@ -234,6 +237,7 @@ public class GameExpressionsHelper {
                 vars.put("maxAir", (double) player.getMaxAirSupply());
                 vars.put("attackCooldown", (double) player.getAttackStrengthScale(delta));
                 vars.put("sleeping", player.isSleeping() ? 1.0 : 0.0);
+                vars.put("isSlim", player.getSkin().model() == PlayerModelType.SLIM ? 1.0 : 0.0 );
 
                 // 1.3.0 start
                 vars.put("attackProgress", (double) player.getAttackAnim(delta));
