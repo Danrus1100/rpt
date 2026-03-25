@@ -3,7 +3,7 @@ package com.danrus.rpt.core.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static com.danrus.rpt.core.expression.GameExpressionsHelper.RESERVED_VARIABLE_NAME;
 
-public record RptVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
+public record RptVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, Identifier> models) {
 
     public static final Codec<RptVariables> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.STRING)
@@ -26,7 +26,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
                     .optionalFieldOf("flags", Map.of())
                     .validate(RptVariables::validateNames)
                     .forGetter(RptVariables::flags),
-            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
+            Codec.unboundedMap(Codec.STRING, Identifier.CODEC)
                     .optionalFieldOf("models", Map.of())
                     .validate(RptVariables::validateNames)
                     .forGetter(RptVariables::models)
@@ -66,7 +66,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
         Map<String, Boolean> newFlags = new HashMap<>(this.flags);
         newFlags.putAll(other.flags);
 
-        Map<String, ResourceLocation> newModels = new HashMap<>(this.models);
+        Map<String, Identifier> newModels = new HashMap<>(this.models);
         newModels.putAll(other.models);
 
         return new RptVariables(
@@ -98,7 +98,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
                 case "string" -> Codec.STRING;
                 case "number" -> Codec.DOUBLE;
                 case "flag" -> Codec.BOOL;
-                case "value" -> ResourceLocation.CODEC;
+                case "value" -> Identifier.CODEC;
                 default -> throw new IllegalArgumentException("Unknown variable type:" + this);
             };
         }
@@ -121,6 +121,6 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
         public static final Type<String> STRING = new Type<>(String.class, "string");
         public static final Type<Double> NUMBER = new Type<>(Double.class, "number");
         public static final Type<Boolean> FLAG = new Type<>(Boolean.class, "flag");
-        public static final Type<ResourceLocation> MODEL = new Type<>(ResourceLocation.class, "value");
+        public static final Type<Identifier> MODEL = new Type<>(Identifier.class, "value");
     }
 }

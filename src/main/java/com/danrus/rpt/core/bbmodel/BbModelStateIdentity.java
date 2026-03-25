@@ -1,6 +1,6 @@
 package com.danrus.rpt.core.bbmodel;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ public class BbModelStateIdentity {
 
     private BbModelStateIdentity() {}
 
-    public BbModelStateIdentity(ResourceLocation modelLocation, int seed) {
+    public BbModelStateIdentity(Identifier modelLocation, int seed) {
         elements.add(modelLocation);
         elements.add(seed);
     }
@@ -20,7 +20,7 @@ public class BbModelStateIdentity {
         elements.addAll(List.of(element));
     }
 
-    public static BbModelStateIdentity of(ResourceLocation modelLocation, int seed) {
+    public static BbModelStateIdentity of(Identifier modelLocation, int seed) {
         return new BbModelStateIdentity(modelLocation, seed);
     }
 

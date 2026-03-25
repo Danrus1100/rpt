@@ -1,6 +1,7 @@
 package com.danrus.rpt.core.bbmodel.fsm;
 
 import com.danrus.bb4j.model.animation.AnimationBlendState;
+import com.danrus.rpt.compat.iris.IrisCompatBridge;
 import com.danrus.rpt.core.bbmodel.fsm.FsmTriggers;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,6 +46,7 @@ public class FsmInstance {
     }
 
     public void tick(float delta, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, com.danrus.bb4j.model.BbModelDocument document) {
+        if (IrisCompatBridge.isShadowsPass.get()) return; //FIXME: hack, move tick to other place
         captured = entity;
 
         if (isHandDisplayContext(displayContext) && shouldTriggerDraw(level)) {

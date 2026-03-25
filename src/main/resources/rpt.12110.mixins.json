@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "plugin": "com.danrus.rpt.plugin.Rpt12110MixinPlugin",
+  "package": "com.danrus.rpt.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "render.bb.SubmitNodeCollectionMixin",
+    "render.bb.SubmitNodeStorageMixin",
+    "render.bb.FeatureRenderDispatcherMixin"
+  ],
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  }
+}

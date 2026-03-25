@@ -63,7 +63,7 @@ public class Rpt implements ClientModInitializer {
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
                         //? if >=1.21.10
-                        //.asLivingEntity()
+                        .asLivingEntity()
                         , event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }

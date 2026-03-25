@@ -6,10 +6,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.fabric.mixin.client.gametest.input.InputUtilMixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -30,18 +29,18 @@ public class FsmTriggers {
 //    public static final String STOP_SNEAK = "stop_sneak";
 //    public static final String JUMP = "jump";
 
-    public static final ExtraCodecs.LateBoundIdMapper<ResourceLocation, MapCodec<? extends FsmTrigger>> ID_MAPPER = new ExtraCodecs.LateBoundIdMapper<>();
+    public static final ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends FsmTrigger>> ID_MAPPER = new ExtraCodecs.LateBoundIdMapper<>();
     public static final Codec<FsmTrigger> CODEC;
     public static final Codec<FsmTrigger> FLEX_CODEC;
 
     public static void bootstrap() {
-        ID_MAPPER.put(ResourceLocation.withDefaultNamespace("simple"), SimpleTrigger.MAP_CODEC);
-        ID_MAPPER.put(ResourceLocation.withDefaultNamespace("conditional"), ConditionalTrigger.MAP_CODEC);
-        ID_MAPPER.put(ResourceLocation.withDefaultNamespace("keypress"), InputPressed.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("simple"), SimpleTrigger.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("conditional"), ConditionalTrigger.MAP_CODEC);
+        ID_MAPPER.put(Identifier.withDefaultNamespace("keypress"), InputPressed.MAP_CODEC);
     }
 
     static {
-        CODEC = ID_MAPPER.codec(ResourceLocation.CODEC).dispatch(FsmTrigger::type, (mapCodec) -> mapCodec);
+        CODEC = ID_MAPPER.codec(Identifier.CODEC).dispatch(FsmTrigger::type, (mapCodec) -> mapCodec);
         FLEX_CODEC = Codec.either(Codec.STRING, CODEC).xmap(
                 either -> either.map(SimpleTrigger::new, trigger -> trigger),
                 trigger -> {
@@ -93,8 +92,10 @@ public class FsmTriggers {
 
         @Override
         public boolean test(Set<String> activeTriggers, Map<String, Double> customVariables, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-            long window = Minecraft.getInstance().getWindow().getWindow();
-            return InputConstants.isKeyDown(window, input);
+            return InputConstants.isKeyDown(Minecraft.getInstance().getWindow()
+                    //? <=1.21.8
+                    //.getWindow()
+                    , input);
         }
 
         @Override

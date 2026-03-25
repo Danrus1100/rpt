@@ -8,7 +8,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,9 +18,9 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 //? >=1.21.11 {
-/*import net.minecraft.world.attribute.EnvironmentAttribute;
+import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-*///? }
+//? }
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -257,12 +257,12 @@ public class GameExpressionsHelper {
                 vars.put("biomeTemp", (double) biome.getBaseTemperature());
 
                 //? <=1.21.10 {
-                vars.put("moonPhase", (double) level.getMoonPhase());
+                /*vars.put("moonPhase", (double) level.getMoonPhase());
                 vars.put("sunAngle", (double) level.getSunAngle(delta));
-                //?} else {
-                /*vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
+                *///?} else {
+                vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
                 vars.put("sunAngle", level.environmentAttributes().getDimensionValue(EnvironmentAttributes.SUN_ANGLE).doubleValue());
-                *///?}
+                //?}
             }
         }
 

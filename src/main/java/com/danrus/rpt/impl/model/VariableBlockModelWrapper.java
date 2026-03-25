@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +50,7 @@ public class VariableBlockModelWrapper extends AbstractRpfItemModel  {
                         .forGetter(Unbaked::tints)
         ).apply(instance, Unbaked::new));
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "variable");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "variable");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -59,7 +59,7 @@ public class VariableBlockModelWrapper extends AbstractRpfItemModel  {
 
         @Override
         public ItemModel bake(BakingContext context) {
-            ResourceLocation model = RptBakingContext.class.cast(context).rpt$getField().variables().models().get(variable);
+            Identifier model = RptBakingContext.class.cast(context).rpt$getField().variables().models().get(variable);
             if (model == null) {
                 throw new IllegalStateException("Can't find model from variable: " + variable);
             }

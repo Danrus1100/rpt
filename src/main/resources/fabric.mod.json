@@ -23,7 +23,8 @@
   },
   "mixins": [
     "rpt.mixins.json",
-    "rpt.12111.mixins.json"
+    "rpt.12111.mixins.json",
+    "rpt.12110.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.17",

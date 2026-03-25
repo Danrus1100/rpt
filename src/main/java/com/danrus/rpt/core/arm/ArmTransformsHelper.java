@@ -9,19 +9,19 @@ public class ArmTransformsHelper {
     public static <T extends HumanoidRenderState> ItemStackRenderState getRightItem(T renderState) {
         return
         //? < 1.21.11 {
-        renderState.rightHandItem;
-        //? } else {
-        /*renderState.rightHandItemState;
-         *///?}
+        /*renderState.rightHandItem;
+        *///? } else {
+        renderState.rightHandItemState;
+         //?}
     }
 
     @Unique
     public static <T extends HumanoidRenderState> ItemStackRenderState getLeftItem(T renderState) {
         return
         //? < 1.21.11 {
-        renderState.leftHandItem;
-        //? } else {
-        /*renderState.leftHandItemState;
-         *///?}
+        /*renderState.leftHandItem;
+        *///? } else {
+        renderState.leftHandItemState;
+         //?}
     }
 }

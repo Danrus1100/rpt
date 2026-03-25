@@ -42,18 +42,18 @@ public class SignedItemModelMixin implements RptSignedItemModel {
             method = "doDelegate",
             at = @At(value = "INVOKE", target =
                     //? >= 1.21.10 {
-                    /*"Lcom/danrus/rpf/api/RpfItemModel;rpf$doDelegate(Lcom/danrus/rpf/core/item/ModelUpdateContext;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/client/renderer/item/ItemModel;Lcom/danrus/rpf/api/TestsResultCollector;)Z"
-                    *///? } else {
-                    "Lcom/danrus/rpf/api/RpfItemModel;rpf$doDelegate(Lcom/danrus/rpf/core/item/ModelUpdateContext;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/item/ItemModel;Lcom/danrus/rpf/api/TestsResultCollector;)Z"
-                    //? }
+                    "Lcom/danrus/rpf/api/RpfItemModel;rpf$doDelegate(Lcom/danrus/rpf/core/item/ModelUpdateContext;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/client/renderer/item/ItemModel;Lcom/danrus/rpf/api/TestsResultCollector;)Z"
+                    //? } else {
+                    /*"Lcom/danrus/rpf/api/RpfItemModel;rpf$doDelegate(Lcom/danrus/rpf/core/item/ModelUpdateContext;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/item/ItemModel;Lcom/danrus/rpf/api/TestsResultCollector;)Z"
+                    *///? }
             )
     )
     private boolean rpt$wrapDelegate(RpfItemModel instance, ModelUpdateContext context, ItemStack stack,
                                      //? >=1.21.10 {
-                                     /*net.minecraft.world.entity.ItemOwner owner,
-                                     *///? } else {
-                                     LivingEntity owner,
-                                     //?}
+                                     net.minecraft.world.entity.ItemOwner owner,
+                                     //? } else {
+                                     /*LivingEntity owner,
+                                     *///?}
                                      ItemModel prev, TestsResultCollector collector, Operation<Boolean> original) {
         RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(this);
         RptFieldHolder holder = RptFieldHolder.class.cast(stack);

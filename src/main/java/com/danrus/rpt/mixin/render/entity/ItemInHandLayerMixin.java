@@ -27,25 +27,25 @@ public abstract class ItemInHandLayerMixin <T extends EntityRenderState, S exten
 
     @WrapOperation(
             //? <=1.21.8
-            method = "renderArmWithItem",
+            //method = "renderArmWithItem",
             //? >=1.21.10
-            //method = "submitArmWithItem",
+            method = "submitArmWithItem",
             at = @At(value = "INVOKE", target =
                     //? <1.21.10
-                    "Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V"
+                    //"Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V"
                     //? >=1.21.10
-                    //"Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V"
+                    "Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V"
             )
     )
     private void rpt$moveToAnchorPart(ArmedModel instance
             //? >=1.21.10
-            //, T t
+            , T t
             , HumanoidArm arm, PoseStack poseStack, Operation<Void> original, @Local(argsOnly = true) ItemStackRenderState itemStackRenderState) {
         AnchorType anchorType = ((RptItemRenderState)itemStackRenderState).rpt$getAnchorType();
         if (anchorType == null || !(getParentModel() instanceof CustomAnchorApplicableModel model)) {
             original.call(instance
                     //? >=1.21.10
-                    //, t
+                    , t
                     , arm, poseStack);
             return;
         }

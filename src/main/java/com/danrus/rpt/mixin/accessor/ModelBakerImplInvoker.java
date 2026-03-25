@@ -11,10 +11,10 @@ public interface ModelBakerImplInvoker {
     @Invoker("<init>")
     static ModelBakery.ModelBakerImpl rpt$create
             //? if <=1.21.10 {
-            (ModelBakery bakery, SpriteGetter spriteGetter)
-            //? } else {
-            /*(ModelBakery bakery, final SpriteGetter spriteGetter, final ModelBaker.PartCache partCache, final ModelBakery.MissingModels missingModels)
-            *///?}
+            /*(ModelBakery bakery, SpriteGetter spriteGetter)
+            *///? } else {
+            (ModelBakery bakery, final SpriteGetter spriteGetter, final ModelBaker.PartCache partCache, final ModelBakery.MissingModels missingModels)
+            //?}
     {
         throw new UnsupportedOperationException();
     }

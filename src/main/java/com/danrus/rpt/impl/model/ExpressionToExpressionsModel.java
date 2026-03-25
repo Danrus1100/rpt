@@ -16,7 +16,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -73,7 +73,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
                 ItemModels.CODEC.optionalFieldOf("fallback").forGetter(Unbaked::fallback)
         ).apply(i, Unbaked::new));
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "expression");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "expression");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

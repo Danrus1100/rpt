@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +48,7 @@ public class CustomAnchorWrapper extends AbstractRpfItemModel {
                 AnchorType.CODEC.fieldOf("anchor").forGetter(Unbaked::anchorType)
         ).apply(i, Unbaked::new));
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "anchor");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "anchor");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {

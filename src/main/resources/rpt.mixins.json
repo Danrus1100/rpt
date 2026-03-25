@@ -29,10 +29,10 @@
     "render.entity.HumanoidModelMixin",
     "render.entity.ItemInHandLayerMixin",
     "render.fpa.ItemInHandRendererMixin",
-    "render.bb.GameRendererMixin",
     "render.bb.SpecialModelWrapperMixin",
     "render.bb.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
+    "rpf.RpfCompatPluginMixin",
     "ItemModelMixin"
   ],
   "mixins": [
@@ -40,8 +40,7 @@
     "render.ItemStackMixin",
     "regs.SpecialModelRenderersMixin",
     "rpf.SignedItemModelMixin",
-    "render.entity.ItemStackRenderStateMixin",
-    "rpf.SignedItemModelMixin"
+    "render.entity.ItemStackRenderStateMixin"
   ],
   "mixinextras": {
     "minVersion": "0.5.0"

@@ -49,6 +49,10 @@ stonecutter{
                 "import net.minecraft.client.model.PlayerModel;",
                 "import net.minecraft.client.model.player.PlayerModel;"
             )
+            replace(
+                "import net.minecraft.client.renderer.RenderType;",
+                "import net.minecraft.client.renderer.rendertype.RenderType;"
+            )
         }
 
         string {
@@ -74,17 +78,26 @@ dependencies {
         include(dependencyNotation)
     }
 
-    minecraft("com.mojang:minecraft:${findProperty("deps.mc")}")
+    minecraft("com.mojang:minecraft:${prop("deps.mc")}")
     mappings(loom.layered() {
         officialMojangMappings()
         opt("deps.parchment") {
-            parchment("org.parchmentmc.data:parchment-${findProperty("deps.mc")}:${it}@zip")
+            parchment("org.parchmentmc.data:parchment-${prop("deps.mc")}:${it}@zip")
         }
     })
-    modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
-    modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}") {
+    modImplementation("net.fabricmc:fabric-loader:${prop("deps.fabric")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fapi")}")
+    modImplementation("com.danrus:rpf:${prop("deps.rpf")}-${prop("deps.mc")}") {
         exclude(group = "maven.modrinth", module = "my_totem_doll")
+    }
+
+    opt("deps.iris") {
+        modImplementation("maven.modrinth:sodium:${prop("deps.sodium")}")
+        modImplementation("maven.modrinth:iris:${it}")
+
+        implementation("org.antlr:antlr4-runtime:4.13.1")
+        implementation("io.github.douira:glsl-transformer:3.0.0-pre3")
+        implementation("org.anarres:jcpp:1.4.14")
     }
 
     implementationAndInclude("com.ezylang:EvalEx:3.6.0")

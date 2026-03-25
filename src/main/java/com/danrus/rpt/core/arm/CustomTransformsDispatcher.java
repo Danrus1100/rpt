@@ -5,7 +5,7 @@ import com.danrus.rpt.duck.CustomTransformsDispatchedState;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,7 +75,7 @@ public class CustomTransformsDispatcher {
     }
 
     public boolean shouldCancelAttack(HumanoidRenderState state) {
-        if (!(state instanceof PlayerRenderState player)) {
+        if (!(state instanceof AvatarRenderState player)) {
             return false;
         }
         HumanoidArm attackArm = player.attackArm;
@@ -94,7 +94,7 @@ public class CustomTransformsDispatcher {
 
     @Nullable
     private ArmTransform getPlayerTransform(HumanoidRenderState state, HumanoidArm arm) {
-        if (!(state instanceof PlayerRenderState player)) {
+        if (!(state instanceof AvatarRenderState player)) {
             return null;
         }
 

@@ -10,7 +10,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StrictJsonParser;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,17 +32,17 @@ public class RptBbModelManager implements RptModelBakeReloadListener {
     private static final FileToIdConverter MODELS_LISTENER = new FileToIdConverter("rpt/bb/models", ".bbmodel");
     private static final FileToIdConverter FSM_LISTENER = new FileToIdConverter("rpt/bb/fsm", ".json");
     private static final Logger log = LoggerFactory.getLogger(RptBbModelManager.class);
-    private final Map<ResourceLocation, BbModelDocument> models = new HashMap<>();
+    private final Map<Identifier, BbModelDocument> models = new HashMap<>();
     private final Map<BbModelStateIdentity, FsmInstance> dynamicStates = new HashMap<>();
-    private final Map<ResourceLocation, FsmController> controllers = new HashMap<>();
+    private final Map<Identifier, FsmController> controllers = new HashMap<>();
 
 
-    public @Nullable BbModelDocument getModel(ResourceLocation modelLocation) {
+    public @Nullable BbModelDocument getModel(Identifier modelLocation) {
         return models.get(modelLocation);
     }
 
     @Nullable
-    public FsmInstance getDynamicState(ResourceLocation location, int seed, @Nullable LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext) {
+    public FsmInstance getDynamicState(Identifier location, int seed, @Nullable LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext) {
         FsmController controller = controllers.get(location);
         if (controller == null) return null;
         BbModelStateIdentity identity = BbModelStateIdentity.of(location, seed);

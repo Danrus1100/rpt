@@ -11,7 +11,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +49,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             at = @At("MIXINEXTRAS:EXPRESSION")
     )
     private void rpt$injectHui(T renderState, CallbackInfo ci) {
-        if (renderState instanceof PlayerRenderState && dispatcher != null) {
+        if (renderState instanceof AvatarRenderState && dispatcher != null) {
             dispatcher.dispatch(renderState);
         }
     }
@@ -67,7 +67,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
     @WrapMethod(method = "poseRightArm")
     private void rpt$wrapPoseRightArm(T renderState,
                                       //? <1.21.11
-                                      HumanoidModel.ArmPose pose,
+                                      //HumanoidModel.ArmPose pose,
                                       Operation<Void> original) {
         if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.RIGHT)) {
@@ -78,32 +78,32 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
             if (armPose != null) {
                 //? <1.21.11 {
-                original.call(renderState
+                /*original.call(renderState
                         , armPose
                 );
-                //?} else {
-                /*renderState.rightArmPose = armPose;
+                *///?} else {
+                renderState.rightArmPose = armPose;
                 original.call(renderState);
-                *///?}
+                //?}
                 return;
             } else {
                 original.call(renderState
                         //? <1.21.11
-                        , pose
+                        //, pose
                 );
             }
         }
 
         original.call(renderState
                 //? <1.21.11
-                , pose
+                //, pose
         );
     }
 
     @WrapMethod(method = "poseLeftArm")
     private void rpt$wrapPoseLeftArm(T renderState,
                                      //? <1.21.11
-                                     HumanoidModel.ArmPose pose,
+                                     //HumanoidModel.ArmPose pose,
                                      Operation<Void> original) {
         if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.LEFT)) {
@@ -114,37 +114,37 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
             if (armPose != null) {
                 //? <1.21.11 {
-                original.call(renderState
+                /*original.call(renderState
                         , armPose
                 );
-                //?} else {
-                /*renderState.leftArmPose = armPose;
+                *///?} else {
+                renderState.leftArmPose = armPose;
                 original.call(renderState);
-                *///?}
+                //?}
                 return;
             } else {
                 original.call(renderState
                         //? <1.21.11
-                        , pose
+                        //, pose
                 );
             }
         }
 
         original.call(renderState
                 //? <1.21.11
-                , pose
+                //, pose
         );
     }
 
     @WrapMethod(method = "setupAttackAnimation")
     private void rpt$wrapAttack(HumanoidRenderState humanoidRenderState,
                                 //? <=1.21.10
-                                 float ageInTicks,
+                                 //float ageInTicks,
                                 Operation<Void> original) {
         Runnable vanilla = () ->
                 original.call(humanoidRenderState
                             //? <=1.21.10
-                            , ageInTicks
+                            //, ageInTicks
                 );
 
         if (dispatcher.shouldCancelAttack(humanoidRenderState)) {

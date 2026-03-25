@@ -2,7 +2,7 @@ package com.danrus.rpt.core.selection;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
 import java.util.IdentityHashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NestedSelectors {
 	private static final Map<Codec<?>, Type<?>> TYPES = new IdentityHashMap<>();
-	private static final Map<ResourceLocation, GenericCodecFactory> GLOBAL_FACTORIES = new LinkedHashMap<>();
+	private static final Map<Identifier, GenericCodecFactory> GLOBAL_FACTORIES = new LinkedHashMap<>();
 
 	private NestedSelectors() {}
 
@@ -30,18 +30,18 @@ public class NestedSelectors {
 		// Put into cache before factory materialization to break recursive codec initialization.
 		TYPES.put(valueCodec, created);
 
-		for (Map.Entry<ResourceLocation, GenericCodecFactory> entry : GLOBAL_FACTORIES.entrySet()) {
+		for (Map.Entry<Identifier, GenericCodecFactory> entry : GLOBAL_FACTORIES.entrySet()) {
 			created.register(entry.getKey(), entry.getValue().create(valueCodec));
 		}
 
 		return created;
 	}
 
-	public static synchronized <T> void register(Codec<T> valueCodec, ResourceLocation id, MapCodec<? extends NestedSelector.Unbaked<T>> mapCodec) {
+	public static synchronized <T> void register(Codec<T> valueCodec, Identifier id, MapCodec<? extends NestedSelector.Unbaked<T>> mapCodec) {
 		type(valueCodec).register(id, mapCodec);
 	}
 
-	public static synchronized void register(ResourceLocation id, GenericCodecFactory factory) {
+	public static synchronized void register(Identifier id, GenericCodecFactory factory) {
 		GLOBAL_FACTORIES.put(id, factory);
 		for (Type<?> type : TYPES.values()) {
 			registerForExistingType(type, id, factory);
@@ -49,7 +49,7 @@ public class NestedSelectors {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> void registerForExistingType(Type<?> type, ResourceLocation id, GenericCodecFactory factory) {
+	private static <T> void registerForExistingType(Type<?> type, Identifier id, GenericCodecFactory factory) {
 		Type<T> typed = (Type<T>) type;
 		typed.register(id, factory.create(typed.valueCodec()));
 	}
@@ -65,17 +65,17 @@ public class NestedSelectors {
 
 	public static final class Type<T> {
 		private final Codec<T> valueCodec;
-		private final ExtraCodecs.LateBoundIdMapper<ResourceLocation, MapCodec<? extends NestedSelector.Unbaked<T>>> idMapper = new ExtraCodecs.LateBoundIdMapper<>();
+		private final ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends NestedSelector.Unbaked<T>>> idMapper = new ExtraCodecs.LateBoundIdMapper<>();
 		private final Codec<NestedSelector.Unbaked<T>> codec;
 
 		private Type(Codec<T> valueCodec) {
 			this.valueCodec = valueCodec;
 			this.codec = idMapper
-					.codec(ResourceLocation.CODEC)
+					.codec(Identifier.CODEC)
 					.dispatch(unbaked -> unbaked.type(this.valueCodec), mapCodec -> mapCodec);
 		}
 
-		public void register(ResourceLocation id, MapCodec<? extends NestedSelector.Unbaked<T>> mapCodec) {
+		public void register(Identifier id, MapCodec<? extends NestedSelector.Unbaked<T>> mapCodec) {
 			idMapper.put(id, mapCodec);
 		}
 
@@ -87,7 +87,7 @@ public class NestedSelectors {
 			return valueCodec;
 		}
 
-		public ExtraCodecs.LateBoundIdMapper<ResourceLocation, MapCodec<? extends NestedSelector.Unbaked<T>>> mapper() {
+		public ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends NestedSelector.Unbaked<T>>> mapper() {
 			return idMapper;
 		}
 	}

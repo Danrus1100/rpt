@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StrictJsonParser;
 import org.jetbrains.annotations.Nullable;
@@ -25,8 +25,8 @@ public class RptTemplatesManager implements RptModelBakeReloadListener {
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
     private static final Logger log = LoggerFactory.getLogger(RptTemplatesManager.class);
 
-    private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
-    private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();
+    private final Map<Identifier, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
+    private final Map<Identifier, RptTemplate> templates = new HashMap<>();
 
     @Override
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
@@ -65,7 +65,7 @@ public class RptTemplatesManager implements RptModelBakeReloadListener {
     @Nullable
     public RptTemplate tryBakeAgain(
             ItemModel.BakingContext context,
-            ResourceLocation location
+            Identifier location
     ) {
         var a = unbakedTemplates.get(location);
         if (a == null) return null;
@@ -73,7 +73,7 @@ public class RptTemplatesManager implements RptModelBakeReloadListener {
     }
 
     @Nullable
-    public RptTemplate getTemplate(ItemModel.BakingContext context, ResourceLocation id) {
+    public RptTemplate getTemplate(ItemModel.BakingContext context, Identifier id) {
         RptTemplate candidate = templates.get(id);
         if (candidate == null || candidate.needRebake()) {
             return tryBakeAgain(context, id);
