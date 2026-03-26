@@ -35,9 +35,9 @@ public record Vector3Expression(NumericExpression x, NumericExpression y, Numeri
 
     public Vector3fc evaluateWithGame(Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         return new Vector3f(
-                (float) GameExpressionsHelper.evaluate(x.expression(), additionalVars, level, entity, seed),
-                (float) GameExpressionsHelper.evaluate(y.expression(), additionalVars, level, entity, seed),
-                (float) GameExpressionsHelper.evaluate(z.expression(), additionalVars, level, entity, seed)
+                (float) GameExpressionsHelper.evaluateNumber(x.expression(), additionalVars, level, entity, seed),
+                (float) GameExpressionsHelper.evaluateNumber(y.expression(), additionalVars, level, entity, seed),
+                (float) GameExpressionsHelper.evaluateNumber(z.expression(), additionalVars, level, entity, seed)
         );
     }
 

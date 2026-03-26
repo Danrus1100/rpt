@@ -2,7 +2,6 @@ package com.danrus.rpt.core.bbmodel.fsm;
 
 import com.danrus.bb4j.model.animation.AnimationBlendState;
 import com.danrus.rpt.compat.iris.IrisCompatBridge;
-import com.danrus.rpt.core.bbmodel.fsm.FsmTriggers;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -108,7 +107,12 @@ public class FsmInstance {
         if (currentState == null) return;
 
         for (FsmTransition transition : currentState.getTransitions()) {
-            if (transition.trigger() != null && transition.trigger().test(activeTriggers, customVariables, level, entity, seed)) {
+            if (!transition.interruptible() && !activeTriggers.contains(FsmTriggers.ANIMATION_FINISHED)) {
+                continue;
+            }
+            boolean triggered = transition.trigger() != null && transition.trigger().test(activeTriggers, customVariables, level, entity, seed);
+            boolean isApplicable = transition.condition().getValueWithGame(customVariables, level, entity, seed);
+            if (transition.trigger() != null && triggered && isApplicable) {
                 performTransition(transition);
                 break;
             }

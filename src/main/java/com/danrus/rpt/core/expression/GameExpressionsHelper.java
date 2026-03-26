@@ -3,28 +3,22 @@ package com.danrus.rpt.core.expression;
 import com.danrus.rpt.core.selection.SelectResult;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 //? >=1.21.11 {
-import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 //? }
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 
 public class GameExpressionsHelper {
 
@@ -50,7 +42,7 @@ public class GameExpressionsHelper {
     }
 
     public static <T> SelectResult<T> selectResultFromCases(List<? extends ExpressionsCase<T>> cases, String expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, T fallback) {
-        double mainEval = evaluate(expression, additionalVars, level, entity, seed);
+        double mainEval = evaluateNumber(expression, additionalVars, level, entity, seed);
 
         for (ExpressionsCase<T> entry : cases) {
             int req = 0;
@@ -63,7 +55,7 @@ public class GameExpressionsHelper {
                         else return SelectResult.ok(entry.value());
                     }
                 } else {
-                    if (mainEval == evaluate(exprStr, additionalVars, level, entity, seed)) {
+                    if (mainEval == evaluateNumber(exprStr, additionalVars, level, entity, seed)) {
                         return SelectResult.ok(entry.value());
                     }
                 }
@@ -76,7 +68,7 @@ public class GameExpressionsHelper {
         return SelectResult.fallback(fallback);
     }
 
-    private static void logError(String expression, Exception e) {
+    public static void logError(String expression, Exception e) {
         if (alreadyLogged.contains(expression)) return;
         log.error("Failed to evaluate expression {}", expression, e);
         alreadyLogged.add(expression);
@@ -104,21 +96,35 @@ public class GameExpressionsHelper {
         alreadyLogged.clear();
     }
 
-    public static double evaluate(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+    public static boolean evaluateBoolean(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         Expression expr = expressionCache.computeIfAbsent(expressionStr, Expression::new);
+        return evaluateBoolean(expr, additionalVars, level, entity, seed);
+    }
 
-        generateGameVariables(level, entity, seed).forEach(expr::with);
-        additionalVars.forEach(expr::with);
+    public static boolean evaluateBoolean(Expression expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        EvaluationValue value = evaluate(expression, additionalVars, level, entity, seed);
+        return value.isBooleanValue() ? value.getBooleanValue() : false;
+    }
+
+    public static double evaluateNumber(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        EvaluationValue value = evaluate(expressionStr, additionalVars, level, entity, seed);
+        return value.isNumberValue() ? value.getNumberValue().doubleValue() : 0.0;
+    }
+
+    public static EvaluationValue evaluate(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        Expression expr = expressionCache.computeIfAbsent(expressionStr, Expression::new);
+        return evaluate(expr, additionalVars, level, entity, seed);
+    }
+
+    public static EvaluationValue evaluate(Expression expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        generateGameVariables(level, entity, seed).forEach(expression::with);
+        additionalVars.forEach(expression::with);
 
         try {
-            EvaluationValue result = expr.evaluate();
-            if (result.isBooleanValue()) {
-                return result.getBooleanValue() ? 1.0 : 0.0;
-            }
-            return result.getNumberValue().doubleValue();
+            return expression.evaluate();
         } catch (Exception e) {
-            logError(expressionStr, e);
-            return 0.0;
+            logError(expression.getExpressionString(), e);
+            return EvaluationValue.NULL_VALUE;
         }
     }
 

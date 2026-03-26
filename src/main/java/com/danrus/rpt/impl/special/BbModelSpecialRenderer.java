@@ -82,7 +82,7 @@ public record BbModelSpecialRenderer(Identifier location, BbModelDocument model)
         PoseStack poseStack = new PoseStack();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         if (displayContext == ItemDisplayContext.GUI) {
-            poseStack.scale(16f, 16f, 16f); // for cases if animations move item out of extends box
+            poseStack.scale(-1f, -1f, 16f); // for cases if animations move item out of extends box
         } else {
             poseStack.scale(-1.0F, -1.0F, 1.0F);
         }

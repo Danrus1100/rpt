@@ -1,6 +1,6 @@
 package com.danrus.rpt.core.bbmodel.fsm;
 
-import net.minecraft.client.Minecraft;
+import com.danrus.rpt.core.expression.BooleanExpression;
 
 import java.util.function.Consumer;
 
@@ -70,6 +70,8 @@ public class FsmBuilder {
         private final String targetState;
         private final double blendDuration;
         private FsmTrigger trigger = null;
+        private boolean interruptible = true;
+        private FsmCondition condition = BooleanExpression.TRUE;
 
         public TransitionBuilder(StateBuilder parent, String targetState, double blendDuration) {
             this.parent = parent;
@@ -87,8 +89,18 @@ public class FsmBuilder {
             return this;
         }
 
+        public TransitionBuilder interruptible(boolean interruptible) {
+            this.interruptible = interruptible;
+            return this;
+        }
+
+        public TransitionBuilder setCondition(FsmCondition condition) {
+            this.condition = condition;
+            return this;
+        }
+
         public StateBuilder end() {
-            parent.addTransition(new FsmTransition(targetState, blendDuration, trigger));
+            parent.addTransition(new FsmTransition(targetState, blendDuration, trigger, interruptible, condition));
             return parent;
         }
     }
