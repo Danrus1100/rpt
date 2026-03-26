@@ -18,6 +18,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Minecraft.class)
 public class MinecraftInteractionMixin {
 
+    @Unique
+    private int rpt$lastAttckTick = 0;
+
+    @Inject(
+            method = "tick",
+            at = @At("HEAD")
+    )
+    private void rpt$prefomAttackTick(CallbackInfo ci) {
+        rpt$lastAttckTick++;
+    }
+
     @Inject(method = "startAttack", at = @At("HEAD"))
     private void rpt$startAttack(CallbackInfoReturnable<Boolean> cir) {
         LocalPlayer player = Minecraft.getInstance().player;
@@ -27,6 +38,7 @@ public class MinecraftInteractionMixin {
 
         ItemStack stack = player.getMainHandItem();
         Rpt.getBbmodelsManager().triggerForHand(FsmTriggers.ATTACK, player, stack, toDisplayContext(player, InteractionHand.MAIN_HAND));
+//        Rpt.getBbmodelsManager().triggerForHand(rpt$lastAttckTick <= 10 ? FsmTriggers.ATTACK2 : FsmTriggers.ATTACK1, player, stack, toDisplayContext(player, InteractionHand.MAIN_HAND));
     }
 
     @Inject(method = "startUseItem", at = @At("HEAD"))

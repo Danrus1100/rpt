@@ -1,10 +1,13 @@
 package com.danrus.rpt.core.bbmodel.fsm;
 
+import com.danrus.bb4j.model.BbModelDocument;
+import com.danrus.bb4j.model.animation.Animation;
 import com.danrus.bb4j.model.animation.AnimationBlendState;
 import com.danrus.rpt.compat.iris.IrisCompatBridge;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -44,7 +47,7 @@ public class FsmInstance {
         customVariables.put(name, value);
     }
 
-    public void tick(float delta, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, com.danrus.bb4j.model.BbModelDocument document) {
+    public void tick(float delta, ItemDisplayContext displayContext, @Nullable ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, BbModelDocument document) {
         if (IrisCompatBridge.isShadowsPass.get()) return; //FIXME: hack, move tick to other place
         captured = entity;
 
@@ -63,7 +66,7 @@ public class FsmInstance {
         }
 
         if (currentState != null && document != null && currentState.getAnimationName() != null) {
-            for (com.danrus.bb4j.model.animation.Animation anim : document.getAnimations()) {
+            for (Animation anim : document.getAnimations()) {
                 if (currentState.getAnimationName().equals(anim.getName())) {
                     if (currentStateTime >= anim.getDuration()) {
                         activeTriggers.add(FsmTriggers.ANIMATION_FINISHED);
@@ -91,7 +94,7 @@ public class FsmInstance {
         }
 
         long now = level.getGameTime();
-        boolean shouldTrigger = lastRenderGameTime != Long.MIN_VALUE && now - lastRenderGameTime > 1;
+        boolean shouldTrigger = lastRenderGameTime != Long.MIN_VALUE && now - lastRenderGameTime > 3;
         lastRenderGameTime = now;
         return shouldTrigger;
     }

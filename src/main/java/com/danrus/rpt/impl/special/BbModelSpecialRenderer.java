@@ -67,7 +67,7 @@ public record BbModelSpecialRenderer(Identifier location, BbModelDocument model)
         instance.tick(
                 Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks() / 20.0f,
                 displayContext,
-                level, entity, seed, model
+                stack, level, entity, seed, model
         );
         return instance;
     }
