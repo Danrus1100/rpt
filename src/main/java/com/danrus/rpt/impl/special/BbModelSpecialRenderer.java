@@ -3,8 +3,10 @@ package com.danrus.rpt.impl.special;
 import com.danrus.bb4j.model.BbModelDocument;
 import com.danrus.rpt.Rpt;
 import com.danrus.rpt.core.bbmodel.BbModelRenderer;
+import com.danrus.rpt.core.bbmodel.BbModelStateIdentity;
 import com.danrus.rpt.core.bbmodel.DynamicSpecialModel;
 import com.danrus.rpt.core.bbmodel.fsm.FsmInstance;
+import com.danrus.rpt.core.bbmodel.fsm.FsmTickContext;
 import com.danrus.rpt.core.bbmodel.nodes.BbModelsSubmitsCollector;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.Codec;
@@ -62,14 +64,10 @@ public record BbModelSpecialRenderer(Identifier location, BbModelDocument model)
 
     @Override
     public FsmInstance extractArgument(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-        FsmInstance instance = Rpt.getBbmodelsManager().getDynamicState(location, seed, entity, stack, displayContext);
-        if (instance == null) return null;
-        instance.tick(
-                Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks() / 20.0f,
-                displayContext,
-                stack, level, entity, seed, model
+        return Rpt.getFsmManager().queue(
+                BbModelStateIdentity.of(location, seed),
+                new FsmTickContext(stack, entity, level, seed, displayContext, model)
         );
-        return instance;
     }
 
     @Override
@@ -81,13 +79,16 @@ public record BbModelSpecialRenderer(Identifier location, BbModelDocument model)
                                    output) {
         PoseStack poseStack = new PoseStack();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        if (displayContext == ItemDisplayContext.GUI) {
-            poseStack.scale(-1f, -1f, 16f); // for cases if animations move item out of extends box
-        } else {
-            poseStack.scale(-1.0F, -1.0F, 1.0F);
-        }
+        poseStack.scale(-1.0F, -1.0F, 1.0F);
         renderState.setAnimated();
-        BbModelRenderer.get().getExtentsForGui(model, poseStack, output);
+        if (displayContext == ItemDisplayContext.GUI) {
+            // Gui bounds fix
+            float guiBoundsPadding = 4F;
+            output.accept(new Vector3f(-guiBoundsPadding, -guiBoundsPadding, -guiBoundsPadding));
+            output.accept(new Vector3f(guiBoundsPadding, guiBoundsPadding, guiBoundsPadding));
+        } else {
+            BbModelRenderer.get().getExtentsForGui(model, poseStack, output);
+        }
     }
 
     public record Unbaked(Identifier location) implements SpecialModelRenderer.Unbaked {

@@ -26,8 +26,7 @@ public class FsmInstance {
     
     private double currentBlendTime = 0.0;
     private double totalBlendDuration = 0.0;
-    
-    private final Set<String> activeTriggers = new HashSet<>();
+
     private final Map<String, Double> customVariables = new HashMap<>();
 
     public FsmInstance(FsmController controller) {
@@ -37,23 +36,14 @@ public class FsmInstance {
             throw new IllegalStateException("Initial state '" + controller.getInitialState() + "' not found in controller.");
         }
     }
-
-    public void trigger(String trigger, @Nullable LivingEntity entity) {
-        if (entity != null && captured != null && entity.getId() != captured.getId()) return;
-        activeTriggers.add(trigger);
-    }
     
     public void setVariable(String name, double value) {
         customVariables.put(name, value);
     }
 
-    public void tick(float delta, ItemDisplayContext displayContext, @Nullable ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, BbModelDocument document) {
+    public void tick(float delta, ItemDisplayContext displayContext, @Nullable ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, BbModelDocument document, Set<String> activeTriggers) {
         if (IrisCompatBridge.isShadowsPass.get()) return; //FIXME: hack, move tick to other place
         captured = entity;
-
-        if (isHandDisplayContext(displayContext) && shouldTriggerDraw(level)) {
-            activeTriggers.add(FsmTriggers.DRAW);
-        }
 
         currentStateTime += delta;
         if (previousState != null) {
@@ -76,7 +66,7 @@ public class FsmInstance {
             }
         }
 
-        checkTransitions(level, entity, seed);
+        checkTransitions(level, entity, seed, activeTriggers);
         activeTriggers.clear();
     }
 
@@ -106,7 +96,7 @@ public class FsmInstance {
                 || context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
     }
 
-    private void checkTransitions(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+    private void checkTransitions(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, Set<String> activeTriggers) {
         if (currentState == null) return;
 
         for (FsmTransition transition : currentState.getTransitions()) {

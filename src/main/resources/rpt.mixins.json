@@ -8,7 +8,7 @@
   },
   "client": [
     "accessor.ModelBakerImplInvoker",
-    "input.MinecraftInteractionMixin",
+    "MinecraftMixin",
     "item.select.SelectItemModelMixin",
     "item.select.UnbakedMixin",
     "load.BakingContextMixin",
@@ -33,6 +33,7 @@
     "render.bb.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "rpf.RpfCompatPluginMixin",
+    "rpf.RpfResolversManagerMixin",
     "ItemModelMixin"
   ],
   "mixins": [

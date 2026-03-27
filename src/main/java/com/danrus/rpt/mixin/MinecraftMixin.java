@@ -1,9 +1,15 @@
-package com.danrus.rpt.mixin.input;
+package com.danrus.rpt.mixin;
 
 import com.danrus.rpt.Rpt;
+import com.danrus.rpt.RptHooks;
 import com.danrus.rpt.core.bbmodel.fsm.FsmTriggers;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -16,17 +22,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Minecraft.class)
-public class MinecraftInteractionMixin {
+public class MinecraftMixin {
 
-    @Unique
-    private int rpt$lastAttckTick = 0;
+    @WrapMethod(method = "tick")
+    private void rpt$hookTick(Operation<Void> original) {
+        RptHooks.preTick();
+        original.call();
+        RptHooks.postTick();
+    }
 
-    @Inject(
-            method = "tick",
-            at = @At("HEAD")
+    @WrapOperation(
+            method = "runTick",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V")
     )
-    private void rpt$prefomAttackTick(CallbackInfo ci) {
-        rpt$lastAttckTick++;
+    private void rpt$hookRender(GameRenderer instance, DeltaTracker deltaTracker, boolean renderLevel, Operation<Void> original) {
+        RptHooks.preRender(instance, deltaTracker);
+        original.call(instance, deltaTracker, renderLevel);
+        RptHooks.postRender(instance, deltaTracker);
     }
 
     @Inject(method = "startAttack", at = @At("HEAD"))
@@ -36,9 +48,7 @@ public class MinecraftInteractionMixin {
             return;
         }
 
-        ItemStack stack = player.getMainHandItem();
-        Rpt.getBbmodelsManager().triggerForHand(FsmTriggers.ATTACK, player, stack, toDisplayContext(player, InteractionHand.MAIN_HAND));
-//        Rpt.getBbmodelsManager().triggerForHand(rpt$lastAttckTick <= 10 ? FsmTriggers.ATTACK2 : FsmTriggers.ATTACK1, player, stack, toDisplayContext(player, InteractionHand.MAIN_HAND));
+        Rpt.getFsmManager().trigger(FsmTriggers.ATTACK, toDisplayContext(player, InteractionHand.MAIN_HAND), player);
     }
 
     @Inject(method = "startUseItem", at = @At("HEAD"))
@@ -54,8 +64,7 @@ public class MinecraftInteractionMixin {
 
     @Unique
     private static void triggerUseForHand(LocalPlayer player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        Rpt.getBbmodelsManager().triggerForHand(FsmTriggers.USE, player, stack, toDisplayContext(player, hand));
+        Rpt.getFsmManager().trigger(FsmTriggers.USE, toDisplayContext(player, hand), player);
     }
 
     @Unique

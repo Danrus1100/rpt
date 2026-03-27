@@ -15,7 +15,7 @@ public record FsmTransition(String toState, double blendDuration,
             Codec.DOUBLE.optionalFieldOf("blend_duration", 0.0).forGetter(FsmTransition::blendDuration),
             FsmTriggers.FLEX_CODEC.optionalFieldOf("trigger").forGetter(t -> Optional.ofNullable(t.trigger())),
             Codec.BOOL.optionalFieldOf("interruptible", true).forGetter(FsmTransition::interruptible),
-            FsmCondition.CODEC.optionalFieldOf("condition", BooleanExpression.TRUE).forGetter(FsmTransition::condition)
+            FsmCondition.CODEC.optionalFieldOf("condition", FsmCondition.TRUE).forGetter(FsmTransition::condition)
     ).apply(instance, (to, blend, triggerOpt, interruptible, condition) ->
             new FsmTransition(to, blend, triggerOpt.orElse(null), interruptible, condition)
     ));

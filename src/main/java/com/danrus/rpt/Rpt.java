@@ -5,6 +5,7 @@ import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
 import com.danrus.rpt.core.bake.RptModelBakeReloadManager;
 import com.danrus.rpt.core.bbmodel.RptBbModelManager;
+import com.danrus.rpt.core.bbmodel.fsm.FsmManager;
 import com.danrus.rpt.core.fpa.FirstPersonAnimManager;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplatesManager;
@@ -24,7 +25,9 @@ import java.util.concurrent.CompletableFuture;
 public class Rpt implements ClientModInitializer {
 
     private static final RptTemplatesManager templatesManager = new RptTemplatesManager();
+
     private static final RptBbModelManager bbmodelsManager = new RptBbModelManager();
+    private static final FsmManager fsmManager = new FsmManager(bbmodelsManager::getModel);
 
     private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
     private static final FirstPersonAnimManager fpaManager = new FirstPersonAnimManager();
@@ -50,6 +53,7 @@ public class Rpt implements ClientModInitializer {
 
         reloadManager.add(templatesManager);
         reloadManager.add(bbmodelsManager);
+        reloadManager.add(fsmManager);
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
             RptFieldHolder holder = RptFieldHolder.class.cast(event.getStack());
@@ -110,5 +114,9 @@ public class Rpt implements ClientModInitializer {
 
     public static RptModelBakeReloadManager getReloadManager() {
         return reloadManager;
+    }
+
+    public static FsmManager getFsmManager() {
+        return fsmManager;
     }
 }

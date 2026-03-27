@@ -5,10 +5,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import com.danrus.rpt.core.bbmodel.RptBbModelUtils.TextureRenderData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -18,37 +20,38 @@ public class BakedModelRenderer {
     
     public static void render(BakedModelData modelData, MultiBufferSource bufferSource, PoseStack.Pose pose, 
                        int packedLight, int packedOverlay, 
-                       TextureResolver textureResolver) {
+                       TextureResolver textureResolver, @Nullable Identifier playerSkin) {
                        
         ArrayList<TranslucentQuad> translucentFaces = TRANSLUCENT_QUAD_CACHE.get();
         translucentFaces.clear();
         
-        renderOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, translucentFaces);
-        renderTranslucent(translucentFaces, bufferSource, packedLight, packedOverlay);
+        renderOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, translucentFaces, playerSkin);
+        renderTranslucent(translucentFaces, bufferSource, packedLight, packedOverlay, playerSkin);
     }
 
-    public static void renderOpaque(BakedModelData modelData, MultiBufferSource bufferSource, PoseStack.Pose pose, 
-                       int packedLight, int packedOverlay, 
-                       TextureResolver textureResolver, java.util.List<TranslucentQuad> outTranslucentFaces) {
+    public static void renderOpaque(BakedModelData modelData, MultiBufferSource bufferSource, PoseStack.Pose pose,
+                                    int packedLight, int packedOverlay,
+                                    TextureResolver textureResolver, java.util.List<TranslucentQuad> outTranslucentFaces, @Nullable Identifier playerSkin) {
         
-        renderDynamicOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, outTranslucentFaces, null);
+        renderDynamicOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, outTranslucentFaces, null, playerSkin);
     }
 
     public static void renderDynamic(BakedModelData modelData, MultiBufferSource bufferSource, PoseStack.Pose pose, 
-                       int packedLight, int packedOverlay, 
-                       TextureResolver textureResolver, java.util.Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms) {
+                       int packedLight, int packedOverlay,
+                       TextureResolver textureResolver, java.util.Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms, @Nullable Identifier playerSkin) {
                        
         ArrayList<TranslucentQuad> translucentFaces = TRANSLUCENT_QUAD_CACHE.get();
         translucentFaces.clear();
         
-        renderDynamicOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, translucentFaces, animatedTransforms);
-        renderTranslucent(translucentFaces, bufferSource, packedLight, packedOverlay);
+        renderDynamicOpaque(modelData, bufferSource, pose, packedLight, packedOverlay, textureResolver, translucentFaces, animatedTransforms, playerSkin);
+        renderTranslucent(translucentFaces, bufferSource, packedLight, packedOverlay, playerSkin);
     }
     
     public static void renderDynamicOpaque(BakedModelData modelData, MultiBufferSource bufferSource, PoseStack.Pose pose, 
                        int packedLight, int packedOverlay, 
                        TextureResolver textureResolver, java.util.List<TranslucentQuad> outTranslucentFaces,
-                       java.util.Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms) {
+                       java.util.Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms,
+                                           @Nullable Identifier playerSkin) {
         
         PoseStack poseStack = new PoseStack();
         poseStack.last().pose().set(pose.pose());
@@ -210,7 +213,7 @@ public class BakedModelRenderer {
                         ));
                     }
                 } else {
-                    renderQuad(quad, bufferSource.getBuffer(textureData.renderType()), matrix4f, normalMatrix, packedLight, packedOverlay);
+                    renderQuad(quad, bufferSource.getBuffer(textureData.renderType().apply(playerSkin)), matrix4f, normalMatrix, packedLight, packedOverlay);
                 }
             }
             
@@ -218,7 +221,7 @@ public class BakedModelRenderer {
         }
     }
 
-    public static void renderTranslucent(java.util.List<TranslucentQuad> translucentFaces, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+    public static void renderTranslucent(java.util.List<TranslucentQuad> translucentFaces, MultiBufferSource bufferSource, int packedLight, int packedOverlay, @Nullable Identifier playerSkin) {
         if (translucentFaces == null || translucentFaces.isEmpty()) {
             return;
         }
@@ -227,7 +230,7 @@ public class BakedModelRenderer {
         for (TranslucentQuad quadData : translucentFaces) {
             renderQuad(
                     quadData.quad(),
-                    bufferSource.getBuffer(quadData.textureData().renderType()),
+                    bufferSource.getBuffer(quadData.textureData().renderType().apply(playerSkin)),
                     quadData.poseMatrix(),
                     quadData.normalMatrix(),
                     packedLight,

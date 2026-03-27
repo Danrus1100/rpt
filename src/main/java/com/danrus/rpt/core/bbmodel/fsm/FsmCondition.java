@@ -12,6 +12,9 @@ import java.util.Map;
 @FunctionalInterface
 public interface FsmCondition {
 
+    public static final FsmCondition TRUE = new ConstantCondition(true);
+    public static final FsmCondition FALSE = new ConstantCondition(false);
+
     static Codec<FsmCondition> CODEC = Codec.either(
             BooleanExpression.CODEC,
             Codec.BOOL

@@ -33,9 +33,13 @@ public class FsmBuilder {
         private boolean isLooping = true;
         private final java.util.List<FsmTransition> transitions = new java.util.ArrayList<>();
 
-        public StateBuilder(String name) {
+        public StateBuilder(String name, String animationName) {
             this.name = name;
-            this.animationName = name; // default to state name
+            this.animationName = animationName;
+        }
+
+        public StateBuilder(String name) {
+            this(name, name);
         }
 
         public StateBuilder animation(String animationName) {

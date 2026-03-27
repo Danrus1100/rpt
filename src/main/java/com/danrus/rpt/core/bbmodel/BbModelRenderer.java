@@ -27,7 +27,7 @@ public interface BbModelRenderer {
 
     // Split rendering methods
     void renderStaticOpaque(BbModelDocument model, MultiBufferSource bufferSource, PoseStack.Pose pose, int packedLight, int packedOverlay, @Nullable Identifier playerSkin, List<com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.TranslucentQuad> outTranslucent);
-    void renderStaticTranslucent(List<com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.TranslucentQuad> quads, MultiBufferSource bufferSource, int packedLight, int packedOverlay);
+    void renderStaticTranslucent(List<com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.TranslucentQuad> quads, MultiBufferSource bufferSource, int packedLight, int packedOverlay, @Nullable Identifier playerSkin);
 
     void getExtentsForGui(BbModelDocument model, PoseStack poseStack, //? <=1.21.10
                           //Set<Vector3f>

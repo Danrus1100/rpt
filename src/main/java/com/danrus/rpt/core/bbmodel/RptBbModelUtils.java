@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RptBbModelUtils implements BbModelRenderer {
 
@@ -66,9 +67,12 @@ public class RptBbModelUtils implements BbModelRenderer {
                 key -> com.danrus.rpt.core.bbmodel.baked.ModelBaker.bakeModel(RenderUtils.forDocument(key).getAllMeshes())
         );
 
+        @Nullable Identifier playerSkin = holder instanceof LocalPlayer player ? player.getSkin().body().texturePath() : null;
+
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.render(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), holder instanceof LocalPlayer player ? player.getSkin().body().texturePath() : null)
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin),
+                playerSkin
         );
     }
 
@@ -92,7 +96,7 @@ public class RptBbModelUtils implements BbModelRenderer {
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
                 (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), location),
-                animatedTransforms
+                animatedTransforms, location
         );
     }
 
@@ -117,7 +121,7 @@ public class RptBbModelUtils implements BbModelRenderer {
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, poseStack.last(), packedLight, packedOverlay,
                 (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), location),
-                animatedTransforms
+                animatedTransforms, location
         );
     }
 
@@ -140,7 +144,7 @@ public class RptBbModelUtils implements BbModelRenderer {
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderDynamic(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
                 (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin),
-                animatedTransforms
+                animatedTransforms, playerSkin
         );
     }
 
@@ -155,7 +159,7 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.render(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
-                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin)
+                (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin), playerSkin
         );
     }
 
@@ -171,12 +175,12 @@ public class RptBbModelUtils implements BbModelRenderer {
         com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderOpaque(
                 bakedData, bufferSource, pose, packedLight, packedOverlay,
                 (texRef) -> resolveTextureRenderData(texRef, textures, utils, bakedData.textureRenderDataCache(), playerSkin),
-                outTranslucent
+                outTranslucent, playerSkin
         );
     }
 
-    public void renderStaticTranslucent(List<com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.TranslucentQuad> quads, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderTranslucent(quads, bufferSource, packedLight, packedOverlay);
+    public void renderStaticTranslucent(List<com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.TranslucentQuad> quads, MultiBufferSource bufferSource, int packedLight, int packedOverlay, @Nullable Identifier playerSkin) {
+        com.danrus.rpt.core.bbmodel.baked.BakedModelRenderer.renderTranslucent(quads, bufferSource, packedLight, packedOverlay, playerSkin);
     }
 
     public static void registerModelTextures(BbModelDocument model) {
@@ -223,6 +227,98 @@ public class RptBbModelUtils implements BbModelRenderer {
                 : render.getAllMeshes();
 
         for (RenderUtils.RenderableMesh mesh : meshes) {
+            poseStack.pushPose();
+            if (mesh.getTransformSteps() != null && !mesh.getTransformSteps().isEmpty()) {
+                for (RenderUtils.RenderableMesh.TransformStep step : mesh.getTransformSteps()) {
+                    double[] stepPos = step.getPosition() != null ? step.getPosition() : new double[]{0.0, 0.0, 0.0};
+                    double[] stepOrigin = step.getOrigin() != null ? step.getOrigin() : new double[]{0.0, 0.0, 0.0};
+                    double[] stepRot = step.getRotation() != null ? step.getRotation() : new double[]{0.0, 0.0, 0.0};
+                    double[] stepScale = step.getScale() != null ? step.getScale() : new double[]{1.0, 1.0, 1.0};
+
+                    float posX = (float) (stepPos[0] / 16.0);
+                    float posY = (float) (stepPos[1] / 16.0);
+                    float posZ = (float) (stepPos[2] / 16.0);
+
+                    float originX = (float) (stepOrigin[0] / 16.0);
+                    float originY = (float) (stepOrigin[1] / 16.0);
+                    float originZ = (float) (stepOrigin[2] / 16.0);
+
+                    float rotX = (float) stepRot[0];
+                    float rotY = (float) stepRot[1];
+                    float rotZ = (float) stepRot[2];
+
+                    float scaleX = (float) stepScale[0];
+                    float scaleY = (float) stepScale[1];
+                    float scaleZ = (float) stepScale[2];
+
+                    poseStack.translate(posX, posY, posZ);
+
+                    boolean hasAnyRot = Math.abs(rotX) > 0.0001f || Math.abs(rotY) > 0.0001f || Math.abs(rotZ) > 0.0001f;
+                    boolean hasAnyScale = Math.abs(scaleX - 1.0f) > 0.0001f || Math.abs(scaleY - 1.0f) > 0.0001f || Math.abs(scaleZ - 1.0f) > 0.0001f;
+
+                    if (hasAnyRot || hasAnyScale) {
+                        poseStack.translate(originX, originY, originZ);
+
+                        if (hasAnyRot) {
+                            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rotZ));
+                            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+                            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
+                        }
+
+                        if (hasAnyScale) {
+                            poseStack.scale(scaleX, scaleY, scaleZ);
+                        }
+
+                        poseStack.translate(-originX, -originY, -originZ);
+                    }
+                }
+            } else {
+                double[] meshPos = mesh.getPosition() != null ? mesh.getPosition() : new double[]{0.0, 0.0, 0.0};
+                double[] meshOrigin = mesh.getLocalOrigin() != null ? mesh.getLocalOrigin() : mesh.getLocalCenter();
+                if (meshOrigin == null) {
+                    meshOrigin = new double[]{0.0, 0.0, 0.0};
+                }
+                double[] meshRot = mesh.getRotation() != null ? mesh.getRotation() : new double[]{0.0, 0.0, 0.0};
+                double[] meshScale = mesh.getScale() != null ? mesh.getScale() : new double[]{1.0, 1.0, 1.0};
+
+                float posX = (float) (meshPos[0] / 16.0);
+                float posY = (float) (meshPos[1] / 16.0);
+                float posZ = (float) (meshPos[2] / 16.0);
+
+                float originX = (float) (meshOrigin[0] / 16.0);
+                float originY = (float) (meshOrigin[1] / 16.0);
+                float originZ = (float) (meshOrigin[2] / 16.0);
+
+                float rotX = (float) meshRot[0];
+                float rotY = (float) meshRot[1];
+                float rotZ = (float) meshRot[2];
+
+                float scaleX = (float) meshScale[0];
+                float scaleY = (float) meshScale[1];
+                float scaleZ = (float) meshScale[2];
+
+                poseStack.translate(posX, posY, posZ);
+
+                boolean hasAnyRot = Math.abs(rotX) > 0.0001f || Math.abs(rotY) > 0.0001f || Math.abs(rotZ) > 0.0001f;
+                boolean hasAnyScale = Math.abs(scaleX - 1.0f) > 0.0001f || Math.abs(scaleY - 1.0f) > 0.0001f || Math.abs(scaleZ - 1.0f) > 0.0001f;
+
+                if (hasAnyRot || hasAnyScale) {
+                    poseStack.translate(originX, originY, originZ);
+
+                    if (hasAnyRot) {
+                        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rotZ));
+                        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+                        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
+                    }
+
+                    if (hasAnyScale) {
+                        poseStack.scale(scaleX, scaleY, scaleZ);
+                    }
+
+                    poseStack.translate(-originX, -originY, -originZ);
+                }
+            }
+
             for (RenderUtils.RenderableFace face : mesh.getFaces()) {
                 for (double[] vertex : face.getVertices()) {
                     float x = (float) vertex[0] / 16.0f;
@@ -238,6 +334,7 @@ public class RptBbModelUtils implements BbModelRenderer {
                             (transformedVertex);
                 }
             }
+            poseStack.popPose();
         }
     }
 
@@ -305,13 +402,16 @@ public class RptBbModelUtils implements BbModelRenderer {
         );
     }
 
-    private static Identifier getTextureLocation(String reference, @Nullable List<Texture> textures, TextureUtils textureUtils, @Nullable Identifier playerSkin) {
+    private static Function<@Nullable Identifier, Identifier> getTextureLocation(String reference, @Nullable List<Texture> textures, TextureUtils textureUtils, @Nullable Identifier playerSkin) {
         Texture texture = textureUtils.getTextureByReference(reference);
         if (texture != null) {
-            if ("rpt_holder".equals(texture.getName()) && playerSkin != null) return playerSkin;
-            return getTextureLocation(texture);
+            return (ps) -> {
+                if ("rpt_holder".equals(texture.getName()) && ps != null) return ps;
+                return getTextureLocation(texture);
+            };
         }
-        return getTextureLocation(reference, textures);
+        Identifier otherThing = getTextureLocation(reference, textures);
+        return (ps) -> otherThing;
     }
 
     private TextureUtils.AlphaMode resolveAlphaMode(String textureReference, Identifier textureLocation, TextureUtils textureUtils) {
@@ -353,17 +453,17 @@ public class RptBbModelUtils implements BbModelRenderer {
             return cached;
         }
 
-        Identifier textureLocation = getTextureLocation(textureReference, textures, textureUtils, playerSkin);
-        TextureUtils.AlphaMode alphaMode = resolveAlphaMode(textureReference, textureLocation, textureUtils);
-        RenderType renderType = switch (alphaMode) {
+        Function<@Nullable Identifier, Identifier> textureLocation = getTextureLocation(textureReference, textures, textureUtils, playerSkin);
+        TextureUtils.AlphaMode alphaMode = resolveAlphaMode(textureReference, textureLocation.apply(playerSkin), textureUtils);
+        Function<@Nullable Identifier, RenderType> renderType = switch (alphaMode) {
             //? <=1.21.10 {
             /*case OPAQUE -> RenderType.entitySolid(textureLocation);
             case CUTOUT -> RenderType.entityCutout(textureLocation);
             case TRANSLUCENT -> RenderType.entityTranslucent(textureLocation);
             *///?} else {
-            case OPAQUE -> net.minecraft.client.renderer.rendertype.RenderTypes.entitySolid(textureLocation);
-            case CUTOUT -> net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(textureLocation);
-            case TRANSLUCENT -> net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(textureLocation);
+            case OPAQUE -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entitySolid(textureLocation.apply(ps));
+            case CUTOUT -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(textureLocation.apply(ps));
+            case TRANSLUCENT -> (ps) ->  net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(textureLocation.apply(ps));
             //?}
         };
 
@@ -372,6 +472,6 @@ public class RptBbModelUtils implements BbModelRenderer {
         return created;
     }
 
-    public record TextureRenderData(Identifier location, TextureUtils.AlphaMode alphaMode, RenderType renderType) {}
+    public record TextureRenderData(Function<@Nullable Identifier, Identifier> location, TextureUtils.AlphaMode alphaMode, Function<@Nullable Identifier, RenderType> renderType) {}
 
 }
