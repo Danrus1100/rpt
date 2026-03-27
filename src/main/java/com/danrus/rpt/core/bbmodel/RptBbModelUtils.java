@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -455,17 +456,28 @@ public class RptBbModelUtils implements BbModelRenderer {
 
         Function<@Nullable Identifier, Identifier> textureLocation = getTextureLocation(textureReference, textures, textureUtils, playerSkin);
         TextureUtils.AlphaMode alphaMode = resolveAlphaMode(textureReference, textureLocation.apply(playerSkin), textureUtils);
-        Function<@Nullable Identifier, RenderType> renderType = switch (alphaMode) {
-            //? <=1.21.10 {
+
+        @Nullable Function<@Nullable Identifier, RenderType> emmesive = textureUtils.getTextureByReference(textureReference).getName().endsWith("_e")
+                ? (ps) -> RenderTypes.entityTranslucentEmissive(textureLocation.apply(ps))
+                : null;
+        
+        Function<@Nullable Identifier, RenderType> renderType;
+
+        if (emmesive == null) {
+            renderType = switch (alphaMode) {
+                //? <=1.21.10 {
             /*case OPAQUE -> RenderType.entitySolid(textureLocation);
             case CUTOUT -> RenderType.entityCutout(textureLocation);
             case TRANSLUCENT -> RenderType.entityTranslucent(textureLocation);
             *///?} else {
-            case OPAQUE -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entitySolid(textureLocation.apply(ps));
-            case CUTOUT -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(textureLocation.apply(ps));
-            case TRANSLUCENT -> (ps) ->  net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(textureLocation.apply(ps));
-            //?}
-        };
+                case OPAQUE -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entitySolid(textureLocation.apply(ps));
+                case CUTOUT -> (ps) -> net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(textureLocation.apply(ps));
+                case TRANSLUCENT -> (ps) ->  net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(textureLocation.apply(ps));
+                //?}
+            };
+        } else {
+            renderType = emmesive;
+        }
 
         TextureRenderData created = new TextureRenderData(textureLocation, alphaMode, renderType);
         cache.put(key, created);
