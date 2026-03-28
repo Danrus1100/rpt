@@ -56,13 +56,9 @@ public class FsmInstance {
         }
 
         if (currentState != null && document != null && currentState.getAnimationName() != null) {
-            for (Animation anim : document.getAnimations()) {
-                if (currentState.getAnimationName().equals(anim.getName())) {
-                    if (currentStateTime >= anim.getDuration()) {
-                        activeTriggers.add(FsmTriggers.ANIMATION_FINISHED);
-                    }
-                    break;
-                }
+            Animation animation = findAnimationByName(document, currentState.getAnimationName());
+            if (animation != null && currentStateTime >= animation.getDuration()) {
+                activeTriggers.add(FsmTriggers.ANIMATION_FINISHED);
             }
         }
 
@@ -124,6 +120,51 @@ public class FsmInstance {
 
         totalBlendDuration = transition.blendDuration();
         currentBlendTime = 0.0;
+    }
+
+    public float getCurrentAnimationProgress(@Nullable BbModelDocument document) {
+        if (currentState == null || document == null) {
+            return 0.0f;
+        }
+
+        String animationName = currentState.getAnimationName();
+        if (animationName == null || animationName.isBlank()) {
+            return 0.0f;
+        }
+
+        Animation animation = findAnimationByName(document, animationName);
+        if (animation == null) {
+            return 0.0f;
+        }
+
+        double duration = animation.getDuration();
+        if (duration <= 0.0) {
+            return 1.0f;
+        }
+
+        double normalized = currentStateTime / duration;
+        return (float) Math.max(0.0, Math.min(1.0, normalized));
+    }
+
+    public float getCurrentAnimationProgressFrom(float startProgress, @Nullable BbModelDocument document) {
+        float progress = getCurrentAnimationProgress(document);
+        if (startProgress <= 0.0f) {
+            return progress;
+        }
+        if (startProgress >= 1.0f) {
+            return progress >= 1.0f ? 1.0f : 0.0f;
+        }
+        float tailProgress = (progress - startProgress) / (1.0f - startProgress);
+        return Math.max(0.0f, Math.min(1.0f, tailProgress));
+    }
+
+    private @Nullable Animation findAnimationByName(BbModelDocument document, String animationName) {
+        for (Animation animation : document.getAnimations()) {
+            if (animationName.equals(animation.getName())) {
+                return animation;
+            }
+        }
+        return null;
     }
 
     public List<AnimationBlendState> getBlendStates() {

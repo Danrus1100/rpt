@@ -41,6 +41,9 @@ public interface BbModelRenderer {
                           Consumer<Vector3fc>
                                   output, String animation, double animationTime);
 
+    boolean applyBoneTransform(BbModelDocument model, PoseStack poseStack, String boneName, @Nullable List<AnimationBlendState> activeAnimations);
+    boolean applyBoneTransformByUuid(BbModelDocument model, PoseStack poseStack, String boneUuid, @Nullable List<AnimationBlendState> activeAnimations);
+
     public static BbModelRenderer get() {
         return RptBbModelUtils.getInstance();
     }

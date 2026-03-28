@@ -4,6 +4,7 @@ import com.danrus.bb4j.api.utils.RenderUtils;
 import com.danrus.bb4j.api.utils.TextureUtils;
 import com.danrus.bb4j.model.BbModelDocument;
 import com.danrus.bb4j.model.animation.AnimationBlendState;
+import com.danrus.bb4j.model.outliner.OutlinerNode;
 import com.danrus.bb4j.model.texture.Texture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -337,6 +338,155 @@ public class RptBbModelUtils implements BbModelRenderer {
             }
             poseStack.popPose();
         }
+    }
+
+    @Override
+    public boolean applyBoneTransform(BbModelDocument model, PoseStack poseStack, String boneName, @Nullable List<AnimationBlendState> activeAnimations) {
+        if (model == null || poseStack == null || boneName == null || boneName.isBlank()) {
+            return false;
+        }
+
+        List<OutlinerNode> path = new ArrayList<>();
+        if (!findOutlinerPathByName(model.getOutliner(), boneName, path)) {
+            return false;
+        }
+
+        Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms =
+                (activeAnimations == null || activeAnimations.isEmpty())
+                        ? Collections.emptyMap()
+                        : com.danrus.bb4j.api.utils.TransformUtils.forDocument(model).getBlendedTransforms(activeAnimations);
+
+        applyOutlinerPathToPoseStack(path, poseStack, animatedTransforms);
+        return true;
+    }
+
+    @Override
+    public boolean applyBoneTransformByUuid(BbModelDocument model, PoseStack poseStack, String boneUuid, @Nullable List<AnimationBlendState> activeAnimations) {
+        if (model == null || poseStack == null || boneUuid == null || boneUuid.isBlank()) {
+            return false;
+        }
+
+        List<OutlinerNode> path = new ArrayList<>();
+        if (!findOutlinerPathByUuid(model.getOutliner(), boneUuid, path)) {
+            return false;
+        }
+
+        Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms =
+                (activeAnimations == null || activeAnimations.isEmpty())
+                        ? Collections.emptyMap()
+                        : com.danrus.bb4j.api.utils.TransformUtils.forDocument(model).getBlendedTransforms(activeAnimations);
+
+        applyOutlinerPathToPoseStack(path, poseStack, animatedTransforms);
+        return true;
+    }
+
+    private void applyOutlinerPathToPoseStack(
+            List<OutlinerNode> path,
+            PoseStack poseStack,
+            Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms
+    ) {
+        for (OutlinerNode node : path) {
+            if (node == null || !node.isGroup()) {
+                continue;
+            }
+
+            Double[] origin = node.getOrigin() != null ? node.getOrigin() : new Double[]{0.0, 0.0, 0.0};
+            Double[] translation = node.getTranslation() != null ? node.getTranslation() : new Double[]{0.0, 0.0, 0.0};
+            Double[] rotation = node.getRotation() != null ? node.getRotation() : new Double[]{0.0, 0.0, 0.0};
+            Double[] scale = node.getScale() != null ? node.getScale() : new Double[]{1.0, 1.0, 1.0};
+
+            float posX = translation.length > 0 && translation[0] != null ? (float) (translation[0] / 16.0) : 0.0f;
+            float posY = translation.length > 1 && translation[1] != null ? (float) (translation[1] / 16.0) : 0.0f;
+            float posZ = translation.length > 2 && translation[2] != null ? (float) (translation[2] / 16.0) : 0.0f;
+
+            float originX = origin.length > 0 && origin[0] != null ? (float) (origin[0] / 16.0) : 0.0f;
+            float originY = origin.length > 1 && origin[1] != null ? (float) (origin[1] / 16.0) : 0.0f;
+            float originZ = origin.length > 2 && origin[2] != null ? (float) (origin[2] / 16.0) : 0.0f;
+
+            float rotX = rotation.length > 0 && rotation[0] != null ? rotation[0].floatValue() : 0.0f;
+            float rotY = rotation.length > 1 && rotation[1] != null ? rotation[1].floatValue() : 0.0f;
+            float rotZ = rotation.length > 2 && rotation[2] != null ? rotation[2].floatValue() : 0.0f;
+
+            float scaleX = scale.length > 0 && scale[0] != null ? scale[0].floatValue() : 1.0f;
+            float scaleY = scale.length > 1 && scale[1] != null ? scale[1].floatValue() : 1.0f;
+            float scaleZ = scale.length > 2 && scale[2] != null ? scale[2].floatValue() : 1.0f;
+
+            com.danrus.bb4j.api.utils.TransformUtils.Transform animated = animatedTransforms.get(node.getUuid());
+            if (animated != null) {
+                posX += (float) (animated.getX() / 16.0);
+                posY += (float) (animated.getY() / 16.0);
+                posZ += (float) (animated.getZ() / 16.0);
+
+                rotX += (float) animated.getRotX();
+                rotY += (float) animated.getRotY();
+                rotZ += (float) animated.getRotZ();
+
+                scaleX *= (float) animated.getScaleX();
+                scaleY *= (float) animated.getScaleY();
+                scaleZ *= (float) animated.getScaleZ();
+            }
+
+            poseStack.translate(posX, posY, posZ);
+
+            boolean hasAnyRot = Math.abs(rotX) > 0.0001f || Math.abs(rotY) > 0.0001f || Math.abs(rotZ) > 0.0001f;
+            boolean hasAnyScale = Math.abs(scaleX - 1.0f) > 0.0001f || Math.abs(scaleY - 1.0f) > 0.0001f || Math.abs(scaleZ - 1.0f) > 0.0001f;
+
+            if (hasAnyRot || hasAnyScale) {
+                poseStack.translate(originX, originY, originZ);
+
+                if (hasAnyRot) {
+                    poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rotZ));
+                    poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
+                }
+
+                if (hasAnyScale) {
+                    poseStack.scale(scaleX, scaleY, scaleZ);
+                }
+
+                poseStack.translate(-originX, -originY, -originZ);
+            }
+        }
+    }
+
+    private boolean findOutlinerPathByName(List<OutlinerNode> nodes, String targetName, List<OutlinerNode> path) {
+        if (nodes == null || nodes.isEmpty()) {
+            return false;
+        }
+        for (OutlinerNode node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            path.add(node);
+            if (targetName.equals(node.getName()) && node.isGroup()) {
+                return true;
+            }
+            if (findOutlinerPathByName(node.getChildren(), targetName, path)) {
+                return true;
+            }
+            path.remove(path.size() - 1);
+        }
+        return false;
+    }
+
+    private boolean findOutlinerPathByUuid(List<OutlinerNode> nodes, String targetUuid, List<OutlinerNode> path) {
+        if (nodes == null || nodes.isEmpty()) {
+            return false;
+        }
+        for (OutlinerNode node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            path.add(node);
+            if (targetUuid.equals(node.getUuid()) && node.isGroup()) {
+                return true;
+            }
+            if (findOutlinerPathByUuid(node.getChildren(), targetUuid, path)) {
+                return true;
+            }
+            path.remove(path.size() - 1);
+        }
+        return false;
     }
 
     public static Identifier getTextureLocation(Texture texture) {
