@@ -198,11 +198,16 @@ publishing {
 
     publications {
         create<MavenPublication>("maven") {
-            from(components["java"])
-
             groupId = "com.danrus"
             artifactId = "rpt"
             version = artifactVersion
+
+            artifact(tasks.remapJar)
+            artifact(tasks.remapSourcesJar)
+
+            pom {
+                name.set("rpt")
+            }
         }
     }
 
