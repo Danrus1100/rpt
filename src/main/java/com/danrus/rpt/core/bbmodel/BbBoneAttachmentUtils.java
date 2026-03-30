@@ -2,6 +2,8 @@ package com.danrus.rpt.core.bbmodel;
 
 import com.danrus.bb4j.model.BbModelDocument;
 import com.danrus.bb4j.model.animation.AnimationBlendState;
+import com.danrus.bb4j.model.geometry.Element;
+import com.danrus.bb4j.model.outliner.OutlinerNode;
 import com.danrus.rpt.core.bbmodel.fsm.FsmInstance;
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.jetbrains.annotations.Nullable;
@@ -98,6 +100,48 @@ public final class BbBoneAttachmentUtils {
         return attached;
     }
 
+    public static boolean withBoneByUuidAndGroupElementCenter(
+            BbModelDocument model,
+            PoseStack poseStack,
+            String boneUuid,
+            @Nullable List<AnimationBlendState> activeAnimations,
+            Runnable renderCall
+    ) {
+        return withBoneByUuidAndGroupElementCenter(model, poseStack, boneUuid, activeAnimations, 1.0f, renderCall);
+    }
+
+    public static boolean withBoneByUuidAndGroupElementCenter(
+            BbModelDocument model,
+            PoseStack poseStack,
+            String boneUuid,
+            @Nullable List<AnimationBlendState> activeAnimations,
+            float blendProgress,
+            Runnable renderCall
+    ) {
+        if (model == null || poseStack == null || boneUuid == null || boneUuid.isBlank() || renderCall == null) {
+            return false;
+        }
+
+        float alpha = clamp01(blendProgress);
+        poseStack.pushPose();
+        Matrix4f startPose = new Matrix4f(poseStack.last().pose());
+
+        boolean attached = BbModelRenderer.get().applyBoneTransformByUuid(model, poseStack, boneUuid, activeAnimations);
+        if (attached) {
+            applyFirstElementAnchorTransform(model, boneUuid, poseStack);
+            if (alpha < 0.9999f) {
+                Matrix4f targetPose = new Matrix4f(poseStack.last().pose());
+                Matrix4f blendedPose = interpolatePose(startPose, targetPose, alpha);
+                poseStack.last().pose().set(blendedPose);
+                Matrix3f blendedNormal = blendedPose.normal(new Matrix3f());
+                poseStack.last().normal().set(blendedNormal);
+            }
+            renderCall.run();
+        }
+        poseStack.popPose();
+        return attached;
+    }
+
     public static boolean withBoneByName(
             BbModelDocument model,
             PoseStack poseStack,
@@ -143,6 +187,17 @@ public final class BbBoneAttachmentUtils {
     ) {
         List<AnimationBlendState> activeAnimations = fsmInstance != null ? fsmInstance.getBlendStates() : null;
         return withBoneByUuid(model, poseStack, boneUuid, activeAnimations, renderCall);
+    }
+
+    public static boolean withBoneByUuidAndGroupElementCenter(
+            BbModelDocument model,
+            PoseStack poseStack,
+            String boneUuid,
+            @Nullable FsmInstance fsmInstance,
+            Runnable renderCall
+    ) {
+        List<AnimationBlendState> activeAnimations = fsmInstance != null ? fsmInstance.getBlendStates() : null;
+        return withBoneByUuidAndGroupElementCenter(model, poseStack, boneUuid, activeAnimations, renderCall);
     }
 
     public static boolean withBoneByUuidFromAnimationTail(
@@ -204,6 +259,93 @@ public final class BbBoneAttachmentUtils {
 
     private static float clamp01(float value) {
         return Math.max(0.0f, Math.min(1.0f, value));
+    }
+
+    private static void applyFirstElementAnchorTransform(BbModelDocument model, String boneUuid, PoseStack poseStack) {
+        OutlinerNode groupNode = findGroupNodeByUuid(model.getOutliner(), boneUuid);
+        if (groupNode == null) {
+            return;
+        }
+
+        String elementUuid = findFirstElementUuid(groupNode);
+        if (elementUuid == null || elementUuid.isBlank()) {
+            return;
+        }
+
+        Element element = model.findElementByUuid(elementUuid);
+        if (element == null) {
+            return;
+        }
+
+        Double[] from = element.getFrom();
+        Double[] to = element.getTo();
+        if (from != null && to != null && from.length >= 3 && to.length >= 3) {
+            float centerX = (float) ((from[0] + to[0]) / 32.0);
+            float centerY = (float) ((from[1] + to[1]) / 32.0);
+            float centerZ = (float) ((from[2] + to[2]) / 32.0);
+            poseStack.translate(centerX, centerY, centerZ);
+        }
+
+        Double[] rotation = element.getRotation();
+        if (rotation == null || rotation.length < 3) {
+            return;
+        }
+
+        float rotX = rotation[0] != null ? rotation[0].floatValue() : 0.0f;
+        float rotY = rotation[1] != null ? rotation[1].floatValue() : 0.0f;
+        float rotZ = rotation[2] != null ? rotation[2].floatValue() : 0.0f;
+        if (Math.abs(rotX) <= 0.0001f && Math.abs(rotY) <= 0.0001f && Math.abs(rotZ) <= 0.0001f) {
+            return;
+        }
+
+        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rotZ));
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
+    }
+
+    private static @Nullable OutlinerNode findGroupNodeByUuid(@Nullable List<OutlinerNode> nodes, String targetUuid) {
+        if (nodes == null || nodes.isEmpty()) {
+            return null;
+        }
+
+        for (OutlinerNode node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            if (node.isGroup() && targetUuid.equals(node.getUuid())) {
+                return node;
+            }
+            OutlinerNode childMatch = findGroupNodeByUuid(node.getChildren(), targetUuid);
+            if (childMatch != null) {
+                return childMatch;
+            }
+        }
+        return null;
+    }
+
+    private static @Nullable String findFirstElementUuid(@Nullable OutlinerNode root) {
+        if (root == null) {
+            return null;
+        }
+
+        List<OutlinerNode> children = root.getChildren();
+        if (children == null || children.isEmpty()) {
+            return null;
+        }
+
+        for (OutlinerNode child : children) {
+            if (child != null && !child.isGroup() && child.getUuid() != null && !child.getUuid().isBlank()) {
+                return child.getUuid();
+            }
+        }
+
+        for (OutlinerNode child : children) {
+            String nested = findFirstElementUuid(child);
+            if (nested != null && !nested.isBlank()) {
+                return nested;
+            }
+        }
+        return null;
     }
 
     private static Matrix4f interpolatePose(Matrix4f start, Matrix4f end, float alpha) {

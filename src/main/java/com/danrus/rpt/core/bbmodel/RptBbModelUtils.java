@@ -356,7 +356,7 @@ public class RptBbModelUtils implements BbModelRenderer {
                         ? Collections.emptyMap()
                         : com.danrus.bb4j.api.utils.TransformUtils.forDocument(model).getBlendedTransforms(activeAnimations);
 
-        applyOutlinerPathToPoseStack(path, poseStack, animatedTransforms);
+        applyOutlinerPathToPoseStack(model, path, poseStack, animatedTransforms);
         return true;
     }
 
@@ -376,11 +376,12 @@ public class RptBbModelUtils implements BbModelRenderer {
                         ? Collections.emptyMap()
                         : com.danrus.bb4j.api.utils.TransformUtils.forDocument(model).getBlendedTransforms(activeAnimations);
 
-        applyOutlinerPathToPoseStack(path, poseStack, animatedTransforms);
+        applyOutlinerPathToPoseStack(model, path, poseStack, animatedTransforms);
         return true;
     }
 
     private void applyOutlinerPathToPoseStack(
+            BbModelDocument model,
             List<OutlinerNode> path,
             PoseStack poseStack,
             Map<String, com.danrus.bb4j.api.utils.TransformUtils.Transform> animatedTransforms
@@ -390,9 +391,20 @@ public class RptBbModelUtils implements BbModelRenderer {
                 continue;
             }
 
-            Double[] origin = node.getOrigin() != null ? node.getOrigin() : new Double[]{0.0, 0.0, 0.0};
-            Double[] translation = node.getTranslation() != null ? node.getTranslation() : new Double[]{0.0, 0.0, 0.0};
-            Double[] rotation = node.getRotation() != null ? node.getRotation() : new Double[]{0.0, 0.0, 0.0};
+            BbModelDocument.Group groupData = findGroupByUuid(model, node.getUuid());
+
+            Double[] origin = groupData != null && groupData.getOrigin() != null
+                    ? groupData.getOrigin()
+                    : (node.getOrigin() != null ? node.getOrigin() : new Double[]{0.0, 0.0, 0.0});
+
+            Double[] translation = node.getTranslation() != null
+                    ? node.getTranslation()
+                    : new Double[]{0.0, 0.0, 0.0};
+
+            Double[] rotation = groupData != null && groupData.getRotation() != null
+                    ? groupData.getRotation()
+                    : (node.getRotation() != null ? node.getRotation() : new Double[]{0.0, 0.0, 0.0});
+
             Double[] scale = node.getScale() != null ? node.getScale() : new Double[]{1.0, 1.0, 1.0};
 
             float posX = translation.length > 0 && translation[0] != null ? (float) (translation[0] / 16.0) : 0.0f;
@@ -447,6 +459,18 @@ public class RptBbModelUtils implements BbModelRenderer {
                 poseStack.translate(-originX, -originY, -originZ);
             }
         }
+    }
+
+    private @Nullable BbModelDocument.Group findGroupByUuid(@Nullable BbModelDocument model, @Nullable String uuid) {
+        if (model == null || uuid == null || uuid.isBlank() || model.getGroups() == null || model.getGroups().isEmpty()) {
+            return null;
+        }
+        for (BbModelDocument.Group group : model.getGroups()) {
+            if (group != null && uuid.equals(group.getUuid())) {
+                return group;
+            }
+        }
+        return null;
     }
 
     private boolean findOutlinerPathByName(List<OutlinerNode> nodes, String targetName, List<OutlinerNode> path) {
@@ -607,7 +631,8 @@ public class RptBbModelUtils implements BbModelRenderer {
         Function<@Nullable Identifier, Identifier> textureLocation = getTextureLocation(textureReference, textures, textureUtils, playerSkin);
         TextureUtils.AlphaMode alphaMode = resolveAlphaMode(textureReference, textureLocation.apply(playerSkin), textureUtils);
 
-        @Nullable Function<@Nullable Identifier, RenderType> emmesive = textureUtils.getTextureByReference(textureReference).getName().endsWith("_e")
+        Texture texture = textureUtils.getTextureByReference(textureReference);
+        @Nullable Function<@Nullable Identifier, RenderType> emmesive = texture != null && texture.getName().endsWith("_e")
                 ? (ps) -> RenderTypes.entityTranslucentEmissive(textureLocation.apply(ps))
                 : null;
         

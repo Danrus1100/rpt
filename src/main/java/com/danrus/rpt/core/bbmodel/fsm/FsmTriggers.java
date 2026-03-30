@@ -20,8 +20,6 @@ public class FsmTriggers {
 
     public static final String DRAW = "draw";
     public static final String ATTACK = "attack";
-    public static final String ATTACK1 = "attack_1";
-    public static final String ATTACK2 = "attack_2";
     public static final String USE = "use";
     public static final String ANIMATION_FINISHED = "animation_finished";
 //    public static final String RELOAD = "reload";
@@ -77,7 +75,7 @@ public class FsmTriggers {
 
         @Override
         public boolean test(Set<String> activeTriggers, Map<String, Double> customVariables, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-            return GameExpressionsHelper.evaluateCondition(condition, 0, customVariables, level, entity, seed);
+            return GameExpressionsHelper.evaluateBoolean(condition, customVariables, level, entity, seed);
         }
 
         @Override

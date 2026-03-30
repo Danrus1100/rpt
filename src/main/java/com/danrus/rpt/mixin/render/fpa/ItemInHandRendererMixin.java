@@ -71,18 +71,17 @@ public abstract class ItemInHandRendererMixin {
                 //transform.draw() ? equippedProgress : 0,
                 poseStack, dir, humanoidArm);
         *///?} else {
+        // FIXME: implement via WrapMethod
         applyItemArmTransform(poseStack, humanoidArm, transform.draw() ? equippedProgress : 0);
-        if (transform.swing()) {
-            switch (stack.getSwingAnimation().type()) {
-                case NONE:
-                default:
-                    break;
-                case WHACK:
-                    this.swingArm(swingProgress, poseStack, dir, humanoidArm);
-                    break;
-                case STAB:
-                    net.minecraft.client.model.effects.SpearAnimations.firstPersonAttack(swingProgress, poseStack, dir, humanoidArm);
-            }
+        switch (stack.getSwingAnimation().type()) {
+            case NONE:
+            default:
+                break;
+            case WHACK:
+                this.swingArm(transform.swing() ? swingProgress : 1, poseStack, dir, humanoidArm);
+                break;
+            case STAB:
+                net.minecraft.client.model.effects.SpearAnimations.firstPersonAttack(transform.swing() ? swingProgress : 1, poseStack, dir, humanoidArm);
         }
         //?}
         this.renderItem(player, stack, isHandRight ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, combinedLight);

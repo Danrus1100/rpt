@@ -6,6 +6,7 @@ import com.ezylang.evalex.data.EvaluationValue;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.AgeableMob;
@@ -231,7 +232,7 @@ public class GameExpressionsHelper {
                 vars.put("age", (double) mob.getAge());
             }
 
-            if (entity instanceof LocalPlayer player) {
+            if (entity instanceof AbstractClientPlayer player) {
                 vars.put("food", (double) player.getFoodData().getFoodLevel());
                 vars.put("saturation", (double) player.getFoodData().getSaturationLevel());
                 vars.put("experienceLevel", (double) player.experienceLevel);

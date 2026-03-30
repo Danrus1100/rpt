@@ -1,16 +1,15 @@
 package com.danrus.rpt.mixin.render.bb;
 
 import com.danrus.rpt.core.bbmodel.DynamicSpecialModel;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.item.SpecialModelWrapper;
+import net.minecraft.client.renderer.item.*;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.world.entity.ItemOwner;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +19,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -80,7 +81,7 @@ public class SpecialModelWrapperMixin<T> {
                     //? >=1.21.11
                     Vector3fc
                     > set = new HashSet();
-            dynamicExtendsGetter.getExtends(
+            dynamicExtendsGetter.updateAndGetExtends(
                     pattern,
                     renderState,
                     stack,
@@ -101,6 +102,37 @@ public class SpecialModelWrapperMixin<T> {
             original.call(instance, newExtends);
         } else {
             original.call(instance, extents);
+        }
+    }
+
+    @Mixin(SpecialModelWrapper.Unbaked.class)
+    private static abstract class UnbakedMixin {
+        @Shadow
+        @Final
+        private SpecialModelRenderer.Unbaked specialModel;
+
+        @Shadow
+        protected abstract ModelRenderProperties getProperties(ItemModel.BakingContext context);
+
+        @WrapMethod(method = "bake")
+        private ItemModel rpt$bake(ItemModel.BakingContext context, Operation<ItemModel> original){
+            if (specialModel instanceof DynamicSpecialModel.Unbaked dynamic) {
+                SpecialModelRenderer<?> renderer = dynamic.bake(context);
+                if (renderer == null) return context.missingItemModel();
+                ModelRenderProperties modelRenderProperties = getProperties(context);
+                return new SpecialModelWrapper<>(renderer, modelRenderProperties);
+            }
+            return original.call(context);
+        }
+
+        @Inject(
+                method = "resolveDependencies",
+                at = @At("HEAD")
+        )
+        private void rpt$resolveDependencies(ResolvableModel.Resolver resolver, CallbackInfo ci){
+            if (specialModel instanceof DynamicSpecialModel.Unbaked dynamic) {
+                dynamic.resolveDependencies(resolver);
+            }
         }
     }
 

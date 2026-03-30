@@ -30,6 +30,7 @@
     "render.entity.ItemInHandLayerMixin",
     "render.fpa.ItemInHandRendererMixin",
     "render.bb.SpecialModelWrapperMixin",
+    "render.bb.SpecialModelWrapperMixin$UnbakedMixin",
     "render.bb.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "rpf.RpfCompatPluginMixin",
