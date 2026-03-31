@@ -74,7 +74,7 @@ public class FsmBuilder {
         private final String targetState;
         private final double blendDuration;
         private FsmTrigger trigger = null;
-        private boolean interruptible = true;
+        private FsmInterrupt interruptible = FsmInterrupt.DONT_INTERRUPT;
         private FsmCondition condition = BooleanExpression.TRUE;
 
         public TransitionBuilder(StateBuilder parent, String targetState, double blendDuration) {
@@ -93,7 +93,7 @@ public class FsmBuilder {
             return this;
         }
 
-        public TransitionBuilder interruptible(boolean interruptible) {
+        public TransitionBuilder interruptible(FsmInterrupt interruptible) {
             this.interruptible = interruptible;
             return this;
         }

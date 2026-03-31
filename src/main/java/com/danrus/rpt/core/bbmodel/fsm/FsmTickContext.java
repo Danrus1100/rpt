@@ -7,4 +7,5 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public record FsmTickContext(ItemStack stack, @Nullable LivingEntity entity, @Nullable ClientLevel level, int seed, ItemDisplayContext context, BbModelDocument model) {}
+public record FsmTickContext(ItemStack stack, @Nullable LivingEntity entity, @Nullable ClientLevel level,
+                             int seed, ItemDisplayContext context, BbModelDocument model) {}

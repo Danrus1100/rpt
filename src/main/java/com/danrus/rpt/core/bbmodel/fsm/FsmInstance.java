@@ -42,7 +42,9 @@ public class FsmInstance {
     }
 
     public void tick(float delta, ItemDisplayContext displayContext, @Nullable ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, BbModelDocument document, Set<String> activeTriggers) {
-        if (IrisCompatBridge.isShadowsPass.get()) return; //FIXME: hack, move tick to other place
+        //FIXME: hack, move tick to other place.
+        // UPDATE: idk is anims works fine without this, so need to test (30 of March, 2026)
+        if (IrisCompatBridge.isShadowsPass.get()) return;
         captured = entity;
 
         currentStateTime += delta;
@@ -62,41 +64,15 @@ public class FsmInstance {
             }
         }
 
-        checkTransitions(level, entity, seed, activeTriggers);
+        checkTransitions(level, entity, seed, activeTriggers, document);
         activeTriggers.clear();
     }
 
-    private boolean shouldTriggerDraw(@Nullable ClientLevel level) {
-        if (firstRenderTick) {
-            firstRenderTick = false;
-            if (level != null) {
-                lastRenderGameTime = level.getGameTime();
-            }
-            return true;
-        }
-
-        if (level == null) {
-            return false;
-        }
-
-        long now = level.getGameTime();
-        boolean shouldTrigger = lastRenderGameTime != Long.MIN_VALUE && now - lastRenderGameTime > 3;
-        lastRenderGameTime = now;
-        return shouldTrigger;
-    }
-
-    private boolean isHandDisplayContext(ItemDisplayContext context) {
-        return context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                || context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
-                || context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
-    }
-
-    private void checkTransitions(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, Set<String> activeTriggers) {
+    private void checkTransitions(@Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, Set<String> activeTriggers, BbModelDocument document) {
         if (currentState == null) return;
 
         for (FsmTransition transition : currentState.getTransitions()) {
-            if (!transition.interruptible() && !activeTriggers.contains(FsmTriggers.ANIMATION_FINISHED)) {
+            if (!transition.interruptible().shouldInterrupt(document, currentState, currentStateTime) && !activeTriggers.contains(FsmTriggers.ANIMATION_FINISHED)) {
                 continue;
             }
             boolean triggered = transition.trigger() != null && transition.trigger().test(activeTriggers, customVariables, level, entity, seed);
@@ -158,7 +134,7 @@ public class FsmInstance {
         return Math.max(0.0f, Math.min(1.0f, tailProgress));
     }
 
-    private @Nullable Animation findAnimationByName(BbModelDocument document, String animationName) {
+    public static @Nullable Animation findAnimationByName(BbModelDocument document, String animationName) {
         for (Animation animation : document.getAnimations()) {
             if (animationName.equals(animation.getName())) {
                 return animation;

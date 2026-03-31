@@ -42,7 +42,8 @@
     "render.ItemStackMixin",
     "regs.SpecialModelRenderersMixin",
     "rpf.SignedItemModelMixin",
-    "render.entity.ItemStackRenderStateMixin"
+    "render.entity.ItemStackRenderStateMixin",
+    "render.bb.LivingEntityMixin"
   ],
   "mixinextras": {
     "minVersion": "0.5.0"

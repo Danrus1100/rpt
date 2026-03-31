@@ -6,6 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
+//TODO: global_transitions
+
 public class FsmController {
     public static final Codec<FsmController> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("initial_state").forGetter(FsmController::getInitialState),

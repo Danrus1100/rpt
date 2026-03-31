@@ -22,34 +22,24 @@ public class FsmTriggers {
     public static final String ATTACK = "attack";
     public static final String USE = "use";
     public static final String ANIMATION_FINISHED = "animation_finished";
-//    public static final String RELOAD = "reload";
-//    public static final String START_SPRINT = "start_sprint";
-//    public static final String STOP_SPRINT = "stop_sprint";
-//    public static final String START_SNEAK = "start_sneak";
-//    public static final String STOP_SNEAK = "stop_sneak";
-//    public static final String JUMP = "jump";
+    public static final String SWING = "swing";
 
     public static final ExtraCodecs.LateBoundIdMapper<Identifier, MapCodec<? extends FsmTrigger>> ID_MAPPER = new ExtraCodecs.LateBoundIdMapper<>();
-    public static final Codec<FsmTrigger> CODEC;
-    public static final Codec<FsmTrigger> FLEX_CODEC;
+    public static final Codec<FsmTrigger> CODEC = ID_MAPPER.codec(Identifier.CODEC).dispatch(FsmTrigger::type, (mapCodec) -> mapCodec);
+    public static final Codec<FsmTrigger> FLEX_CODEC = Codec.either(Codec.STRING, CODEC).xmap(
+            either -> either.map(SimpleTrigger::new, trigger -> trigger),
+            trigger -> {
+                if (trigger instanceof SimpleTrigger simple) {
+                    return Either.left(simple.id());
+                }
+                return Either.right(trigger);
+            }
+    );
 
     public static void bootstrap() {
         ID_MAPPER.put(Identifier.withDefaultNamespace("simple"), SimpleTrigger.MAP_CODEC);
         ID_MAPPER.put(Identifier.withDefaultNamespace("conditional"), ConditionalTrigger.MAP_CODEC);
         ID_MAPPER.put(Identifier.withDefaultNamespace("keypress"), InputPressed.MAP_CODEC);
-    }
-
-    static {
-        CODEC = ID_MAPPER.codec(Identifier.CODEC).dispatch(FsmTrigger::type, (mapCodec) -> mapCodec);
-        FLEX_CODEC = Codec.either(Codec.STRING, CODEC).xmap(
-                either -> either.map(SimpleTrigger::new, trigger -> trigger),
-                trigger -> {
-                    if (trigger instanceof SimpleTrigger simple) {
-                        return Either.left(simple.id());
-                    }
-                    return Either.right(trigger);
-                }
-        );
     }
 
     public record SimpleTrigger(String id) implements FsmTrigger {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class FsmState {
-    public static final Codec<FsmState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<FsmState>  CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.optionalFieldOf("animation").forGetter(s -> Optional.ofNullable(s.getAnimationName())),
             Codec.BOOL.optionalFieldOf("looping", true).forGetter(FsmState::isLooping),
             FsmTransition.CODEC.listOf().optionalFieldOf("transitions", List.of()).forGetter(FsmState::getTransitions)

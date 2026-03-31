@@ -28,6 +28,6 @@ public class FeatureRenderDispatcherMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/ItemFeatureRenderer;render(Lnet/minecraft/client/renderer/SubmitNodeCollection;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/OutlineBufferSource;)V")
     )
     private void rpt$renderBbModels(CallbackInfo ci, @Local SubmitNodeCollection submitNodeCollection) {
-        rpt$bbModelFeatureRenderer.render((BbModelsSubmitsCollector) submitNodeCollection, bufferSource);
+        rpt$bbModelFeatureRenderer.renderAll((BbModelsSubmitsCollector) submitNodeCollection, bufferSource);
     }
 }
