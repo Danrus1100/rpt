@@ -9,25 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record RptField(List<String> customFlags, RptVariables variables) {
+public record RptField(List<String> customFlags, ItemConstants constants) {
     public static final Codec<RptField> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.list(Codec.STRING)
                     .optionalFieldOf("custom_flags", List.of())
                     .forGetter(RptField::customFlags),
-            RptVariables.CODEC
-                    .optionalFieldOf("variables", RptVariables.EMPTY)
-                    .forGetter(RptField::variables)
+            ItemConstants.CODEC
+                    .optionalFieldOf("constants", ItemConstants.EMPTY)
+                    .forGetter(RptField::constants)
     ).apply(instance, RptField::new));
 
-    public static final RptField EMPTY = new RptField(List.of(), RptVariables.EMPTY);
+    public static final RptField EMPTY = new RptField(List.of(), ItemConstants.EMPTY);
 
     public RptField merge(RptField other) {
         List<String> newFlags = new ArrayList<>(this.customFlags);
         newFlags.addAll(other.customFlags);
 
-        RptVariables newVariables = this.variables.merge(other.variables);
+        ItemConstants newConstats = this.constants.merge(other.constants);
 
-        return new RptField(List.copyOf(newFlags), newVariables);
+        return new RptField(List.copyOf(newFlags), newConstats);
     }
 
     public static RptField merge(RptField target, RptField source) {

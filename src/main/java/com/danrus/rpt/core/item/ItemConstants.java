@@ -11,26 +11,26 @@ import java.util.Map;
 
 import static com.danrus.rpt.core.expression.GameExpressionsHelper.RESERVED_VARIABLE_NAME;
 
-public record RptVariables(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
+public record ItemConstants(Map<String, String> strings, Map<String, Double> numbers, Map<String, Boolean> flags, Map<String, ResourceLocation> models) {
 
-    public static final Codec<RptVariables> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ItemConstants> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.STRING)
                     .optionalFieldOf("strings", Map.of())
-                    .validate(RptVariables::validateNames)
-                    .forGetter(RptVariables::strings),
+                    .validate(ItemConstants::validateNames)
+                    .forGetter(ItemConstants::strings),
             Codec.unboundedMap(Codec.STRING, Codec.DOUBLE)
                     .optionalFieldOf("numbers", Map.of())
-                    .validate(RptVariables::validateNames)
-                    .forGetter(RptVariables::numbers),
+                    .validate(ItemConstants::validateNames)
+                    .forGetter(ItemConstants::numbers),
             Codec.unboundedMap(Codec.STRING, Codec.BOOL)
                     .optionalFieldOf("flags", Map.of())
-                    .validate(RptVariables::validateNames)
-                    .forGetter(RptVariables::flags),
+                    .validate(ItemConstants::validateNames)
+                    .forGetter(ItemConstants::flags),
             Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC)
                     .optionalFieldOf("models", Map.of())
-                    .validate(RptVariables::validateNames)
-                    .forGetter(RptVariables::models)
-    ).apply(instance, RptVariables::new));
+                    .validate(ItemConstants::validateNames)
+                    .forGetter(ItemConstants::models)
+    ).apply(instance, ItemConstants::new));
 
     private static <T> DataResult<Map<String, T>> validateNames(Map<String, T> candidates) {
         for (String str : candidates.keySet()) {
@@ -41,7 +41,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
         return DataResult.success(candidates);
     }
 
-    public static final RptVariables EMPTY = new RptVariables(Map.of(), Map.of(), Map.of(), Map.of());
+    public static final ItemConstants EMPTY = new ItemConstants(Map.of(), Map.of(), Map.of(), Map.of());
 
     public <T> T get(Type<T> type, String name) {
         if (type == Type.STRING) {
@@ -56,7 +56,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
         throw new IllegalArgumentException("Unsupported variable type: " + type);
     }
 
-    public RptVariables merge(RptVariables other) {
+    public ItemConstants merge(ItemConstants other) {
         Map<String, String> newStrings = new HashMap<>(this.strings);
         newStrings.putAll(other.strings);
 
@@ -69,7 +69,7 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
         Map<String, ResourceLocation> newModels = new HashMap<>(this.models);
         newModels.putAll(other.models);
 
-        return new RptVariables(
+        return new ItemConstants(
                 Map.copyOf(newStrings),
                 Map.copyOf(newNumbers),
                 Map.copyOf(newFlags),

@@ -2,7 +2,7 @@ package com.danrus.rpt.core.arm;
 
 import com.danrus.rpt.core.expression.NumericExpression;
 import com.danrus.rpt.core.item.RptField;
-import com.danrus.rpt.core.item.RptVariables;
+import com.danrus.rpt.core.item.ItemConstants;
 import com.danrus.rpt.duck.RptItemRenderState;
 import com.ezylang.evalex.Expression;
 import com.mojang.datafixers.util.Either;
@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla, RptVariables variables) {
+public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla, ItemConstants constants) {
 
     public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla) {
-        this(x, y, z, bob, swing, attack, armorStands, ofVanilla, RptVariables.EMPTY);
+        this(x, y, z, bob, swing, attack, armorStands, ofVanilla, ItemConstants.EMPTY);
     }
 
     public ArmTransform(ArmTransform other, RptField field) {
-        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.armorStands(), other.ofVanilla, field.variables());
+        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.armorStands(), other.ofVanilla, field.constants());
     }
 
     public static ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, "");
@@ -74,7 +74,7 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
         );
 
         vars.putAll(varsGame);
-        vars.putAll(variables.numbers());
+        vars.putAll(constants.numbers());
 
         if (state instanceof PlayerRenderState playerRenderState) {
             vars.putAll(Map.of(

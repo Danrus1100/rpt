@@ -9,7 +9,7 @@ import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import com.danrus.rpt.core.expression.NumericExpression;
 import com.danrus.rpt.core.OwnerHolder;
 import com.danrus.rpt.core.item.RptField;
-import com.danrus.rpt.core.item.RptVariables;
+import com.danrus.rpt.core.item.ItemConstants;
 import com.danrus.rpt.duck.RptFieldHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -45,23 +45,23 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
             collector.hit(ExpressionToExpressionsModel.class, "force cancel delegation");
             return false;
         }
-        RptVariables vars = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
-        return  ((RpfItemModel)selectModelToUpdate(vars, context.level(), owner.get() == null ? null : owner.asLivingEntity()
+        ItemConstants constants = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).constants();
+        return  ((RpfItemModel)selectModelToUpdate(constants, context.level(), owner.get() == null ? null : owner.asLivingEntity()
                 , context.seed()
         )).rpf$doDelegate(context, stack, owner.get(), prev, collector);
     }
 
     @Override
     void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
-        RptVariables vars = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
-        selectModelToUpdate(vars, level, owner.get() == null ? null : owner.asLivingEntity()
+        ItemConstants constants = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).constants();
+        selectModelToUpdate(constants, level, owner.get() == null ? null : owner.asLivingEntity()
                 , seed).update(
                 renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed
         );
     }
 
-    private ItemModel selectModelToUpdate(RptVariables vars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-        return GameExpressionsHelper.selectValueFromCases(modelExpressions, main, vars.numbers(), level, entity, seed, fallback);
+    private ItemModel selectModelToUpdate(ItemConstants constants, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        return GameExpressionsHelper.selectValueFromCases(modelExpressions, main, constants.numbers(), level, entity, seed, fallback);
     }
 
     public static record Unbaked(String main, List<ExpressionsCase<ItemModel.Unbaked>> expressions, boolean delegate, Optional<ItemModel.Unbaked> fallback) implements ItemModel.Unbaked {
