@@ -39,7 +39,6 @@ public class Rpt implements ClientModInitializer {
     public void onInitializeClient() {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
-//        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
 
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
@@ -73,7 +72,10 @@ public class Rpt implements ClientModInitializer {
         });
 
         Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext()).rpt$addFields(RptClientItem.class.cast(event.getClientItem()).rpt$getField().orElse(RptField.EMPTY));
+            RptBakingContext.class.cast(event.getBakingContext())
+                    .rpt$addFields(
+                            RptClientItem.class.cast(event.getClientItem()).rpt$getField().orElse(RptField.EMPTY)
+                    );
         });
 
         Rpf.getEventBus().register(PostBakeEvent.class, event -> {

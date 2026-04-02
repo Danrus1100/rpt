@@ -36,7 +36,8 @@
     "render.entity.HumanoidModelMixin",
     "render.entity.ItemStackRenderStateMixin",
     "rpf.SignedItemModelMixin",
-    "meta.PackMixin"
+    "meta.PackMixin",
+    "meta.RptMetaHolderMixin"
   ],
   "mixinextras": {
     "minVersion": "0.5.0"
