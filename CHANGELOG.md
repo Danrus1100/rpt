@@ -1,2 +1,1 @@
-- Fixed a critical bug that prevented the game from launching on versions 1.21.10-11
-- Added a new item model `rpt:anchor`. With it, you can change which body part the item's position and rotation will be attached to
+ - Fixed incorrect arm transform behavior for vanilla Trident and Spear animations during elytra glide

@@ -91,6 +91,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                         //? <1.21.11
                         , pose
                 );
+                return;
             }
         }
 
@@ -127,6 +128,7 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
                         //? <1.21.11
                         , pose
                 );
+                return;
             }
         }
 
