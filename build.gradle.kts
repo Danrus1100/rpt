@@ -165,7 +165,7 @@ publishMods {
             dryRunWebhookUrl = discordWebhookDry.toString()
 
             username  = prop("mod.name")
-            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpf/icon.png?raw=true"
+            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
 
             content = changelog.map{ "# Версия " + prop("mod.version") + " вышла! \n\n" + rootProject.file("CHANGELOG_RU.md").readText() +"\n\n<@&1426901890582581248>" }
         }
