@@ -30,9 +30,7 @@ public class Rpt implements ClientModInitializer {
 
     public static void prepareModelParams(RptSignedItemModel signedItemModel, RptFieldHolder holder) {
         holder.rpt$clearParams();
-        signedItemModel.rpt$getField().ifPresent(params -> {
-            holder.rpt$setParams(params);
-        });
+        signedItemModel.rpt$getField().ifPresent(holder::rpt$setParams);
     }
 
     @Override
