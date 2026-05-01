@@ -1,5 +1,6 @@
 package com.danrus.rpt.core.meta;
 
+import com.danrus.rpt.duck.RptMetaHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.server.packs.PackResources;
@@ -43,5 +44,24 @@ public record RptMeta(boolean enable) {
         }
 
         return rptMeta;
+    }
+
+    @Nullable
+    public static RptMeta from(Object object) {
+        if (object instanceof RptMetaHolder holder) {
+            holder.rpt$getMeta();
+        } else {
+            throw new IllegalArgumentException("RptMeta: wrong holder presents, got " + object.getClass().getSimpleName());
+        }
+        // wtf, why java compiler wants return here?
+        return null;
+    }
+
+    public static void set(Object object, RptMeta meta) {
+        if (object instanceof RptMetaHolder holder) {
+            holder.rpt$setMeta(meta);
+        } else {
+            throw new IllegalArgumentException("RptMeta: wrong holder presents, got " + object.getClass().getSimpleName());
+        }
     }
 }

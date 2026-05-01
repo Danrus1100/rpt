@@ -8,7 +8,7 @@ public record RptModelUpdateData(RptField field, RptDynamicVariables variables) 
         if (field.constants().numbers().containsKey(key)) {
             return field.constants().numbers().get(key);
         }
-
+        return 0d;
     }
 
 }

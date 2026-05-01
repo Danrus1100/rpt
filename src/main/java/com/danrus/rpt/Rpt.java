@@ -3,8 +3,10 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
+import com.danrus.rpf.core.item.SignedItemModel;
 import com.danrus.rpt.core.fpa.FirstPersonAnimManager;
 import com.danrus.rpt.core.item.RptField;
+import com.danrus.rpt.core.meta.RptMeta;
 import com.danrus.rpt.core.template.TemplatesManager;
 import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
@@ -13,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +31,12 @@ public class Rpt implements ClientModInitializer {
     @Nullable
     public static CompletableFuture<Void> rpt$repairFuture = null;
 
-    public static void prepareModelParams(RptSignedItemModel signedItemModel, RptFieldHolder holder) {
+    public static void prepareModelParams(SignedItemModel signedItemModel, ItemStack stack) {
+        RptFieldHolder holder = RptFieldHolder.class.cast(stack);
+        RptSignedItemModel rptSignedItemModel = RptSignedItemModel.class.cast(signedItemModel);
         holder.rpt$clearParams();
-        signedItemModel.rpt$getField().ifPresent(holder::rpt$setParams);
+        rptSignedItemModel.rpt$getField().ifPresent(holder::rpt$setParams);
+        RptMeta.set(stack, RptMeta.from(signedItemModel.info()));
     }
 
     @Override
@@ -38,51 +44,7 @@ public class Rpt implements ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
 
-        Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
-            RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-            RptFieldHolder holder = RptFieldHolder.class.cast(event.getStack());
-            prepareModelParams(signedItemModel, holder);
-        });
-
-        Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
-            SelectItemModelProperty property = event.getProperty();
-            if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
-                event.setGetter(() -> rptProperty.get(
-                        event.getStack(), event.getContext().level(), event.getOwner()
-                        //? if >=1.21.10
-                        //.asLivingEntity()
-                        , event.getContext().seed(), event.getContext().displayContext(), params
-                ));
-            }
-        });
-
-        Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {
-            if (event.getStage() == AbstractStagedEvent.Stage.PRE) {
-                if (Rpt.rpt$repairFuture == null) {
-                    log.error("Templates were not prepared in time for value discovery. it shouldn't happen!");
-                    return;
-                }
-                Rpt.rpt$repairFuture.join();
-                Rpt.rpt$repairFuture = null;
-                Rpt.getTemplatesManager().forEachUnbakedTemplate(event.getModelDiscovery()::addRoot);
-            }
-        });
-
-        Rpf.getEventBus().register(PreBakeEvent.class, event -> {
-            RptBakingContext.class.cast(event.getBakingContext())
-                    .rpt$addFields(
-                            RptClientItem.class.cast(event.getClientItem()).rpt$getField().orElse(RptField.EMPTY)
-                    );
-        });
-
-        Rpf.getEventBus().register(PostBakeEvent.class, event -> {
-            RptSignedItemModel signed = RptSignedItemModel.class.cast(event.getResult());
-            RptClientItem clientItem = RptClientItem.class.cast(event.getClientItem());
-            clientItem.rpt$getField().ifPresent(params -> {
-                signed.rpt$setField(params);
-            });
-        });
+        RptHooks.register();
     }
 
     public static TemplatesManager getTemplatesManager() {

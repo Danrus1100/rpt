@@ -55,9 +55,8 @@ public class SignedItemModelMixin implements RptSignedItemModel {
                                      LivingEntity owner,
                                      //?}
                                      ItemModel prev, TestsResultCollector collector, Operation<Boolean> original) {
-        RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(this);
         RptFieldHolder holder = RptFieldHolder.class.cast(stack);
-        Rpt.prepareModelParams(signedItemModel, holder);
+        Rpt.prepareModelParams((SignedItemModel) (Object) this, stack);
         boolean result = original.call(instance, context, stack, owner, prev, collector);
         holder.rpt$clearParams();
         return result;
