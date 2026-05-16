@@ -16,6 +16,8 @@ public class CustomAnchorApplicableModelMixin implements CustomAnchorApplicableM
     @Override
     public void rpt$poseToAnchor(AnchorType anchor, PoseStack poseStack) {
         HumanoidModel<?> self = (HumanoidModel<?>) (Object) this;
+        poseStack.pushPose();
         anchor.getPart(self).translateAndRotate(poseStack);
+        poseStack.popPose();
     }
 }
