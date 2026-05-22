@@ -8,6 +8,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.sprite.MaterialBaker;
+import net.minecraft.client.resources.model.SpriteGetter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -41,11 +43,17 @@ public class ModelManagerMixin {
                 *///?}
     }
 
+//    @WrapOperation(
+//            method = "loadModels",
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;bakeModels(Lnet/minecraft/client/resources/model/SpriteGetter;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;")
+//    )
+
     @WrapOperation(
             method = "loadModels",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;bakeModels(Lnet/minecraft/client/resources/model/SpriteGetter;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;bakeModels(Lnet/minecraft/client/resources/model/sprite/MaterialBaker;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;")
     )
-    private static CompletableFuture<ModelBakery.BakingResult> rpt$wrapLoadModels(ModelBakery instance, SpriteGetter sprites, Executor executor, Operation<CompletableFuture<ModelBakery.BakingResult>> original) {
+//    private static CompletableFuture<ModelBakery.BakingResult> rpt$wrapLoadModels(ModelBakery instance, SpriteGetter sprites, Executor executor, Operation<CompletableFuture<ModelBakery.BakingResult>> original) {
+    private static CompletableFuture<ModelBakery.BakingResult> rpt$wrapLoadModels(ModelBakery instance, MaterialBaker materials, Executor executor, Operation<CompletableFuture<ModelBakery.BakingResult>> original) {
         return Rpt.getTemplatesManager().bake(
                 (BakingContextSource) instance,
                 ((ModelBakerSource)instance).rpt$createModelBaker(sprites),

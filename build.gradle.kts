@@ -1,8 +1,8 @@
 plugins {
-    id("fabric-loom") version "1.15-SNAPSHOT"
+    id("dev.isxander.modstitch.base") version "0.8.4"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
-    id("maven-publish")
     id("java")
+    id("maven-publish")
 }
 
 fun opt(name: String, consumer: (prop: String) -> Unit) {
@@ -10,14 +10,35 @@ fun opt(name: String, consumer: (prop: String) -> Unit) {
         ?.let(consumer)
 }
 
-fun prop(name: String) : String {
-    return findProperty(name)?.toString() ?: throw IllegalArgumentException("Missing property: $name")
-}
+fun prop(name: String): String =
+    findProperty(name)?.toString() ?: throw IllegalArgumentException("Missing property: $name")
 
 fun propExists(name: String) = project.properties.containsKey(name)
 
+fun versionParts(version: String): List<Int> =
+    version.split('.')
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map { it.toIntOrNull() ?: 0 }
+
+fun versionAtLeast(version: String, floor: String): Boolean {
+    val a = versionParts(version)
+    val b = versionParts(floor)
+    val max = maxOf(a.size, b.size)
+    for (i in 0 until max) {
+        val ai = a.getOrElse(i) { 0 }
+        val bi = b.getOrElse(i) { 0 }
+        if (ai != bi) return ai > bi
+    }
+    return true
+}
+
 val mainBranch = "multiversion"
+val gitBranchName = providers.exec {
+    commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
+}.standardOutput.asText.map { it.trim() }.get()
 val minecraft = property("deps.mc") as String
+
 
 repositories {
     mavenCentral()
@@ -27,13 +48,55 @@ repositories {
     maven("https://maven.shlakoblock.com/releases")
 }
 
-loom {
-    accessWidenerPath = project.file("src/main/resources/rpt.accesswidener")
-}
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+modstitch {
+    minecraftVersion = minecraft
+    parchment {
+        opt("deps.parchment") { mappingsVersion = it }
+    }
+
+    runs {
+        register("rpt") {
+            client()
+        }
+    }
+
+    metadata {
+        modId = prop("mod.id")
+        modName = prop("mod.name")
+        modVersion = prop("mod.version")
+        modDescription = prop("mod.description")
+        modGroup = "com.danrus.rpt"
+        modAuthor = prop("mod.author")
+
+        fun MapProperty<String, String>.populate(block: MapProperty<String, String>.() -> Unit) {
+            block()
+        }
+
+        replacementProperties.populate {
+            // You can put any other replacement properties/metadata here that
+            // modstitch doesn't initially support. Some examples below.
+            put("mcdep", prop("mod.mcdep"))
+            put("minecraft_version", prop("deps.mc"))
+        }
+    }
+
+    loom {
+        fabricLoaderVersion = "0.18.4"
+
+        // Configure loom like normal in this block.
+        configureLoom {
+
+        }
+    }
+
+    mixin {
+        addMixinsToModManifest = true
+
+        configs.register("rpt")
+        configs.register("rpt.12111")
+
+    }
 }
 
 stonecutter{
@@ -64,20 +127,26 @@ stonecutter{
             direction = eval(current.version, ">=1.21.10")
             replace("PlayerRenderState", "AvatarRenderState")
         }
+
+        string {
+            direction = eval(current.version, ">=26.1")
+            replace(
+                "import net.minecraft.client.renderer.block.model.ItemTransform;",
+                "import net.minecraft.client.resources.model.cuboid.ItemTransform;"
+            )
+            replace(
+                "import net.minecraft.client.resources.model.SpriteGetter;",
+                "import net.minecraft.client.resources.model.sprite.SpriteGetter;"
+            )
+            replace("BlockModelWrapper", "CuboidItemModelWrapper")
+        }
     }
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${findProperty("deps.mc")}")
-    mappings(loom.layered() {
-        officialMojangMappings()
-        opt("deps.parchment") {
-            parchment("org.parchmentmc.data:parchment-${findProperty("deps.mc")}:${it}@zip")
-        }
-    })
-    modImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
-    modImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
+    modstitchModImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
+    modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
+    modstitchModImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
     implementation("com.ezylang:EvalEx:3.6.0")
     include("com.ezylang:EvalEx:3.6.0")
 }
@@ -104,16 +173,6 @@ tasks.processResources {
     filesMatching("fabric.mod.json") { expand(map) }
 }
 
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-
-base {
-    archivesName.set(findProperty("mod.id") as String)
-}
-
 val artifactVersion = "${prop("mod.version")}-${minecraft}"
 
 publishMods {
@@ -127,7 +186,8 @@ publishMods {
 
     type = STABLE
 
-    file.set(tasks.named("remapJar").flatMap { (it as org.gradle.jvm.tasks.Jar).archiveFile })
+//    file.set(tasks.named("remapJar").flatMap { (it as org.gradle.jvm.tasks.Jar).archiveFile })
+    file = modstitch.finalJarTask.flatMap { it.archiveFile }
 
     changelog = rootProject.file("CHANGELOG.md").readText()
 

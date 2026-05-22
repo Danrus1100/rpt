@@ -1,0 +1,18 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+issueTrackerURL = "https://github.com/Danrus1100/rpf/issues"
+license = "MIT"
+logoFile = "assets/rpf/icon.png"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+displayURL = "https://danrus1100.github.io/rtp-rpf-docs/"
+description = '''${mod_description}'''
+authors = "${mod_author}"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version}"

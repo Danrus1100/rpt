@@ -3,7 +3,7 @@ package com.danrus.rpt.mixin.accessor;
 import net.minecraft.client.resources.model.ModelBakery;
 import org.spongepowered.asm.mixin.Mixin;
 
-//? >= 1.21.11 {
+//? >= 1.21.11 < 26.1 {
 
 /*import org.spongepowered.asm.mixin.gen.Invoker;
 

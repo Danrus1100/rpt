@@ -7,6 +7,7 @@ import com.danrus.rpt.mixin.accessor.PartCacheImplInvoker;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.SpriteGetter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,12 +23,14 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     @Final
     ResolvedModel missingModel;
 
-    //? if >= 1.21.10 {
+    //? if >= 1.21.10 <26.1 {
     /*@Shadow
     @Final
     private MaterialSet materials;
+    *///?}
 
-    @Shadow
+    //? if >= 1.21.10 {
+    /*@Shadow
     @Final
     private net.minecraft.client.renderer.PlayerSkinRenderCache playerSkinRenderCache;
     *///?}
@@ -40,7 +43,7 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
                 //? if >= 1.21.10
                 //materials, playerSkinRenderCache,
                 ModelBakery.MissingModels.bake(missingModel, baker.sprites()
-                        //? if >=1.21.11
+                        //? if >=1.21.11 <26.1
                         //, PartCacheImplInvoker.rpt$create()
                 ).item(),
                 null
@@ -49,15 +52,18 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
 
     @Override
     public ModelBaker rpt$createModelBaker(SpriteGetter spriteGetter) {
-        //? if >= 1.21.11
+        //? if >= 1.21.11 <26.1
         //ModelBakery.PartCacheImpl parts = PartCacheImplInvoker.rpt$create();
-        return ModelBakerImplInvoker.rpt$create(
+        //? if >= 26.1
+
+        //return ModelBakerImplInvoker.rpt$create(
                 (ModelBakery) (Object) this,
                 spriteGetter
-                //? >= 1.21.11 {
-                /*, parts,
-                ModelBakery.MissingModels.bake(this.missingModel, spriteGetter, parts)
-                *///? }
+                //? >= 1.21.11 <26.1
+                //, parts,
+
+                //? >= 1.21.11
+                //ModelBakery.MissingModels.bake(this.missingModel, spriteGetter, parts)
         );
     }
 }

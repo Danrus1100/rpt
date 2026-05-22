@@ -129,7 +129,12 @@ public class GameExpressionsHelper {
                 : deltaTracker.getGameTimeDeltaPartialTick(true);
 
         vars.put("gameTime", (double) (level != null ? level.getGameTime() : 0));
-        vars.put("dayTime", (double) (level != null ? level.getLevelData().getDayTime() : 0));
+        vars.put("dayTime", (double) (level != null ?
+                //? <=1.21.11
+                 level.getLevelData().getDayTime()
+                //? >=26.1
+                //level.getLevelData().getGameTime() % 24000
+                : 0));
         vars.put("delta", (double) delta);
         vars.put("seed", (double) seed);
 
