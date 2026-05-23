@@ -5,6 +5,7 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.anchor.AnchorType;
 import com.danrus.rpt.duck.RptItemRenderState;
 import com.mojang.serialization.MapCodec;
@@ -41,7 +42,7 @@ public class CustomAnchorWrapper extends AbstractRpfItemModel {
         model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
-    public record Unbaked(ItemModel.Unbaked model, AnchorType anchorType) implements ItemModel.Unbaked {
+    public record Unbaked(ItemModel.Unbaked model, AnchorType anchorType) implements RptUnbakedModel {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::model),
@@ -56,8 +57,8 @@ public class CustomAnchorWrapper extends AbstractRpfItemModel {
         }
 
         @Override
-        public ItemModel bake(BakingContext context) {
-            return new CustomAnchorWrapper(model.bake(context), anchorType);
+        public ItemModel bake(BakingContext context, Baker baker) {
+            return new CustomAnchorWrapper(baker.bake(context, model), anchorType);
         }
 
         @Override

@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.renderer.item.*;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -38,9 +39,15 @@ public class ItemModelMixin implements PatchInformer {
     @WrapMethod(
             method = "bake"
     )
-    private ItemModel rpt$bake(ItemModel.BakingContext context, Operation<ItemModel> original) {
+    private ItemModel rpt$bake(ItemModel.BakingContext context,
+                               //? >=26.1
+                               //Matrix4fc transformations,
+                               Operation<ItemModel> original) {
         if (rpt$patch == null) {
-            return original.call(context);
+            return original.call(context
+                    //? >=26.1
+                    //, transformations
+            );
         }
         RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, rpt$patch);
         if (template == null) {

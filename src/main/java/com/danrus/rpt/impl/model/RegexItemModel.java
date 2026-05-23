@@ -5,6 +5,7 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -62,7 +63,7 @@ public class RegexItemModel extends AbstractRpfItemModel{
     }
 
 
-    public static record Unbaked(Optional<ItemModel.Unbaked> fallback, List<RegexCase> regexes) implements ItemModel.Unbaked {
+    public static record Unbaked(Optional<ItemModel.Unbaked> fallback, List<RegexCase> regexes) implements RptUnbakedModel {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 ItemModels.CODEC.optionalFieldOf("fallback").forGetter(Unbaked::fallback),
@@ -78,8 +79,8 @@ public class RegexItemModel extends AbstractRpfItemModel{
         }
 
         @Override
-        public @NotNull ItemModel bake(BakingContext context) {
-            ItemModel fallbackModel = this.fallback.map(unbaked -> unbaked.bake(context)).orElseGet(context::missingItemModel);
+        public @NotNull ItemModel bake(BakingContext context, Baker baker) {
+            ItemModel fallbackModel = this.fallback.map(unbaked -> baker.bake(context, unbaked)).orElseGet(context::missingItemModel);
             RpfItemModel.class.cast(fallbackModel).rpf$markAsFallback();
 
             Map<List<Pattern>, ItemModel> regexesModels = new LinkedHashMap<>();
@@ -88,7 +89,7 @@ public class RegexItemModel extends AbstractRpfItemModel{
                         .map(Pattern::compile)
                         .toList();
 
-                regexesModels.put(compiledPatterns, regexCase.model.bake(context));
+                regexesModels.put(compiledPatterns, baker.bake(context, regexCase.model));
             }
             return new RegexItemModel(regexesModels, fallbackModel);
         }

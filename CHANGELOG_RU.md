@@ -1,0 +1,7 @@
+ - Изменён Condition Property `rpt:in_fluid`: now it can принимает параметр `fluid`:
+     - `empty` - нет жидкости
+     - `flowing_water` - вода с течением
+     - `water` - источник воды
+     - `flowing_lava` - лава с течением
+     - `lava` - источник лавы
+ - Порт на 26.1.X

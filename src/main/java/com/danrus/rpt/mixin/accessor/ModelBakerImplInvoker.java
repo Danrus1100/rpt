@@ -17,7 +17,7 @@ public interface ModelBakerImplInvoker {
             //? } else if =1.21.11 {
             /*(ModelBakery bakery, final SpriteGetter spriteGetter, final ModelBaker.PartCache partCache, final ModelBakery.MissingModels missingModels)
             *///?} else {
-            /*(final MaterialBaker materials, final ModelBaker.Interner interner, final ModelBakery.MissingModels missingModels)
+            /*(ModelBakery bakery, final MaterialBaker materials, final ModelBaker.Interner interner, final ModelBakery.MissingModels missingModels)
             *///?}
     {
         throw new UnsupportedOperationException();

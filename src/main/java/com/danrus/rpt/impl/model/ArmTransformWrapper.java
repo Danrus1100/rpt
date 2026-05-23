@@ -5,6 +5,7 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.core.OwnerHolder;
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptItemRenderState;
@@ -68,7 +69,7 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
         model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
-    public static record Unbaked(ItemModel.Unbaked model, Optional<ArmTransform> otherTransform, ArmTransform transform) implements ItemModel.Unbaked {
+    public static record Unbaked(ItemModel.Unbaked model, Optional<ArmTransform> otherTransform, ArmTransform transform) implements RptUnbakedModel {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::model),
@@ -84,8 +85,8 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
         }
 
         @Override
-        public ItemModel bake(BakingContext context) {
-            return new ArmTransformWrapper(transform, otherTransform, model.bake(context));
+        public ItemModel bake(BakingContext context, Baker baker) {
+            return new ArmTransformWrapper(transform, otherTransform, baker.bake(context, model));
         }
 
         @Override

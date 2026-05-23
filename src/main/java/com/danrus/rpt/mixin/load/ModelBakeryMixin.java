@@ -2,12 +2,13 @@ package com.danrus.rpt.mixin.load;
 
 import com.danrus.rpt.duck.BakingContextSource;
 import com.danrus.rpt.duck.ModelBakerSource;
+import com.danrus.rpt.mixin.accessor.InternerImplInvoker;
 import com.danrus.rpt.mixin.accessor.ModelBakerImplInvoker;
 import com.danrus.rpt.mixin.accessor.PartCacheImplInvoker;
+import net.minecraft.client.resources.model.SpriteGetter;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.*;
-import net.minecraft.client.resources.model.SpriteGetter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,14 +36,33 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     private net.minecraft.client.renderer.PlayerSkinRenderCache playerSkinRenderCache;
     *///?}
 
+    //? if >= 26.1 {
+    /*@Shadow
+    @Final
+    private net.minecraft.client.resources.model.sprite.SpriteGetter sprites;
+    *///?}
+
     @Override
-    public ItemModel.BakingContext rpt$createBakingContext(ModelBaker baker) {
+    public ItemModel.BakingContext rpt$createBakingContext(
+            ModelBaker baker
+            //? >= 26.1
+            //, net.minecraft.client.resources.model.sprite.MaterialBaker materials
+    ) {
         return new ItemModel.BakingContext(
                 baker,
                 entityModelSet,
+                //? if >= 1.21.10 <26.1
+                //materials,
+                //? if >= 26.1
+                //sprites,
                 //? if >= 1.21.10
-                //materials, playerSkinRenderCache,
-                ModelBakery.MissingModels.bake(missingModel, baker.sprites()
+                //playerSkinRenderCache,
+                ModelBakery.MissingModels.bake(missingModel
+                        //? <26.1 {
+                        , baker.sprites()
+                        //?} else {
+                        /*, materials, InternerImplInvoker.rpt$create()
+                        *///?}
                         //? if >=1.21.11 <26.1
                         //, PartCacheImplInvoker.rpt$create()
                 ).item(),
@@ -51,19 +71,23 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     }
 
     @Override
-    public ModelBaker rpt$createModelBaker(SpriteGetter spriteGetter) {
+    public ModelBaker rpt$createModelBaker(
+            //? <26.1
+            SpriteGetter sprites
+            //? >=26.1
+            //net.minecraft.client.resources.model.sprite.MaterialBaker sprites
+    ) {
         //? if >= 1.21.11 <26.1
-        //ModelBakery.PartCacheImpl parts = PartCacheImplInvoker.rpt$create();
+        //var parts = PartCacheImplInvoker.rpt$create();
         //? if >= 26.1
-
-        //return ModelBakerImplInvoker.rpt$create(
+        //var parts = InternerImplInvoker.rpt$create();
+        return ModelBakerImplInvoker.rpt$create(
                 (ModelBakery) (Object) this,
-                spriteGetter
-                //? >= 1.21.11 <26.1
-                //, parts,
-
+                sprites
                 //? >= 1.21.11
-                //ModelBakery.MissingModels.bake(this.missingModel, spriteGetter, parts)
+                //, parts
+                //? >= 1.21.11
+                //, ModelBakery.MissingModels.bake(this.missingModel, sprites, parts)
         );
     }
 }

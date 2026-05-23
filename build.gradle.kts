@@ -139,6 +139,7 @@ stonecutter{
                 "import net.minecraft.client.resources.model.sprite.SpriteGetter;"
             )
             replace("BlockModelWrapper", "CuboidItemModelWrapper")
+            replace("GuiGraphics", "GuiGraphicsExtractor")
         }
     }
 }

@@ -1,1 +1,7 @@
- - Fixed incorrect arm transform behavior for vanilla Trident and Spear animations during elytra glide
+- Changed Condition Property `rpt:in_fluid`: now it can accepts a `fluid` parameter:
+    - `empty` - no fluid
+    - `flowing_water` - flowing water
+    - `water` - water without flow
+    - `flowing_lava` - flowing lava
+    - `lava` - lava without flow
+- Port for 26.1.X

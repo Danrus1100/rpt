@@ -1,5 +1,6 @@
 package com.danrus.rpt.core.template;
 
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.item.ItemModel;
@@ -10,6 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.StrictJsonParser;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +29,8 @@ public class TemplatesManager {
 
     private final Map<ResourceLocation, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
     private final Map<ResourceLocation, RptTemplate> templates = new HashMap<>();
+
+    private static final Matrix4fc IDENTITY = new Matrix4f();
 
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         templates.clear();
@@ -44,13 +49,22 @@ public class TemplatesManager {
     public CompletableFuture<Void> bake(
             BakingContextSource source,
             ModelBaker baker,
+            //? >= 26.1 {
+            /*net.minecraft.client.resources.model.sprite.MaterialBaker materials,
+            *///?}
             Executor executor
             ) {
         return CompletableFuture.runAsync(() ->{
             for (var entry : unbakedTemplates.entrySet()) {
                 try {
-                    ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker);
-                    RptTemplate baked = entry.getValue().bake(bakingContext);
+                    ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker
+                            //? >=26.1
+                            //, materials
+                    );
+                    RptTemplate baked = entry.getValue().bake(bakingContext
+                            //? >=26.1
+                            //, IDENTITY
+                    );
                     templates.put(entry.getKey(), baked);
                 } catch (Exception e) {
                     log.error("Failed to bake template: {}", entry.getKey(), e);
@@ -66,7 +80,10 @@ public class TemplatesManager {
     ) {
         var a = unbakedTemplates.get(location);
         if (a == null) return null;
-        return a.bake(context);
+        return a.bake(context
+                //? >=26.1
+                //, IDENTITY
+        );
     }
 
     @Nullable

@@ -20,7 +20,11 @@ public class DifficultyTypeProperty implements SelectItemModelProperty<String> {
     public @Nullable String get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
         if (level == null) return NONE;
         if (level.getLevelData().isHardcore()) return HARDCORE;
-        return level.getLevelData().getDifficulty().getKey();
+        return level.getLevelData().getDifficulty()
+                //? <26.1
+                .getKey();
+                //? >=26.1
+                //.getSerializedName();
     }
 
     @Override
