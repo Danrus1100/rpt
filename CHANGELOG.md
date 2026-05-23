@@ -4,4 +4,5 @@
     - `water` - water without flow
     - `flowing_lava` - flowing lava
     - `lava` - lava without flow
+- Texture swappers now supports elytra
 - Port for 26.1.X
