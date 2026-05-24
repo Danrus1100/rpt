@@ -202,6 +202,7 @@ publishMods {
         projectId = prop("publish.modrinth")
         accessToken = modrinthToken.toString()
         targets.forEach(minecraftVersions::add)
+        requires("rpf")
     }
 
     curseforge {
@@ -209,6 +210,7 @@ publishMods {
         accessToken = curseforgeToken.toString()
         projectSlug = prop("pub.slug")
         targets.forEach(minecraftVersions::add)
+        requires("rpf")
     }
 
     if (targets.contains("1.21.8") && loaders.contains("fabric")) {

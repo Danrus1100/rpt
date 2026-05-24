@@ -27,7 +27,6 @@
     "render.entity.ArmorStandModelMixin",
     "render.entity.CustomAnchorApplicableModelMixin",
     "render.entity.ItemInHandLayerMixin",
-    "render.entity.WingsLayerMixin",
     "render.fpa.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
     "ItemModelMixin"

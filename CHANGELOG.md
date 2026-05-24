@@ -1,8 +1,1 @@
-- Changed Condition Property `rpt:in_fluid`: now it can accepts a `fluid` parameter:
-    - `empty` - no fluid
-    - `flowing_water` - flowing water
-    - `water` - water without flow
-    - `flowing_lava` - flowing lava
-    - `lava` - lava without flow
-- Texture swappers now supports elytra
-- Port for 26.1.X
+ - Crash fix when player renders
