@@ -8,6 +8,7 @@
   },
   "client": [
     "accessor.ModelBakerImplInvoker",
+    "accessor.InternerImplInvoker",
     "item.select.SelectItemModelMixin",
     "item.select.UnbakedMixin",
     "load.BakingContextMixin",

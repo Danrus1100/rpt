@@ -23,9 +23,15 @@ public class WeatherTypeProperty implements SelectItemModelProperty<String> {
     public @Nullable String get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
         if (level == null) return NONE;
         String weather = CLEAR;
-        if (level.getLevelData().isRaining()) {
+        if (level
+                //? <26.1
+                .getLevelData()
+                .isRaining()) {
             weather = RAIN;
-        } else if (level.getLevelData().isThundering()) { // permanent false =(
+        } else if (level
+                //? <26.1
+                .getLevelData()
+                .isThundering()) { // permanent false =(
             weather = THUNDER;
         }
         return weather;
