@@ -156,8 +156,6 @@ public class CustomTransformsDispatcher {
                 arm == HumanoidArm.RIGHT,
                 state
         );
-
-        dispatchedState.rpt$markAsAlreadyTransformed(arm);
     }
 
     private void tryApplyOtherHand(
@@ -171,6 +169,7 @@ public class CustomTransformsDispatcher {
 
         if (otherHolder.isBothHandsAvailable(sourceArm) && shouldApply(otherTransform)) {
             applyTransform(otherTransform, otherArm, state, dispatchedState);
+            dispatchedState.rpt$markAsAlreadyTransformed(otherArm);
         }
     }
 

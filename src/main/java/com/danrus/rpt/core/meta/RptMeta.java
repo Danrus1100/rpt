@@ -49,12 +49,10 @@ public record RptMeta(boolean enable) {
     @Nullable
     public static RptMeta from(Object object) {
         if (object instanceof RptMetaHolder holder) {
-            holder.rpt$getMeta();
+            return holder.rpt$getMeta();
         } else {
             throw new IllegalArgumentException("RptMeta: wrong holder presents, got " + object.getClass().getSimpleName());
         }
-        // wtf, why java compiler wants return here?
-        return null;
     }
 
     public static void set(Object object, RptMeta meta) {

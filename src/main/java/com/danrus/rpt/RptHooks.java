@@ -80,11 +80,6 @@ public class RptHooks {
     // ----------------------END--------------------------------
 
     public static void register() {
-//        Rpf.getEventBus().register(UpdateModelEvent.class, RptHooks::hookUpdateModel);
-//        Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, RptHooks::hookSelectModelPropertyGetWhenDoDelegate);
-//        Rpf.getEventBus().register(ModelDiscoveryEvent.class, RptHooks::hookModelDiscovery);
-//        Rpf.getEventBus().register(PreBakeEvent.class, RptHooks::hookPreBake);
-//        Rpf.getEventBus().register(PostBakeEvent.class, RptHooks::hookPostBake);
         for (Method method : RptHooks.class.getDeclaredMethods()) {
             if (!method.isAnnotationPresent(RptHook.class)) continue;
 

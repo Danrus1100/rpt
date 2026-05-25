@@ -76,7 +76,7 @@ public class VariableItemModelWrapper extends AbstractRpfItemModel  {
 
         @Override
         public ItemModel bake(BakingContext context, Baker baker) {
-            ResourceLocation model = RptBakingContext.class.cast(context).rpt$getField().variables().models().get(variable);
+            ResourceLocation model = RptBakingContext.class.cast(context).rpt$getField().constants().models().get(variable);
             if (model == null) {
                 throw new IllegalStateException("Can't find model from variable: " + variable);
             }
