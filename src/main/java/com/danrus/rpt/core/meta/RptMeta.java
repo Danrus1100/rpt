@@ -1,6 +1,7 @@
 package com.danrus.rpt.core.meta;
 
 import com.danrus.rpt.duck.RptMetaHolder;
+import com.danrus.rpt.utils.RptCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.server.packs.PackResources;
@@ -17,7 +18,7 @@ public record RptMeta(boolean enable) {
     public static final String EXTENSION = ".json";
     public static final String FILENAME = "rptmeta.json";
 
-    public static final Codec<RptMeta> CODEC = Codec.unit(new RptMeta(true));
+    public static final Codec<RptMeta> CODEC = RptCodecs.unit(new RptMeta(true));
 
     @Nullable
     public static RptMeta load(final PackResources packResources) throws IOException {

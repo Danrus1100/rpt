@@ -46,6 +46,7 @@ repositories {
     maven("https://maven.parchmentmc.org")
     maven("https://api.modrinth.com/maven")
     maven("https://maven.shlakoblock.com/releases")
+    maven("https://maven.quiltmc.org/repository/release")
 }
 
 
@@ -148,6 +149,11 @@ dependencies {
     modstitchModImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
     modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
     modstitchModImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
+
+    opt("deps.yacl") {
+        modstitchModImplementation("dev.isxander:yet-another-config-lib:${it}")
+    }
+
     implementation("com.ezylang:EvalEx:3.6.0")
     include("com.ezylang:EvalEx:3.6.0")
 }
