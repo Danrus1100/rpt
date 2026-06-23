@@ -3,7 +3,8 @@ package com.danrus.rpt;
 import com.danrus.rpf.Rpf;
 import com.danrus.rpf.api.event.AbstractStagedEvent;
 import com.danrus.rpf.api.event.type.*;
-import com.danrus.rpt.core.expression.GameExpressionsHelper;
+import com.danrus.rpt.core.bake.RptModelBakeReloadListener;
+import com.danrus.rpt.core.bake.RptModelBakeReloadManager;
 import com.danrus.rpt.core.fpa.FirstPersonAnimManager;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.TemplatesManager;
@@ -22,7 +23,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class Rpt implements ClientModInitializer {
 
+    private static final RptModelBakeReloadManager reloadManager = new RptModelBakeReloadManager();
     private static final TemplatesManager templatesManager = new TemplatesManager();
+
     private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
     private static final FirstPersonAnimManager fpaManager = new FirstPersonAnimManager();
     private static final Logger log = LoggerFactory.getLogger(Rpt.class);
@@ -41,6 +44,8 @@ public class Rpt implements ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
 //        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
+
+        reloadManager.add(templatesManager);
 
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
             RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
@@ -85,6 +90,8 @@ public class Rpt implements ClientModInitializer {
             });
         });
     }
+
+    public static RptModelBakeReloadManager getReloadManager() { return reloadManager; }
 
     public static TemplatesManager getTemplatesManager() {
         return templatesManager;
