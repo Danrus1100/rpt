@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "accessWidener": "rpt.accesswidener",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "issues": "https://github.com/Danrus1100/rpt/issues",
+    "sources": "https://github.com/Danrus1100/rpt",
+    "homepage": "https://danrus1100.github.io/rtp-rpf-docs/"
+  },
+  "license": "MIT",
+  "icon": "assets/rpt/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.danrus.rpt.Rpt"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18",
+    "minecraft": "${mcdep}"
+  }
+}

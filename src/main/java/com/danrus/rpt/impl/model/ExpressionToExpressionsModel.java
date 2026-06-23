@@ -4,6 +4,7 @@ import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.expression.ExpressionsCase;
 import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import com.danrus.rpt.core.expression.NumericExpression;
@@ -64,7 +65,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
         return GameExpressionsHelper.selectValueFromCases(modelExpressions, main, vars.numbers(), level, entity, seed, fallback);
     }
 
-    public static record Unbaked(String main, List<ExpressionsCase<ItemModel.Unbaked>> expressions, boolean delegate, Optional<ItemModel.Unbaked> fallback) implements ItemModel.Unbaked {
+    public static record Unbaked(String main, List<ExpressionsCase<ItemModel.Unbaked>> expressions, boolean delegate, Optional<ItemModel.Unbaked> fallback) implements RptUnbakedModel {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 Codec.STRING.fieldOf("value").forGetter(Unbaked::main),
@@ -81,12 +82,13 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
         }
 
         @Override
-        public ItemModel bake(BakingContext context) {
+        public ItemModel bake(BakingContext context, Baker baker) {
             List<BakedModelExpressionsCase> modelMap = new ArrayList<>();
             for (ExpressionsCase<ItemModel.Unbaked> expression : expressions) {
-                modelMap.add(new BakedModelExpressionsCase(expression.when(), expression.value().bake(context), expression.requireAll()));
+                modelMap.add(new BakedModelExpressionsCase(expression.when(), baker.bake(context, expression.value()), expression.requireAll()));
             }
-            ItemModel fallbackModel = fallback.map(unbaked -> unbaked.bake(context)).orElseGet(context::missingItemModel);
+
+            ItemModel fallbackModel = fallback.map(unbaked -> baker.bake(context, unbaked)).orElseGet(context::missingItemModel);
             return new ExpressionToExpressionsModel(main, modelMap, fallbackModel, delegate);
         }
 

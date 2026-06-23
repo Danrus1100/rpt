@@ -25,7 +25,7 @@ public class ItemModelsMixin {
     )
     private static void rpt$injectBootstrap(CallbackInfo ci) {
         ID_MAPPER.put(TemplateItemModel.Unbaked.ID, TemplateItemModel.Unbaked.MAP_CODEC);
-        ID_MAPPER.put(VariableBlockModelWrapper.Unbaked.ID, VariableBlockModelWrapper.Unbaked.MAP_CODEC);
+        ID_MAPPER.put(VariableItemModelWrapper.Unbaked.ID, VariableItemModelWrapper.Unbaked.MAP_CODEC);
         ID_MAPPER.put(RegexItemModel.Unbaked.ID, RegexItemModel.Unbaked.MAP_CODEC);
         ID_MAPPER.put(ArmTransformWrapper.Unbaked.ID, ArmTransformWrapper.Unbaked.MAP_CODEC);
         ID_MAPPER.put(ExpressionToExpressionsModel.Unbaked.ID, ExpressionToExpressionsModel.Unbaked.MAP_CODEC);

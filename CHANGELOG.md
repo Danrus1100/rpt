@@ -1,1 +1,1 @@
- - Fixed incorrect arm transform behavior for vanilla Trident and Spear animations during elytra glide
+ - Crash fix when player renders

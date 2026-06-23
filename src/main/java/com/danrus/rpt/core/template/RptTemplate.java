@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.item.EmptyModel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
+import org.joml.Matrix4fc;
 
 public record RptTemplate(ItemModel model, RptField params, boolean needRebake) {
 
@@ -17,7 +18,10 @@ public record RptTemplate(ItemModel model, RptField params, boolean needRebake) 
                 RptField.CODEC.optionalFieldOf("rpt", RptField.EMPTY).forGetter(Unbaked::params)
         ).apply(instance, Unbaked::new));
 
-        public RptTemplate bake(ItemModel.BakingContext context) {
+        public RptTemplate bake(ItemModel.BakingContext context
+                                //? >=26.1
+                                //, Matrix4fc transformations
+        ) {
             // adding params to context to include current params to children's params
             RptBakingContext rptContext = RptBakingContext.class.cast(context);
             rptContext.rpt$addFields(params);
@@ -26,7 +30,10 @@ public record RptTemplate(ItemModel model, RptField params, boolean needRebake) 
             boolean needRebake = false;
             ItemModel model;
             try {
-                model = unbaked.bake(context);
+                model = unbaked.bake(context
+                        //? >=26.1
+                        //, transformations
+                );
             } catch (Exception e) {
                 needRebake = true;
                 model = new EmptyModel();

@@ -6,6 +6,7 @@ import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.Rpt;
 import com.danrus.rpt.core.OwnerHolder;
+import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
@@ -41,7 +42,7 @@ public class TemplateItemModel extends AbstractRpfItemModel {
         template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
     }
 
-    public static record Unbaked(ResourceLocation templateId) implements ItemModel.Unbaked {
+    public static record Unbaked(ResourceLocation templateId) implements RptUnbakedModel {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("template").forGetter(Unbaked::templateId)
@@ -55,7 +56,7 @@ public class TemplateItemModel extends AbstractRpfItemModel {
         }
 
         @Override
-        public @NotNull ItemModel bake(BakingContext context) {
+        public @NotNull ItemModel bake(BakingContext context, Baker baker) {
             RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, templateId);
             if (template == null) {
                 throw new IllegalStateException("can't find template " + templateId);
