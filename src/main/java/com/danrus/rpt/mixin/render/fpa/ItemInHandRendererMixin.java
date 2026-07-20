@@ -6,7 +6,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+//? <26.2
+ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,7 +39,10 @@ public abstract class ItemInHandRendererMixin {
     protected abstract void applyItemArmTransform(PoseStack poseStack, HumanoidArm hand, float equippedProg);
 
     @WrapMethod(
-            method = "renderArmWithItem"
+            //? <26.2
+             method = "renderArmWithItem"
+            //? >=26.2
+            //method = "submitArmWithItem"
     )
     //? <=1.21.8 {
     private void rpt$renderArmWithItem(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equippedProgress, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, Operation<Void> original) {

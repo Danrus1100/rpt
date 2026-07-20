@@ -59,7 +59,11 @@ public class ModelManagerMixin {
     *///?}
         BakingContextSource contextSource = (BakingContextSource) instance;
         ModelBakerSource bakerSource = (ModelBakerSource) instance;
-        Supplier<ItemModel.BakingContext> source = () -> contextSource.rpt$createBakingContext(bakerSource.rpt$createModelBaker(sprites));
+        Supplier<ItemModel.BakingContext> source = () -> contextSource.rpt$createBakingContext(
+                bakerSource.rpt$createModelBaker(sprites)
+                //? >=26.2
+                //, sprites
+        );
 
         return Rpt.getReloadManager().bake(
                 source,
