@@ -18,6 +18,8 @@ public class RptModelBakeReloadManager {
         listeners.add(listener);
     }
 
+    //TODO: figurate out something with ReloadState additional values
+
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         return CompletableFuture.allOf(
                 listeners.stream()

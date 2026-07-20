@@ -65,9 +65,11 @@ public class ModelManagerMixin {
                 //, sprites
         );
 
-        return Rpt.getReloadManager().bake(
-                source,
-                executor
-        ).thenCompose(v -> original.call(instance, sprites, executor));
+        return Rpt.rpt$repairFuture
+                .thenCompose(v ->  Rpt.getReloadManager().bake(
+                        source,
+                        executor
+                ))
+                .thenCompose(v -> original.call(instance, sprites, executor));
     }
 }

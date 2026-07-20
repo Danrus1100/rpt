@@ -47,40 +47,10 @@ public class Rpt implements ClientModInitializer {
     public void onInitializeClient() {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
-//        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
 
         reloadManager.add(templatesManager);
 
-        Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
-            RptSignedItemModel signedItemModel = RptSignedItemModel.class.cast(event.getModel());
-            RptFieldHolder holder = RptFieldHolder.class.cast(event.getStack());
-            prepareModelParams(signedItemModel, holder);
-        });
 
-        Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
-            SelectItemModelProperty property = event.getProperty();
-            if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
-                event.setGetter(() -> rptProperty.get(
-                        event.getStack(), event.getContext().level(), event.getOwner()
-                        //? if >=1.21.10
-                        //.asLivingEntity()
-                        , event.getContext().seed(), event.getContext().displayContext(), params
-                ));
-            }
-        });
-
-        Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {
-            if (event.getStage() == AbstractStagedEvent.Stage.PRE) {
-                if (Rpt.rpt$repairFuture == null) {
-                    log.error("Templates were not prepared in time for value discovery. it shouldn't happen!");
-                    return;
-                }
-                Rpt.rpt$repairFuture.join();
-                Rpt.rpt$repairFuture = null;
-                Rpt.getTemplatesManager().forEachUnbakedTemplate(event.getModelDiscovery()::addRoot);
-            }
-        });
 
         RptHooks.register();
     }
