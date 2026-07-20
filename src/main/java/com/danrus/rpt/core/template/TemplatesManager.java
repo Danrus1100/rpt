@@ -1,6 +1,7 @@
 package com.danrus.rpt.core.template;
 
 import com.danrus.rpt.core.RptUnbakedModel;
+import com.danrus.rpt.core.bake.RptModelBakeReloadListener;
 import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.item.ItemModel;
@@ -21,8 +22,9 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class TemplatesManager {
+public class TemplatesManager implements RptModelBakeReloadListener {
 
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
     private static final Logger log = LoggerFactory.getLogger(TemplatesManager.class);
@@ -32,6 +34,7 @@ public class TemplatesManager {
 
     private static final Matrix4fc IDENTITY = new Matrix4f();
 
+    @Override
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         templates.clear();
         return CompletableFuture.runAsync(() -> {
@@ -46,22 +49,15 @@ public class TemplatesManager {
         }, executor);
     }
 
+    @Override
     public CompletableFuture<Void> bake(
-            BakingContextSource source,
-            ModelBaker baker,
-            //? >= 26.1 {
-            /*net.minecraft.client.resources.model.sprite.MaterialBaker materials,
-            *///?}
+            Supplier<ItemModel.BakingContext> context,
             Executor executor
             ) {
         return CompletableFuture.runAsync(() ->{
             for (var entry : unbakedTemplates.entrySet()) {
                 try {
-                    ItemModel.BakingContext bakingContext = source.rpt$createBakingContext(baker
-                            //? >=26.1
-                            //, materials
-                    );
-                    RptTemplate baked = entry.getValue().bake(bakingContext
+                    RptTemplate baked = entry.getValue().bake(context.get()
                             //? >=26.1
                             //, IDENTITY
                     );

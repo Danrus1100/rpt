@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.client.resources.model.SpriteGetter;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 @Mixin(ModelManager.class)
 public class ModelManagerMixin {
@@ -33,7 +35,7 @@ public class ModelManagerMixin {
     /*private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.SharedState sharedState, Executor executor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
         ResourceManager resourceManager = sharedState.resourceManager();
     *///?}
-        Rpt.rpt$repairFuture = Rpt.getTemplatesManager().prepare(resourceManager, executor);
+        Rpt.rpt$repairFuture = Rpt.getReloadManager().prepare(resourceManager, executor);
         return original.call
                 //? if <=1.21.8 {
                 (preparationBarrier, resourceManager, executor, executor2);
@@ -55,13 +57,16 @@ public class ModelManagerMixin {
     )
     private static CompletableFuture<ModelBakery.BakingResult> rpt$wrapLoadModels(ModelBakery instance, net.minecraft.client.resources.model.sprite.MaterialBaker sprites, Executor executor, Operation<CompletableFuture<ModelBakery.BakingResult>> original) {
     *///?}
-        return Rpt.getTemplatesManager().bake(
-                (BakingContextSource) instance,
-                ((ModelBakerSource)instance).rpt$createModelBaker(
-                        sprites
-                ),
-                //? >= 26.1
-                //sprites,
+        BakingContextSource contextSource = (BakingContextSource) instance;
+        ModelBakerSource bakerSource = (ModelBakerSource) instance;
+        Supplier<ItemModel.BakingContext> source = () -> contextSource.rpt$createBakingContext(
+                bakerSource.rpt$createModelBaker(sprites)
+                //? >=26.2
+                //, sprites
+        );
+
+        return Rpt.getReloadManager().bake(
+                source,
                 executor
         ).thenCompose(v -> original.call(instance, sprites, executor));
     }

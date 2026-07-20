@@ -18,7 +18,12 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-@Mixin(Gui.class)
+@Mixin(
+        //? <26.2
+         Gui.class
+        //? >=26.2
+        //net.minecraft.client.gui.Hud.class
+)
 public class GuiMixin {
 
     @WrapOperation(
@@ -56,11 +61,18 @@ public class GuiMixin {
             at = @At(value = "INVOKE", target =
                     //? <26.1
                     "Lnet/minecraft/client/gui/Gui;renderTextureOverlay(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;F)V"
-                    //? >=26.1
+                    //? >=26.1 <26.2
                     //"Lnet/minecraft/client/gui/Gui;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V"
+                    //? >=26.2
+                    //"Lnet/minecraft/client/gui/Hud;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V"
             )
     )
-    private static void rpt$wrapPumpkinOverlay(Gui instance, GuiGraphics guiGraphics, ResourceLocation shaderLocation, float alpha, Operation<Void> original, @Share("itemStack") LocalRef<ItemStack> stackLocalRef) {
+    private static void rpt$wrapPumpkinOverlay(
+            //? <26.2
+            Gui
+            //? >=26.2
+            //net.minecraft.client.gui.Hud
+            instance, GuiGraphics guiGraphics, ResourceLocation shaderLocation, float alpha, Operation<Void> original, @Share("itemStack") LocalRef<ItemStack> stackLocalRef) {
         Rpt.getTextureSwappersManager().swap(shaderLocation, stackLocalRef.get(), Minecraft.getInstance().player, location -> {
             original.call(instance, guiGraphics, location, alpha);
         });
