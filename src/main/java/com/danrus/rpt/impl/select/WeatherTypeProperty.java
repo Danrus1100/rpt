@@ -24,13 +24,9 @@ public class WeatherTypeProperty implements SelectItemModelProperty<String> {
         if (level == null) return NONE;
         String weather = CLEAR;
         if (level
-                //? <26.1
-                .getLevelData()
                 .isRaining()) {
             weather = RAIN;
         } else if (level
-                //? <26.1
-                .getLevelData()
                 .isThundering()) { // permanent false =(
             weather = THUNDER;
         }

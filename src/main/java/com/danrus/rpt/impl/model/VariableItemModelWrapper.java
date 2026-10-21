@@ -14,11 +14,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -45,8 +45,7 @@ public class VariableItemModelWrapper extends AbstractRpfItemModel  {
     }
 
     public static record Unbaked(String variable, List<ItemTintSource> tints
-                                 //? >=26.1
-                                 //, Optional<Transformation> transformation
+                                 , Optional<Transformation> transformation
     ) implements RptUnbakedModel {
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
                 Codec.STRING.fieldOf("variable")
@@ -55,14 +54,12 @@ public class VariableItemModelWrapper extends AbstractRpfItemModel  {
                         .optionalFieldOf("tints", List.of())
                         .forGetter(Unbaked::tints)
 
-                //? >=26.1 {
-                /*, Transformation.EXTENDED_CODEC
+                , Transformation.EXTENDED_CODEC
                         .optionalFieldOf("transformation")
                         .forGetter(Unbaked::transformation)
-                *///?}
         ).apply(instance, Unbaked::new));
 
-        public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("rpt", "variable");
+        public static final Identifier ID = Identifier.fromNamespaceAndPath("rpt", "variable");
 
         @Override
         public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -76,13 +73,12 @@ public class VariableItemModelWrapper extends AbstractRpfItemModel  {
 
         @Override
         public ItemModel bake(BakingContext context, Baker baker) {
-            ResourceLocation model = RptBakingContext.class.cast(context).rpt$getField().variables().models().get(variable);
+            Identifier model = RptBakingContext.class.cast(context).rpt$getField().variables().models().get(variable);
             if (model == null) {
                 throw new IllegalStateException("Can't find model from variable: " + variable);
             }
-            BlockModelWrapper.Unbaked unbaked = new BlockModelWrapper.Unbaked(model
-                    //? >=26.1
-                    //, transformation
+            CuboidItemModelWrapper.Unbaked unbaked = new CuboidItemModelWrapper.Unbaked(model
+                    , transformation
                     , tints);
             return new VariableItemModelWrapper(baker.bake(context, unbaked));
         }

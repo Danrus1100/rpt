@@ -1,18 +1,16 @@
 package com.danrus.rpt.core.fpa;
 
 import com.danrus.rpt.core.AbstractNestedSelectorItemsReloadListener;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FirstPersonAnimManager
-        extends AbstractNestedSelectorItemsReloadListener<CustomFirstPersonTransforms>
-        implements IdentifiableResourceReloadListener {
+        extends AbstractNestedSelectorItemsReloadListener<CustomFirstPersonTransforms> {
 
     private static final FileToIdConverter LISTENER = FileToIdConverter.json("rpt/first_person");
 
@@ -26,17 +24,12 @@ public class FirstPersonAnimManager
     }
 
     @Override
-    protected ResourceLocation prepareLocation(ResourceLocation rawLocation) {
+    protected Identifier prepareLocation(Identifier rawLocation) {
         return LISTENER.idToFile(rawLocation);
     }
 
-    @Override
-    public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath("rpt", "first_person_transforms");
-    }
-
     public CustomFirstPersonTransforms getTransforms(ItemStack stack) {
-        ResourceLocation raw = stack.get(DataComponents.ITEM_MODEL);
+        Identifier raw = stack.get(DataComponents.ITEM_MODEL);
 
         if (raw == null) {
             return CustomFirstPersonTransforms.DEFAULT;

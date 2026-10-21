@@ -2,9 +2,8 @@ package com.danrus.rpt.core.textures;
 
 import com.danrus.rpt.core.AbstractNestedSelectorItemsReloadListener;
 import com.danrus.rpt.core.selection.NestedSelector;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -12,15 +11,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class TextureSwappersManager
-        extends AbstractNestedSelectorItemsReloadListener<ResourceLocation>
-        implements IdentifiableResourceReloadListener {
+        extends AbstractNestedSelectorItemsReloadListener<Identifier> {
 
     private static final FileToIdConverter LISTENER = FileToIdConverter.json("rpt/swappers");
 
     public TextureSwappersManager() {
         super(
                 LISTENER,
-                ResourceLocation.CODEC,
+                Identifier.CODEC,
                 true
         );
     }
@@ -31,10 +29,10 @@ public class TextureSwappersManager
     }
 
     @Override
-    protected ResourceLocation prepareLocation(ResourceLocation rawLocation) {
+    protected Identifier prepareLocation(Identifier rawLocation) {
         String path = rawLocation.getPath().replace(".png", "");
 
-        ResourceLocation swapperLocation = ResourceLocation.fromNamespaceAndPath(
+        Identifier swapperLocation = Identifier.fromNamespaceAndPath(
                 rawLocation.getNamespace(),
                 path
         );
@@ -43,7 +41,7 @@ public class TextureSwappersManager
     }
 
 
-    public void swap(ResourceLocation original, ItemStack stack, @Nullable LivingEntity entity, SwapApplier applier) {
+    public void swap(Identifier original, ItemStack stack, @Nullable LivingEntity entity, SwapApplier applier) {
 
         callback(
                 original,
@@ -52,10 +50,5 @@ public class TextureSwappersManager
                 original,
                 applier::apply
         );
-    }
-
-    @Override
-    public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath("rpt", "texture_swappers");
     }
 }

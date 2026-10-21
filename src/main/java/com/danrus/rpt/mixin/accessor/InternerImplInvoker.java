@@ -4,9 +4,8 @@ package com.danrus.rpt.mixin.accessor;
 import net.minecraft.client.resources.model.ModelBakery;
 import org.spongepowered.asm.mixin.Mixin;
 
-//? >= 26.1 {
 
-/*import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ModelBakery.InternerImpl.class)
 public interface InternerImplInvoker {
@@ -15,7 +14,3 @@ public interface InternerImplInvoker {
         throw new UnsupportedOperationException();
     }
 }
-*///? } else {
-@Mixin(ModelBakery.class)
-public interface InternerImplInvoker {}
-//?}

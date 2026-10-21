@@ -3,12 +3,11 @@ package com.danrus.rpt.core.expression;
 import com.danrus.rpt.core.selection.SelectResult;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,10 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
-//? >=1.21.11 {
-/*import net.minecraft.world.attribute.EnvironmentAttribute;
+import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-*///? }
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -130,10 +127,7 @@ public class GameExpressionsHelper {
 
         vars.put("gameTime", (double) (level != null ? level.getGameTime() : 0));
         vars.put("dayTime", (double) (level != null ?
-                //? <=1.21.11
-                 level.getLevelData().getDayTime()
-                //? >=26.1
-                //level.getLevelData().getGameTime() % 24000
+                level.getLevelData().getGameTime() % 24000
                 : 0));
         vars.put("delta", (double) delta);
         vars.put("seed", (double) seed);
@@ -221,7 +215,7 @@ public class GameExpressionsHelper {
             vars.put("isInvisible", entity.isInvisible() ? 1.0 : 0.0);
             vars.put("hurtTime", (double) entity.hurtTime);
             vars.put("deathTime", (double) entity.deathTime);
-            vars.put("invulnerableTime", (double) entity.invulnerableTime);
+            vars.put("invulnerableTime", (double) entity.getInvulnerableTime());
 
             if (entity instanceof AgeableMob mob) {
                 vars.put("age", (double) mob.getAge());
@@ -241,7 +235,7 @@ public class GameExpressionsHelper {
                 vars.put("sleeping", player.isSleeping() ? 1.0 : 0.0);
 
                 // 1.3.0 start
-                vars.put("attackProgress", (double) player.getAttackAnim(delta));
+                vars.put("attackProgress", (double) player.getSwingAnimation(delta));
                 float currUsageTime = player.getUseItemRemainingTicks() - delta + 1.0F;
                 @Nullable
                 ItemStack itemStack = player.getUseItem();
@@ -261,13 +255,8 @@ public class GameExpressionsHelper {
                 var biome = level.getBiome(entityPos).value();
                 vars.put("biomeTemp", (double) biome.getBaseTemperature());
 
-                //? <=1.21.10 {
-                vars.put("moonPhase", (double) level.getMoonPhase());
-                vars.put("sunAngle", (double) level.getSunAngle(delta));
-                //?} else {
-                /*vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
+                vars.put("moonPhase", (double) level.environmentAttributes().getDimensionValue(EnvironmentAttributes.MOON_PHASE).index());
                 vars.put("sunAngle", level.environmentAttributes().getDimensionValue(EnvironmentAttributes.SUN_ANGLE).doubleValue());
-                *///?}
             }
         }
 

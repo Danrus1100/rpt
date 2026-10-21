@@ -5,30 +5,30 @@ import com.danrus.rpt.core.selection.type.CompositeSelector;
 import com.danrus.rpt.core.selection.type.EmptySelector;
 import com.danrus.rpt.core.selection.type.ExpressionSelector;
 import com.danrus.rpt.core.selection.type.SelectApplier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class NestedSelectorsBootstrap {
     private NestedSelectorsBootstrap() {}
 
     public static void bootstrap() {
         NestedSelectors.register(
-                ResourceLocation.fromNamespaceAndPath("rpt", "apply"),
+                Identifier.fromNamespaceAndPath("rpt", "apply"),
                 SelectApplier::codec
         );
         NestedSelectors.register(
-                ResourceLocation.fromNamespaceAndPath("rpt", "component"),
+                Identifier.fromNamespaceAndPath("rpt", "component"),
                 ByComponentSelector::codec
         );
         NestedSelectors.register(
-                ResourceLocation.fromNamespaceAndPath("rpt", "empty"),
+                Identifier.fromNamespaceAndPath("rpt", "empty"),
                 EmptySelector::codec
         );
         NestedSelectors.register(
-                ResourceLocation.fromNamespaceAndPath("rpt", "expression"),
+                Identifier.fromNamespaceAndPath("rpt", "expression"),
                 ExpressionSelector.Unbaked::codec
         );
         NestedSelectors.register(
-                ResourceLocation.fromNamespaceAndPath("rpt", "composite"),
+                Identifier.fromNamespaceAndPath("rpt", "composite"),
                 CompositeSelector.Unbaked::codec
         );
     }

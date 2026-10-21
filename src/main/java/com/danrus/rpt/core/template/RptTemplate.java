@@ -19,8 +19,7 @@ public record RptTemplate(ItemModel model, RptField params, boolean needRebake) 
         ).apply(instance, Unbaked::new));
 
         public RptTemplate bake(ItemModel.BakingContext context
-                                //? >=26.1
-                                //, Matrix4fc transformations
+                                , Matrix4fc transformations
         ) {
             // adding params to context to include current params to children's params
             RptBakingContext rptContext = RptBakingContext.class.cast(context);
@@ -31,8 +30,7 @@ public record RptTemplate(ItemModel model, RptField params, boolean needRebake) 
             ItemModel model;
             try {
                 model = unbaked.bake(context
-                        //? >=26.1
-                        //, transformations
+                        , transformations
                 );
             } catch (Exception e) {
                 needRebake = true;

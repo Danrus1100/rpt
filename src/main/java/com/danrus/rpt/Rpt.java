@@ -11,17 +11,14 @@ import com.danrus.rpt.core.template.TemplatesManager;
 import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
-import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-public class Rpt implements ClientModInitializer {
+public class Rpt {
 
     private static final RptModelBakeReloadManager reloadManager = new RptModelBakeReloadManager();
     private static final TemplatesManager templatesManager = new TemplatesManager();
@@ -39,12 +36,7 @@ public class Rpt implements ClientModInitializer {
         });
     }
 
-    @Override
-    public void onInitializeClient() {
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(swappersManager);
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(fpaManager);
-//        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new GameExpressionsHelper());
-
+    public static void init() {
         reloadManager.add(templatesManager);
 
         Rpf.getEventBus().register(UpdateModelEvent.class, event -> {
@@ -59,8 +51,7 @@ public class Rpt implements ClientModInitializer {
                 RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
                 event.setGetter(() -> rptProperty.get(
                         event.getStack(), event.getContext().level(), event.getOwner()
-                        //? if >=1.21.10
-                        //.asLivingEntity()
+                        .asLivingEntity()
                         , event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }

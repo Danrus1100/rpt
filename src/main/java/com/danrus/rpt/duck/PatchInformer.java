@@ -1,8 +1,8 @@
 package com.danrus.rpt.duck;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface PatchInformer {
-    ResourceLocation rpt$getPatchPath();
-    void rpt$setPatchPath(ResourceLocation path);
+    Identifier rpt$getPatchPath();
+    void rpt$setPatchPath(Identifier path);
 }

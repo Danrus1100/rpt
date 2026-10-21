@@ -21,10 +21,7 @@ public class DifficultyTypeProperty implements SelectItemModelProperty<String> {
         if (level == null) return NONE;
         if (level.getLevelData().isHardcore()) return HARDCORE;
         return level.getLevelData().getDifficulty()
-                //? <26.1
-                .getKey();
-                //? >=26.1
-                //.getSerializedName();
+                .getSerializedName();
     }
 
     @Override

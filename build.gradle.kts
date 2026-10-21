@@ -1,180 +1,164 @@
-plugins {
-    id("dev.isxander.modstitch.base") version "0.8.4"
-    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
-    id("java")
-    id("maven-publish")
-}
+import dev.isxander.mtk.manifests.spec.ModManifestSpec.DependencyType
+import dev.isxander.mtk.manifests.spec.ModManifestSpec.Side
+import dev.isxander.mtk.multiloader.utils.ngRuns
+import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
+import org.gradle.api.tasks.bundling.Jar
 
-fun opt(name: String, consumer: (prop: String) -> Unit) {
-    (findProperty(name) as? String?)
-        ?.let(consumer)
+plugins {
+    id("net.fabricmc.fabric-loom") version "1.18.4" apply false
+    id("net.neoforged.gradle.userdev") version "7.1.39" apply false
+
+    id("dev.isxander.mtk.multiloader") version "0.1.11"
+    id("dev.isxander.mtk.manifests") version "0.1.5"
+    id("dev.isxander.mtk.accessx") version "0.1.1"
+
+    id("me.modmuss50.mod-publish-plugin") version "2.2.1"
+    id("maven-publish")
 }
 
 fun prop(name: String): String =
     findProperty(name)?.toString() ?: throw IllegalArgumentException("Missing property: $name")
 
-fun propExists(name: String) = project.properties.containsKey(name)
+val minecraftVersion = prop("deps.mc")
+val artifactVersion = "${prop("mod.version")}-$minecraftVersion"
 
-fun versionParts(version: String): List<Int> =
-    version.split('.')
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .map { it.toIntOrNull() ?: 0 }
+group = "com.danrus.rpt"
+version = artifactVersion
 
-fun versionAtLeast(version: String, floor: String): Boolean {
-    val a = versionParts(version)
-    val b = versionParts(floor)
-    val max = maxOf(a.size, b.size)
-    for (i in 0 until max) {
-        val ai = a.getOrElse(i) { 0 }
-        val bi = b.getOrElse(i) { 0 }
-        if (ai != bi) return ai > bi
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
-    return true
 }
-
-val mainBranch = "multiversion"
-val gitBranchName = providers.exec {
-    commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
-}.standardOutput.asText.map { it.trim() }.get()
-val minecraft = property("deps.mc") as String
-
 
 repositories {
+    // RPF is published by modstitch with loader capabilities instead of the default
+    // module capability, which attribute-less resolve configurations cannot match.
+    // Consume its jar directly; only the API classes are needed at compile time.
+    mavenLocal {
+        content { includeGroup("com.danrus") }
+        metadataSources { artifact() }
+    }
+    maven("https://maven.shlakoblock.com/releases") {
+        name = "Shlakoblock"
+        content { includeGroup("com.danrus") }
+        metadataSources { artifact() }
+    }
     mavenCentral()
     maven("https://maven.fabricmc.net/")
-    maven("https://maven.parchmentmc.org")
+    maven("https://maven.neoforged.net/releases")
     maven("https://api.modrinth.com/maven")
-    maven("https://maven.shlakoblock.com/releases")
 }
 
+// One canonical access-widener file. Fabric uses it directly, accessx derives
+// the NeoForge access transformer from it.
+val accessWidenerFile = layout.projectDirectory.file("accesswidener/rpt.accesswidener")
 
-modstitch {
-    minecraftVersion = minecraft
-    parchment {
-        opt("deps.parchment") { mappingsVersion = it }
-    }
+sourceSets.fabric.get().resources.srcDir("accesswidener")
 
-    runs {
-        register("rpt") {
-            client()
-        }
-    }
-
-    metadata {
-        modId = prop("mod.id")
-        modName = prop("mod.name")
-        modVersion = prop("mod.version")
-        modDescription = prop("mod.description")
-        modGroup = "com.danrus.rpt"
-        modAuthor = prop("mod.author")
-
-        fun MapProperty<String, String>.populate(block: MapProperty<String, String>.() -> Unit) {
-            block()
-        }
-
-        replacementProperties.populate {
-            // You can put any other replacement properties/metadata here that
-            // modstitch doesn't initially support. Some examples below.
-            put("mcdep", prop("mod.mcdep"))
-            put("minecraft_version", prop("deps.mc"))
-        }
-    }
-
-    loom {
-        fabricLoaderVersion = "0.18.4"
-
-        // Configure loom like normal in this block.
-        configureLoom {
-
-        }
-    }
-
-    mixin {
-        addMixinsToModManifest = true
-
-        configs.register("rpt")
-        configs.register("rpt.12111")
-
-    }
+val neoforgeAccessTransformer = accessx.convert("neoforge", sourceSets.neoforge.get()) {
+    inputFiles.from(accessWidenerFile)
+    outputFormat = accessx.AT
 }
 
-stonecutter{
-    replacements {
-        string {
-            direction = eval(current.version, ">=1.21.11")
-            replace(
-                "import net.minecraft.client.model.ArmorStandModel;",
-                "import net.minecraft.client.model.object.armorstand.ArmorStandModel;"
-            )
-            replace(
-                "import net.minecraft.client.model.PlayerModel;",
-                "import net.minecraft.client.model.player.PlayerModel;"
-            )
-        }
+loom {
+    accessWidenerPath.set(accessWidenerFile)
+}
 
-        string {
-            direction = eval(current.version, ">=1.21.11")
-            replace("ResourceLocation", "Identifier")
-        }
+accessTransformers {
+    file(neoforgeAccessTransformer.flatMap { it.outputFile })
+}
 
-        string {
-            direction = eval(current.version, ">=1.21.11")
-            replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")
-        }
+// NeoGradle needs an explicit dependency from the AT-applying task to the accessx output.
+tasks.matching { it.name == "neoFormApplyAccessTransformer" }.configureEach {
+    dependsOn(neoforgeAccessTransformer)
+}
 
-        string {
-            direction = eval(current.version, ">=1.21.10")
-            replace("PlayerRenderState", "AvatarRenderState")
-        }
-
-        string {
-            direction = eval(current.version, ">=26.1")
-            replace(
-                "import net.minecraft.client.renderer.block.model.ItemTransform;",
-                "import net.minecraft.client.resources.model.cuboid.ItemTransform;"
+ngRuns {
+    configureEach {
+        if (name == "neoforgeClient") {
+            programArguments(
+                "--username", "Dev",
+                "--uuid", "00000000000000000000000000000000",
+                "--accessToken", "0"
             )
-            replace(
-                "import net.minecraft.client.resources.model.SpriteGetter;",
-                "import net.minecraft.client.resources.model.sprite.SpriteGetter;"
-            )
-            replace("BlockModelWrapper", "CuboidItemModelWrapper")
-            replace("GuiGraphics", "GuiGraphicsExtractor")
         }
     }
 }
 
 dependencies {
-    modstitchModImplementation("net.fabricmc:fabric-loader:${findProperty("deps.fabric")}")
-    modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("deps.fapi")}")
-    modstitchModImplementation("com.danrus:rpf:${findProperty("deps.rpf")}-${findProperty("deps.mc")}")
-    implementation("com.ezylang:EvalEx:3.6.0")
-    include("com.ezylang:EvalEx:3.6.0")
+    minecraft("com.mojang:minecraft:$minecraftVersion")
+    fabricLoader("net.fabricmc:fabric-loader:${prop("deps.fabric")}")
+    neoforgeImplementation("net.neoforged:neoforge:${prop("deps.neoforge")}")
+
+    fabricImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fapi")}")
+
+    // RPF's API is provided at runtime by the RPF mod, so it is compile-only here.
+    commonCompileOnly("com.danrus:rpf:${prop("deps.rpf")}-$minecraftVersion")
+
+    commonImplementation("com.ezylang:EvalEx:${prop("deps.evalex")}")
+    commonInclude("com.ezylang:EvalEx:${prop("deps.evalex")}")
 }
 
-tasks.processResources {
-    inputs.property("id", findProperty("mod.id"))
-    inputs.property("name", findProperty("mod.name"))
-    inputs.property("version", findProperty("mod.version"))
-    inputs.property("mcdep", findProperty("mod.mcdep"))
-    inputs.property("minecraft_version", findProperty("deps.mc"))
-    inputs.property("description", findProperty("mod.description"))
-    inputs.property("author", findProperty("mod.author"))
+manifests {
+    val common = manifest {
+        modId = prop("mod.id")
+        version = prop("mod.version")
+        displayName = prop("mod.name")
+        description = prop("mod.description")
+        authors = listOf(prop("mod.author"))
+        homepage = "https://danrus1100.github.io/rtp-rpf-docs/"
+        sourcesUrl = "https://github.com/Danrus1100/rpt"
+        issueTrackerUrl = "https://github.com/Danrus1100/rpt/issues"
+        licenses = listOf("MIT")
+        iconPath = "assets/rpt/icon.png"
 
-    val map = mapOf(
-        "id" to findProperty("mod.id"),
-        "name" to findProperty("mod.name"),
-        "version" to findProperty("mod.version"),
-        "mcdep" to findProperty("mod.mcdep"),
-        "minecraft_version" to findProperty("deps.mc"),
-        "description" to findProperty("mod.description"),
-        "author" to findProperty("mod.author")
-    )
+        dependency("minecraft", DependencyType.REQUIRED, "[$minecraftVersion,26.4)")
+        dependency("rpf", DependencyType.REQUIRED, "[${prop("deps.rpf")},)")
 
-    filesMatching("fabric.mod.json") { expand(map) }
+        mixin("rpt.mixins.json", Side.CLIENT)
+    }
+
+    fabricModJson(sourceSets.fabric.get()) {
+        from(common)
+
+        client()
+        entrypoint("client", "com.danrus.rpt.fabric.RptFabric")
+        accessWidener("rpt.accesswidener")
+
+        dependency("fabricloader", DependencyType.REQUIRED, "[${prop("deps.fabric")},)")
+        dependency("fabric-api", DependencyType.REQUIRED, "[0.160.0,)")
+    }
+
+    neoForgeModsToml(sourceSets.neoforge.get()) {
+        from(common)
+
+        modLoader = "javafml"
+        loaderVersion = "[4,)"
+        accessTransformer(neoforgeAccessTransformer)
+
+        dependency("neoforge", DependencyType.REQUIRED, "[${prop("deps.neoforge")},)")
+    }
 }
 
-val artifactVersion = "${prop("mod.version")}-${minecraft}"
+// modstitch-manifests 0.1.5 has no displayTest option. RPT is client-only,
+// so NeoForge must not require it on the server.
+tasks.named("generateNeoforgeNeoForgeModsToml") {
+    doLast {
+        outputs.files.files
+            .filter { it.name == "neoforge.mods.toml" }
+            .forEach { file ->
+                val text = file.readText()
+                if (!text.contains("displayTest")) {
+                    file.writeText(
+                        text.replace(Regex("""mods = \[\{.*}]""")) { match ->
+                            match.value.removeSuffix("}]") + ", displayTest = 'IGNORE_ALL_VERSION'}]"
+                        }
+                    )
+                }
+            }
+    }
+}
 
 publishMods {
     val modrinthToken = findProperty("modrinth-token")
@@ -187,20 +171,21 @@ publishMods {
 
     type = STABLE
 
-//    file.set(tasks.named("remapJar").flatMap { (it as org.gradle.jvm.tasks.Jar).archiveFile })
-    file = modstitch.finalJarTask.flatMap { it.archiveFile }
+    file.set(tasks.named<Jar>("universalJar").flatMap { it.archiveFile })
+    additionalFiles.from(tasks.named<Jar>("universalSourcesJar").flatMap { it.archiveFile })
 
     changelog = rootProject.file("CHANGELOG.md").readText()
 
     val loaders = prop("pub.target.platforms").split(' ')
     loaders.forEach(modLoaders::add)
-    displayName = "PRT ${prop("mod.version")} for ${minecraft}"
+    displayName = "RPT ${prop("mod.version")} for $minecraftVersion"
     version = artifactVersion
 
     val targets = prop("pub.target.versions").split(' ')
     modrinth {
         projectId = prop("publish.modrinth")
         accessToken = modrinthToken.toString()
+        environment = ModrinthEnvironment.CLIENT_ONLY
         targets.forEach(minecraftVersions::add)
         requires("rpf")
     }
@@ -209,34 +194,39 @@ publishMods {
         projectId = prop("publish.curseforge")
         accessToken = curseforgeToken.toString()
         projectSlug = prop("pub.slug")
+        client = true
+        server = false
         targets.forEach(minecraftVersions::add)
         requires("rpf")
     }
 
-    if (targets.contains("1.21.8") && loaders.contains("fabric")) {
-        discord ("DR freak mods anonuncement") {
-            webhookUrl = discordWebhookDR.toString()
-            dryRunWebhookUrl = discordWebhookDry.toString()
+    discord("DR freak mods announcement") {
+        webhookUrl = discordWebhookDR.toString()
+        dryRunWebhookUrl = discordWebhookDry.toString()
 
-            username  = prop("mod.name")
-            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
+        username = prop("mod.name")
+        avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
 
-            content = changelog.map{ "# " + prop("mod.version") + " version here! \n\n" + rootProject.file("CHANGELOG.md").readText() +"\n\n<@&1426901890582581248>" }
+        content = changelog.map {
+            "# " + prop("mod.version") + " version here! \n\n" +
+                rootProject.file("CHANGELOG.md").readText() + "\n\n<@&1426901890582581248>"
         }
-        discord ("DR freak mods anonuncement (RU)") {
-            webhookUrl = discordWebhookDRRU.toString()
-            dryRunWebhookUrl = discordWebhookDry.toString()
+    }
+    discord("DR freak mods announcement (RU)") {
+        webhookUrl = discordWebhookDRRU.toString()
+        dryRunWebhookUrl = discordWebhookDry.toString()
 
-            username  = prop("mod.name")
-            avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
+        username = prop("mod.name")
+        avatarUrl = "https://github.com/Danrus1100/rpt/blob/master/src/main/resources/assets/rpt/icon.png?raw=true"
 
-            content = changelog.map{ "# Версия " + prop("mod.version") + " вышла! \n\n" + rootProject.file("CHANGELOG_RU.md").readText() +"\n\n<@&1426901890582581248>" }
+        content = changelog.map {
+            "# Версия " + prop("mod.version") + " вышла! \n\n" +
+                rootProject.file("CHANGELOG_RU.md").readText() + "\n\n<@&1426901890582581248>"
         }
     }
 }
 
 publishing {
-
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
@@ -249,18 +239,8 @@ publishing {
 
     repositories {
         maven {
-            name = "ShlakoblockReleases"
+            name = "Shlakoblock"
             url = uri("https://maven.shlakoblock.com/releases")
-
-            credentials {
-                username = project.findProperty("shlakoblock-maven-username")?.toString()
-                password = project.findProperty("shlakoblock-maven-password")?.toString()
-            }
-        }
-
-        maven {
-            name = "ShlakoblockSnapshots"
-            url = uri("https://maven.shlakoblock.com/snapshots")
 
             credentials {
                 username = project.findProperty("shlakoblock-maven-username")?.toString()
@@ -269,14 +249,3 @@ publishing {
         }
     }
 }
-
-
-stonecutter {
-//    constants {
-//        "rprenames" to propExists("deps.rprenames")
-//    }
-    val isRpRenames = propExists("deps.rprenames")
-    constants["rprenames"] = isRpRenames
-}
-
-version = findProperty("mod.version") as String + "-" +findProperty("deps.mc") as String

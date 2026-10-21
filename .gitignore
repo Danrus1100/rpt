@@ -48,3 +48,6 @@ local.properties
 # Generated resource packs / assets
 
 resources/generated/
+
+# Modstitch multi-loader run directories
+runs/

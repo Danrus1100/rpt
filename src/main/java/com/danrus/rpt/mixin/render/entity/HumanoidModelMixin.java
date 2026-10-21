@@ -2,8 +2,6 @@ package com.danrus.rpt.mixin.render.entity;
 
 import com.danrus.rpt.core.arm.CustomTransformsDispatcher;
 import com.danrus.rpt.duck.CustomTransformsDispatchedState;
-import com.llamalad7.mixinextras.expression.Definition;
-import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -11,7 +9,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,16 +38,15 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
         dispatcher = new CustomTransformsDispatcher(rightArm, leftArm, head);
     }
 
-    @Definition(id = "mainArm", field = "Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;mainArm:Lnet/minecraft/world/entity/HumanoidArm;")
-    @Definition(id = "renderState", local = @Local(argsOnly = true, type = HumanoidRenderState.class))
-    @Definition(id = "RIGHT", field = "Lnet/minecraft/world/entity/HumanoidArm;RIGHT:Lnet/minecraft/world/entity/HumanoidArm;")
-    @Expression("renderState.mainArm == RIGHT")
     @Inject(
             method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V",
-            at = @At("MIXINEXTRAS:EXPRESSION")
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;getArmPose(Lnet/minecraft/world/entity/HumanoidArm;)Lnet/minecraft/client/model/HumanoidModel$ArmPose;"
+            )
     )
     private void rpt$injectHui(T renderState, CallbackInfo ci) {
-        if (renderState instanceof PlayerRenderState && dispatcher != null) {
+        if (renderState instanceof AvatarRenderState && dispatcher != null) {
             dispatcher.dispatch(renderState);
         }
     }
@@ -66,8 +63,6 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
 
     @WrapMethod(method = "poseRightArm")
     private void rpt$wrapPoseRightArm(T renderState,
-                                      //? <1.21.11
-                                      HumanoidModel.ArmPose pose,
                                       Operation<Void> original) {
         if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.RIGHT)) {
@@ -77,34 +72,22 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             HumanoidModel.ArmPose armPose = dispatcher.getVanilla(renderState, HumanoidArm.RIGHT);
 
             if (armPose != null) {
-                //? <1.21.11 {
-                original.call(renderState
-                        , armPose
-                );
-                //?} else {
-                /*renderState.rightArmPose = armPose;
+                renderState.rightArmPose = armPose;
                 original.call(renderState);
-                *///?}
                 return;
             } else {
                 original.call(renderState
-                        //? <1.21.11
-                        , pose
                 );
                 return;
             }
         }
 
         original.call(renderState
-                //? <1.21.11
-                , pose
         );
     }
 
     @WrapMethod(method = "poseLeftArm")
     private void rpt$wrapPoseLeftArm(T renderState,
-                                     //? <1.21.11
-                                     HumanoidModel.ArmPose pose,
                                      Operation<Void> original) {
         if (renderState instanceof CustomTransformsDispatchedState dispatchedState && dispatcher != null) {
             if (dispatchedState.rpt$isAlreadyTransformed(HumanoidArm.LEFT)) {
@@ -114,39 +97,25 @@ public abstract class HumanoidModelMixin<T extends HumanoidRenderState> {
             HumanoidModel.ArmPose armPose = dispatcher.getVanilla(renderState, HumanoidArm.LEFT);
 
             if (armPose != null) {
-                //? <1.21.11 {
-                original.call(renderState
-                        , armPose
-                );
-                //?} else {
-                /*renderState.leftArmPose = armPose;
+                renderState.leftArmPose = armPose;
                 original.call(renderState);
-                *///?}
                 return;
             } else {
                 original.call(renderState
-                        //? <1.21.11
-                        , pose
                 );
                 return;
             }
         }
 
         original.call(renderState
-                //? <1.21.11
-                , pose
         );
     }
 
     @WrapMethod(method = "setupAttackAnimation")
     private void rpt$wrapAttack(HumanoidRenderState humanoidRenderState,
-                                //? <=1.21.10
-                                 float ageInTicks,
                                 Operation<Void> original) {
         Runnable vanilla = () ->
                 original.call(humanoidRenderState
-                            //? <=1.21.10
-                            , ageInTicks
                 );
 
         if (dispatcher.shouldCancelAttack(humanoidRenderState)) {

@@ -1,7 +1,7 @@
 package com.danrus.rpt.core.expression;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;

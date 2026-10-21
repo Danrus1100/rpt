@@ -2,13 +2,13 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.danrus.rpt.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "accessor.ModelBakerImplInvoker",
     "accessor.InternerImplInvoker",
+    "accessor.ModelBakerImplInvoker",
     "item.select.SelectItemModelMixin",
     "item.select.UnbakedMixin",
     "load.BakingContextMixin",
@@ -18,25 +18,23 @@
     "load.ModelManagerMixin",
     "regs.ConditionalItemModelPropertiesMixin",
     "regs.ItemModelsMixin",
+    "regs.SelectItemModelPropertiesMixin",
     "render.GuiMixin",
+    "render.ItemStackMixin",
     "render.entity.EquipmentLayerRendererMixin",
     "render.entity.LivingEntityHolderMixins",
     "render.entity.HumanoidMobRendererMixin",
     "render.entity.HumanoidArmorLayerMixin",
+    "render.entity.HumanoidModelMixin",
     "render.entity.CustomTransformsDispatchedStateMixin",
     "render.entity.ArmorStandModelMixin",
     "render.entity.CustomAnchorApplicableModelMixin",
     "render.entity.ItemInHandLayerMixin",
+    "render.entity.ItemStackRenderStateMixin",
     "render.fpa.ItemInHandRendererMixin",
     "rpf.RpfCodecsMixin",
+    "rpf.SignedItemModelMixin",
     "ItemModelMixin"
-  ],
-  "mixins": [
-    "regs.SelectItemModelPropertiesMixin",
-    "render.ItemStackMixin",
-    "render.entity.HumanoidModelMixin",
-    "render.entity.ItemStackRenderStateMixin",
-    "rpf.SignedItemModelMixin"
   ],
   "mixinextras": {
     "minVersion": "0.5.0"

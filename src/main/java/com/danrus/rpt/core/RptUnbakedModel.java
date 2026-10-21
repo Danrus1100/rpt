@@ -9,12 +9,10 @@ public interface RptUnbakedModel extends ItemModel.Unbaked {
 
     @Override
     default ItemModel bake(ItemModel.BakingContext context
-            //? >=26.1
-            //, Matrix4fc transformation
+            , Matrix4fc transformation
     ) {
         return bake(context, (c, u) -> u.bake(c
-                //? >=26.1
-                //, transformation
+                , transformation
         ));
     }
 
