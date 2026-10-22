@@ -14,26 +14,29 @@ import java.util.List;
 public class BakingContextMixin implements RptBakingContext {
 
     @Unique
-    private List<RptField> rpt$params = new ArrayList<>();
+    private final List<RptField> rpt$params = new ArrayList<>();
 
     @Override
     public RptField rpt$getField() {
-        if (rpt$params.isEmpty()) return RptField.EMPTY;
-
-        RptField initial = rpt$params.getFirst();
-
-        if (rpt$params.size() == 1) {
-            return initial;
+        RptField merged = RptField.EMPTY;
+        for (RptField field : rpt$params) {
+            merged = merged.merge(field);
         }
-
-        for (int i = 1; i < this.rpt$params.size(); i++) {
-            initial.merge(rpt$params.get(i));
-        }
-        return initial;
+        return merged;
     }
 
     @Override
-    public void rpt$addFields(RptField... params) {
+    public int rpt$addFields(RptField... params) {
+        int previousSize = this.rpt$params.size();
         this.rpt$params.addAll(Arrays.asList(params));
+        return previousSize;
+    }
+
+    @Override
+    public void rpt$truncateFields(int size) {
+        int clampedSize = Math.max(0, Math.min(size, this.rpt$params.size()));
+        if (clampedSize < this.rpt$params.size()) {
+            this.rpt$params.subList(clampedSize, this.rpt$params.size()).clear();
+        }
     }
 }
