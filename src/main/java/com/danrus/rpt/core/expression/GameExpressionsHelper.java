@@ -3,6 +3,7 @@ package com.danrus.rpt.core.expression;
 import com.danrus.rpt.core.selection.SelectResult;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
+import com.ezylang.evalex.parser.ParseException;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -95,7 +96,7 @@ public class GameExpressionsHelper {
     public static boolean evaluateCondition(String condition, double mainValue, Map<String, Double> vars) {
         String fullExprStr = RESERVED_VARIABLE_NAME + " " + condition;
 
-        Expression expr = expressionCache.computeIfAbsent(fullExprStr, Expression::new);
+        Expression expr = copyOf(fullExprStr);
 
         vars.forEach(expr::with);
         expr.with(RESERVED_VARIABLE_NAME, mainValue);
@@ -105,6 +106,18 @@ public class GameExpressionsHelper {
         } catch (Exception e) {
             logError(condition, e);
             return false;
+        }
+    }
+
+    private static Expression copyOf(String expression) {
+        Expression cached = expressionCache.computeIfAbsent(expression, Expression::new);
+        try {
+            // A copy reuses the parsed AST but gets a fresh data accessor, so variables
+            // from the previous item/frame cannot leak into this evaluation.
+            return new Expression(cached);
+        } catch (ParseException e) {
+            logError(expression, e);
+            return cached;
         }
     }
 
@@ -120,7 +133,7 @@ public class GameExpressionsHelper {
     }
 
     public static double evaluate(String expressionStr, Map<String, Double> vars) {
-        Expression expr = expressionCache.computeIfAbsent(expressionStr, Expression::new);
+        Expression expr = copyOf(expressionStr);
 
         vars.forEach(expr::with);
 
@@ -261,7 +274,10 @@ public class GameExpressionsHelper {
                 float currUsageTime = player.getUseItemRemainingTicks() - delta + 1.0F;
                 @Nullable
                 ItemStack itemStack = player.getUseItem();
-                vars.put("usageProgress", itemStack.isEmpty() ? 0.0 : currUsageTime / itemStack.getUseDuration(player));
+                int useDuration = itemStack.getUseDuration(player);
+                vars.put("usageProgress", itemStack.isEmpty() || useDuration <= 0
+                        ? 0.0
+                        : Math.max(0.0, Math.min(1.0, currUsageTime / useDuration)));
                 // 1.3.0 end
 
                 if (player instanceof AbstractClientPlayer clientPlayer) {
