@@ -48,11 +48,22 @@ public record ExpressionSelector<T>(String main, List<ExpressionsCase<NestedSele
         @Override
         public BakeResult<T> bakeResult() {
             List<ExpressionsCase<NestedSelector<T>>> baked = new ArrayList<>(cases.size());
+            boolean hasFallbacks = false;
             for (ExpressionsCase<NestedSelector.Unbaked<T>> entry : cases) {
-                baked.add(new BakedExpressionsCase(entry.when(), entry.value().bakeResult().selector(), entry.requireAll()));
+                BakeResult<T> bakedEntry = entry.value().bakeResult();
+                baked.add(new BakedExpressionsCase(entry.when(), bakedEntry.selector(), entry.requireAll()));
+                hasFallbacks |= bakedEntry.hasFallbacks();
             }
-            NestedSelector<T> bakedFallback = fallback.isPresent() ? fallback.get().bakeResult().selector() : EmptySelector.instance();
-            return new BakeResult<>(new ExpressionSelector<>(main.expression(), baked, bakedFallback), fallback.isPresent());
+
+            BakeResult<T> bakedFallback = fallback
+                    .map(NestedSelector.Unbaked::bakeResult)
+                    .orElseGet(() -> new BakeResult<>(EmptySelector.instance(), false));
+            hasFallbacks |= fallback.isPresent() || bakedFallback.hasFallbacks();
+
+            return new BakeResult<>(
+                    new ExpressionSelector<>(main.expression(), baked, bakedFallback.selector()),
+                    hasFallbacks
+            );
         }
 
         @Override

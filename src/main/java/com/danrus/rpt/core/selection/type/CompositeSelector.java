@@ -34,6 +34,15 @@ public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements 
         }
 
         @Override
+        public BakeResult<T> bakeResult() {
+            List<BakeResult<T>> results = swappers.stream().map(NestedSelector.Unbaked::bakeResult).toList();
+            return new BakeResult<>(
+                    new CompositeSelector<>(results.stream().map(BakeResult::selector).toList()),
+                    results.stream().anyMatch(BakeResult::hasFallbacks)
+            );
+        }
+
+        @Override
         public MapCodec<? extends NestedSelector.Unbaked<T>> type(Codec<T> valueCodec) {
             return codec(valueCodec);
         }

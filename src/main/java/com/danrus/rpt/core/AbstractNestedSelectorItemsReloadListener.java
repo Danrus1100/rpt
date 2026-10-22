@@ -54,8 +54,7 @@ public abstract class AbstractNestedSelectorItemsReloadListener<T> extends Simpl
     private NestedSelector<T> parseResource(Identifier location, Resource resource) {
         try (Reader reader = resource.openAsReader()) {
             NestedSelector.BakeResult<T> result = NestedSelectors.codec(codec).parse(JsonOps.INSTANCE, StrictJsonParser.parse(reader)).getOrThrow().bakeResult();
-            // FIXME: it can lost info about fallbacks if root hasn't fallback
-            if (result.hasFallbacks() && !ignoreFallback) {
+            if (result.hasFallbacks() && ignoreFallback) {
                 log.warn("{} {} from pack {} has \"fallback\". This field will be ignored.", getNameOfObjective(), location, resource.sourcePackId());
             }
             return result.selector();

@@ -59,14 +59,22 @@ public record ByComponentSelector<C, T>(
         @Override
         public BakeResult<T> bakeResult() {
             Object2ObjectMap<C, NestedSelector<T>> bakedMap = new Object2ObjectOpenHashMap<>();
-            valueToSelector.object2ObjectEntrySet().forEach(e -> bakedMap.put(e.getKey(), e.getValue().bakeResult().selector()));
+            boolean hasFallbacks = false;
+            for (var entry : valueToSelector.object2ObjectEntrySet()) {
+                BakeResult<T> baked = entry.getValue().bakeResult();
+                bakedMap.put(entry.getKey(), baked.selector());
+                hasFallbacks |= baked.hasFallbacks();
+            }
 
-            NestedSelector<T> bakedFallback = fallback
+            BakeResult<T> bakedFallbackResult = fallback
                 .map(NestedSelector.Unbaked::bakeResult)
-                .orElse(new BakeResult<>((a,b,c)-> {}, false))
-                .selector();
+                .orElseGet(() -> new BakeResult<>((a, b, c) -> {}, false));
+            hasFallbacks |= fallback.isPresent() || bakedFallbackResult.hasFallbacks();
 
-            return new BakeResult<>(new ByComponentSelector<>(componentType, bakedMap, bakedFallback), fallback.isPresent());
+            return new BakeResult<>(
+                    new ByComponentSelector<>(componentType, bakedMap, bakedFallbackResult.selector()),
+                    hasFallbacks
+            );
         }
 
         @Override
