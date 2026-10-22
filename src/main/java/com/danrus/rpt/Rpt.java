@@ -11,10 +11,15 @@ import com.danrus.rpt.core.template.TemplatesManager;
 import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
+import net.minecraft.client.resources.model.ModelDiscovery;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class Rpt {
@@ -74,7 +79,16 @@ public class Rpt {
 
         Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {
             if (event.getStage() == AbstractStagedEvent.Stage.PRE) {
-                Rpt.getTemplatesManager().forEachUnbakedTemplate(event.getModelDiscovery()::addRoot);
+                ModelDiscovery discovery = event.getModelDiscovery();
+                Rpt.getTemplatesManager().forEachUnbakedTemplate(discovery::addRoot);
+                Rpt.getTemplatesManager().forEachReferencedModel(id -> rpt$addModelRoot(discovery, id));
+                for (var layer : event.getItemLayers()) {
+                    for (var clientItem : layer.contents().values()) {
+                        RptClientItem.class.cast(clientItem).rpt$getField().ifPresent(field ->
+                                field.variables().models().values().forEach(id -> rpt$addModelRoot(discovery, id))
+                        );
+                    }
+                }
             }
         });
 
@@ -89,6 +103,10 @@ public class Rpt {
                 signed.rpt$setField(params);
             });
         });
+    }
+
+    private static void rpt$addModelRoot(ModelDiscovery discovery, Identifier modelId) {
+        discovery.addRoot(new CuboidItemModelWrapper.Unbaked(modelId, Optional.empty(), List.of()));
     }
 
     public static RptModelBakeReloadManager getReloadManager() { return reloadManager; }
