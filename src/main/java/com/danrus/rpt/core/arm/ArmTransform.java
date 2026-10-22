@@ -97,7 +97,13 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
         String exprStr = val.expression();
         if (exprStr.isEmpty()) return 0f;
 
-        Expression exp = EXPR_CACHE.computeIfAbsent(exprStr, Expression::new);
+        Expression exp;
+        try {
+            // Fresh data accessor per evaluation; the parsed AST is reused.
+            exp = new Expression(EXPR_CACHE.computeIfAbsent(exprStr, Expression::new));
+        } catch (Exception e) {
+            return 0f;
+        }
         vars.forEach(exp::with);
 
         try {
@@ -105,6 +111,10 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
         } catch (Exception e) {
             return 0f;
         }
+    }
+
+    public static void clearCache() {
+        EXPR_CACHE.clear();
     }
 
 

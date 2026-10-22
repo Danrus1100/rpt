@@ -1,5 +1,6 @@
 package com.danrus.rpt.core.bake;
 
+import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -19,6 +20,7 @@ public class RptModelBakeReloadManager {
 
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
         GameExpressionsHelper.onReload();
+        ArmTransform.clearCache();
         return CompletableFuture.allOf(
                 listeners.stream()
                         .map(listener -> listener.prepare(resourceManager, executor))
