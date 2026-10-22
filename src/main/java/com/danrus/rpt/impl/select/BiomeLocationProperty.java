@@ -26,14 +26,9 @@ public class BiomeLocationProperty implements SelectItemModelProperty<Identifier
                     .registryAccess()
                     .lookupOrThrow(Registries.BIOME)
                     .getKey(
-                            level.getBiome(
-                                    new BlockPos(
-                                            (int) entity.position().x,
-                                            (int) entity.position().y,
-                                            (int) entity.position().z)
-                            ).value()
+                            level.getBiome(BlockPos.containing(entity.position())).value()
                     );
-        } catch (Throwable throwable) {
+        } catch (Exception exception) {
             return null;
         }
     }
