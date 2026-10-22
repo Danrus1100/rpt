@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.concurrent.atomic.AtomicReference;
 
 @Mixin(
         net.minecraft.client.gui.Hud.class
@@ -53,8 +52,17 @@ public class GuiMixin {
     private static void rpt$wrapPumpkinOverlay(
             net.minecraft.client.gui.Hud
             instance, GuiGraphicsExtractor guiGraphics, Identifier shaderLocation, float alpha, Operation<Void> original, @Share("itemStack") LocalRef<ItemStack> stackLocalRef) {
-        Rpt.getTextureSwappersManager().swap(shaderLocation, stackLocalRef.get(), Minecraft.getInstance().player, location -> {
+        ItemStack stack = stackLocalRef.get();
+        if (stack == null) {
+            original.call(instance, guiGraphics, shaderLocation, alpha);
+            return;
+        }
+
+        Rpt.getTextureSwappersManager().swap(shaderLocation, stack, Minecraft.getInstance().player, location -> {
             original.call(instance, guiGraphics, location, alpha);
         });
+        // The stack belongs to one equipment slot; later overlays (e.g. powder snow)
+        // must not be evaluated against it.
+        stackLocalRef.set(null);
     }
 }
