@@ -20,29 +20,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla, RptVariables variables) {
+public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla, RptVariables variables) {
 
-    public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, boolean armorStands, String ofVanilla) {
-        this(x, y, z, bob, swing, attack, armorStands, ofVanilla, RptVariables.EMPTY);
+    public ArmTransform(NumericExpression x, NumericExpression y, NumericExpression z, boolean bob, boolean swing, boolean attack, String ofVanilla) {
+        this(x, y, z, bob, swing, attack, ofVanilla, RptVariables.EMPTY);
     }
 
     public ArmTransform(ArmTransform other, RptField field) {
-        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.armorStands(), other.ofVanilla, field.variables());
+        this(other.x, other.y, other.z, other.bob, other.swing, other.attack, other.ofVanilla, field.variables());
     }
 
-    public static ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, "");
+    public static final ArmTransform EMPTY = new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, "");
 
     private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
     public boolean isEmpty() {
-        return x == NumericExpression.ZERO &&
-                y == NumericExpression.ZERO &&
-                z == NumericExpression.ZERO &&
+        return NumericExpression.ZERO.equals(x) &&
+                NumericExpression.ZERO.equals(y) &&
+                NumericExpression.ZERO.equals(z) &&
                 bob && swing && ofVanilla.isEmpty();
     }
 
     public static ArmTransform fromVanilla(String name) {
-        return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, false, name);
+        return new ArmTransform(NumericExpression.ZERO, NumericExpression.ZERO, NumericExpression.ZERO, true, true, true, name);
     }
 
     public void rotateModelPart(@Nullable ModelPart arm, @Nullable ModelPart head, boolean isRightArm, HumanoidRenderState state) {
@@ -141,7 +141,6 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
             Codec.BOOL.optionalFieldOf("bob", true).forGetter(ArmTransform::bob),
             Codec.BOOL.optionalFieldOf("swing", true).forGetter(ArmTransform::swing),
             Codec.BOOL.optionalFieldOf("attack", true).forGetter(ArmTransform::attack),
-            Codec.BOOL.optionalFieldOf("enable_armorstands_custom_defrmations_secret", false).forGetter(ArmTransform::armorStands),
             Codec.STRING.optionalFieldOf("type", "").forGetter(ArmTransform::ofVanilla)
     ).apply(instance, ArmTransform::new));
 

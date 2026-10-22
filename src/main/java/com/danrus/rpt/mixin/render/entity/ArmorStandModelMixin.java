@@ -35,19 +35,8 @@ public abstract class ArmorStandModelMixin extends HumanoidModel {
             at = @At("TAIL")
     )
     private void rpt$animateArmorStandArms(ArmorStandRenderState renderState, CallbackInfo ci) {
-//        ArmTransform rightArmTransform = ((CustomArmTransformHolder) ArmTransformsHelper.getRightItem(renderState)).rpt$getRightArmTransform();
-//        if (!rightArmTransform.isEmpty() && rightArmTransform.getVanillaOrNull() == null && rightArmTransform.armorStands()) {
-//            rightArmTransform.rotateModelPart(rightArm, head, true, renderState);
-//        }
-//
-//        ArmTransform leftArmTransform = ((CustomArmTransformHolder) ArmTransformsHelper.getLeftItem(renderState)).rpt$getLeftArmTransform();
-//        if (!leftArmTransform.isEmpty() && leftArmTransform.getVanillaOrNull() == null && leftArmTransform.armorStands()) {
-//            leftArmTransform.rotateModelPart(leftArm, head, false, renderState);
-//        }
-
         if (dispatcher != null) {
             dispatcher.dispatch(renderState);
         }
-
     }
 }

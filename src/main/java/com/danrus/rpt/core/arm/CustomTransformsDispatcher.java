@@ -40,6 +40,7 @@ public class CustomTransformsDispatcher {
 
             tryApplyCompanionFromSameHolder(
                 ctx.main(),
+                ctx.offhand(),
                 ctx.offArm(),
                 state,
                 dispatchedState
@@ -59,6 +60,7 @@ public class CustomTransformsDispatcher {
 
             tryApplyCompanionFromSameHolder(
                 ctx.offhand(),
+                ctx.main(),
                 ctx.mainArm(),
                 state,
                 dispatchedState
@@ -178,12 +180,17 @@ public class CustomTransformsDispatcher {
 
     private void tryApplyCompanionFromSameHolder(
             RptItemRenderState holder,
+            RptItemRenderState otherHolder,
             HumanoidArm otherArm,
             HumanoidRenderState state,
             CustomTransformsDispatchedState dispatchedState
     ) {
-        ArmTransform otherTransform = getTransform(holder, otherArm);
+        // The item in the other hand overrides the "opposite" transform.
+        if (!getTransform(otherHolder, otherArm).isEmpty()) {
+            return;
+        }
 
+        ArmTransform otherTransform = getTransform(holder, otherArm);
         if (shouldApply(otherTransform)) {
             applyTransform(otherTransform, otherArm, state, dispatchedState);
         }
