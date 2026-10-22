@@ -14,8 +14,8 @@ import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -26,8 +26,8 @@ public class TemplatesManager implements RptModelBakeReloadListener {
     private static final FileToIdConverter TEMPLATE_LISTENER = FileToIdConverter.json("rpt/templates");
     private static final Logger log = LoggerFactory.getLogger(TemplatesManager.class);
 
-    private final Map<Identifier, RptTemplate.Unbaked> unbakedTemplates = new HashMap<>();
-    private final Map<Identifier, RptTemplate> templates = new HashMap<>();
+    private final Map<Identifier, RptTemplate.Unbaked> unbakedTemplates = new ConcurrentHashMap<>();
+    private final Map<Identifier, RptTemplate> templates = new ConcurrentHashMap<>();
 
     private static final Matrix4fc IDENTITY = new Matrix4f();
 
