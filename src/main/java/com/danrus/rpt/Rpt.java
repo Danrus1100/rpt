@@ -13,11 +13,13 @@ import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class Rpt {
 
@@ -35,6 +37,24 @@ public class Rpt {
         signedItemModel.rpt$getField().ifPresent(params -> {
             holder.rpt$setParams(params);
         });
+    }
+
+    /**
+     * Applies model-specific fields while a child model is evaluated and restores the
+     * previous fields afterwards. Extra fields take precedence over the item's own fields.
+     */
+    public static <T> T withExtraParams(ItemStack stack, RptField extra, Supplier<T> action) {
+        RptField original = RptField.fromItemStack(stack);
+        if (extra == null || extra.equals(RptField.EMPTY)) {
+            return action.get();
+        }
+
+        RptField.putToItemStack(stack, original.merge(extra));
+        try {
+            return action.get();
+        } finally {
+            RptField.putToItemStack(stack, original);
+        }
     }
 
     public static void init() {

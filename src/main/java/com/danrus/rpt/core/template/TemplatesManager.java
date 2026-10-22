@@ -35,8 +35,12 @@ public class TemplatesManager implements RptModelBakeReloadListener {
 
     @Override
     public CompletableFuture<Void> prepare(ResourceManager resourceManager, Executor executor) {
+        // Template parsing is small and must be complete before model discovery runs.
+        // Keeping it synchronous also avoids joining a task submitted to the reload executor.
         templates.clear();
-        return CompletableFuture.runAsync(() -> {
+        unbakedTemplates.clear();
+
+        try {
             TEMPLATE_LISTENER.listMatchingResources(resourceManager).forEach((location, resource) -> {
                 try (var reader = resource.openAsReader()) {
                     RptTemplate.Unbaked unbaked = RptTemplate.Unbaked.CODEC.parse(JsonOps.INSTANCE, StrictJsonParser.parse(reader)).getOrThrow(string -> new RuntimeException("Failed to parse template: " + location + ": " + string));
@@ -45,7 +49,11 @@ public class TemplatesManager implements RptModelBakeReloadListener {
                     log.error("Failed to load template: {}", location, e);
                 }
             });
-        }, executor);
+        } catch (Exception e) {
+            log.error("Failed to list templates", e);
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
@@ -83,12 +91,26 @@ public class TemplatesManager implements RptModelBakeReloadListener {
     public RptTemplate getTemplate(ItemModel.BakingContext context, Identifier id) {
         RptTemplate candidate = templates.get(id);
         if (candidate == null || candidate.needRebake()) {
-            return tryBakeAgain(context, id);
+            RptTemplate baked = tryBakeAgain(context, id);
+            if (baked != null && !baked.needRebake()) {
+                templates.put(id, baked);
+            }
+            return baked;
         } else {
             return candidate;
         }
     }
     public void forEachUnbakedTemplate(Consumer<ResolvableModel> consumer) {
         unbakedTemplates.values().forEach(unbaked -> consumer.accept(unbaked.unbaked()));
+    }
+
+    /**
+     * Model ids referenced from template rpt fields are not visible to vanilla dependency
+     * discovery, so they have to be registered as roots separately.
+     */
+    public void forEachReferencedModel(Consumer<Identifier> consumer) {
+        unbakedTemplates.values().forEach(unbaked ->
+                unbaked.params().variables().models().values().forEach(consumer)
+        );
     }
 }

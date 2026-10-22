@@ -5,7 +5,6 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.Rpt;
-import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -32,14 +31,17 @@ public class TemplateItemModel extends AbstractRpfItemModel {
     @Override
     public boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, ItemOwner owner, @Nullable ItemModel prev, TestsResultCollector collector) {
         collector.info(getClass().getSimpleName() + ": delegating to template model: " + template.getClass().getSimpleName());
-        return ((RpfItemModel) template.model()).rpf$doDelegate(context, stack, owner, this, collector);
+        return Rpt.withExtraParams(stack, template.params(), () ->
+                ((RpfItemModel) template.model()).rpf$doDelegate(context, stack, owner, this, collector)
+        );
     }
 
     @Override
     public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, ItemOwner owner,int seed) {
-        RptField merged = RptField.merge(template.params(), RptField.fromItemStack(stack));
-        RptField.putToItemStack(stack, merged);
-        template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner, seed);
+        Rpt.withExtraParams(stack, template.params(), () -> {
+            template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner, seed);
+            return null;
+        });
     }
 
     public static record Unbaked(Identifier templateId) implements ItemModel.Unbaked {
