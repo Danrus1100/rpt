@@ -2,6 +2,7 @@ package com.danrus.rpt.mixin.load;
 
 import com.danrus.rpt.duck.RptClientItem;
 import com.danrus.rpt.core.item.RptField;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.item.ClientItem;
@@ -28,6 +29,21 @@ public class ClientItemMixin implements RptClientItem {
     @Override
     public void rpt$setField(@Nullable RptField params) {
         this.rpt$params = params;
+    }
+
+    /**
+     * Vanilla always allocates a new {@link ClientItem} here, dropping mixin-added state.
+     * RPF calls this for registry-backed properties, so the rpt field must survive the copy.
+     */
+    @ModifyReturnValue(
+            method = "withRegistrySwapper",
+            at = @At("RETURN")
+    )
+    private ClientItem rpt$keepField(ClientItem copy) {
+        if (copy != (ClientItem) (Object) this) {
+            RptClientItem.class.cast(copy).rpt$setField(this.rpt$params);
+        }
+        return copy;
     }
 
     @Redirect(
