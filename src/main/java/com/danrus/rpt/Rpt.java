@@ -12,6 +12,7 @@ import com.danrus.rpt.core.textures.TextureSwappersManager;
 import com.danrus.rpt.duck.*;
 import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +49,12 @@ public class Rpt {
         Rpf.getEventBus().register(SelectModelPropertyGetWhenDoDelegateEvent.class, event -> {
             SelectItemModelProperty property = event.getProperty();
             if (property instanceof RptSelectItemModelProperty rptProperty) {
-                RptField params = RptFieldHolder.class.cast(event.getStack()).rpt$getParams().orElse(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
+                RptField params = RptField.fromItemStack(event.getStack())
+                        .merge(RptSelectItemModel.class.cast(event.getModel()).rpt$getField());
+                LivingEntity owner = event.getOwner() == null ? null : event.getOwner().asLivingEntity();
                 event.setGetter(() -> rptProperty.get(
-                        event.getStack(), event.getContext().level(), event.getOwner()
-                        .asLivingEntity()
-                        , event.getContext().seed(), event.getContext().displayContext(), params
+                        event.getStack(), event.getContext().level(), owner,
+                        event.getContext().seed(), event.getContext().displayContext(), params
                 ));
             }
         });

@@ -14,6 +14,6 @@ public interface RptSelectItemModelProperty<T> extends SelectItemModelProperty<T
     @Override
     @Nullable
     default T get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
-        return null;
+        return get(stack, level, entity, seed, displayContext, RptField.fromItemStack(stack));
     }
 }
