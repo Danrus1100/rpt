@@ -1,15 +1,22 @@
 package com.danrus.rpt.mixin.load;
 
+import com.danrus.rpt.Rpt;
 import com.danrus.rpt.duck.BakingContextSource;
 import com.danrus.rpt.duck.ModelBakerSource;
 import com.danrus.rpt.mixin.accessor.InternerImplInvoker;
 import com.danrus.rpt.mixin.accessor.ModelBakerImplInvoker;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 @Mixin(ModelBakery.class)
 public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
@@ -30,6 +37,20 @@ public class ModelBakeryMixin implements BakingContextSource, ModelBakerSource {
     @Shadow
     @Final
     private net.minecraft.client.resources.model.sprite.SpriteGetter sprites;
+
+    @WrapMethod(method = "bakeModels")
+    private CompletableFuture<ModelBakery.BakingResult> rpt$wrapBakeModels(
+            net.minecraft.client.resources.model.sprite.MaterialBaker materials,
+            Executor executor,
+            Operation<CompletableFuture<ModelBakery.BakingResult>> original
+    ) {
+        Supplier<ItemModel.BakingContext> source = () -> rpt$createBakingContext(
+                rpt$createModelBaker(materials),
+                materials
+        );
+        return Rpt.getReloadManager().bake(source, executor)
+                .thenCompose(v -> original.call(materials, executor));
+    }
 
     @Override
     public ItemModel.BakingContext rpt$createBakingContext(
