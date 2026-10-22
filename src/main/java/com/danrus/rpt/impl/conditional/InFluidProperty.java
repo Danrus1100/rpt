@@ -29,6 +29,6 @@ public record InFluidProperty(TagKey<Fluid> fluidType) implements ConditionalIte
     @Override
     public boolean get(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, ItemDisplayContext displayContext) {
         if (entity == null) return false;
-        return !entity.isEyeInFluid(fluidType);
+        return entity.isEyeInFluid(fluidType);
     }
 }
