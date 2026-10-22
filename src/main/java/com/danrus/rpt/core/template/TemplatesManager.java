@@ -89,11 +89,9 @@ public class TemplatesManager implements RptModelBakeReloadListener {
     public RptTemplate getTemplate(ItemModel.BakingContext context, Identifier id) {
         RptTemplate candidate = templates.get(id);
         if (candidate == null || candidate.needRebake()) {
-            RptTemplate baked = tryBakeAgain(context, id);
-            if (baked != null && !baked.needRebake()) {
-                templates.put(id, baked);
-            }
-            return baked;
+            // A re-bake uses the current item's context, so its baked model may contain
+            // item-specific params. Never publish it into the shared template cache.
+            return tryBakeAgain(context, id);
         } else {
             return candidate;
         }
