@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,13 +21,34 @@ public record RptField(List<String> customFlags, RptVariables variables) {
 
     public static final RptField EMPTY = new RptField(List.of(), RptVariables.EMPTY);
 
+    public boolean isEmpty() {
+        return customFlags.isEmpty() && variables.isEmpty();
+    }
+
     public RptField merge(RptField other) {
-        List<String> newFlags = new ArrayList<>(this.customFlags);
-        newFlags.addAll(other.customFlags);
+        if (other == null || other.isEmpty()) {
+            return this;
+        }
+        if (this.isEmpty()) {
+            return other;
+        }
+
+        List<String> newFlags;
+        if (this.customFlags.isEmpty()) {
+            newFlags = other.customFlags;
+        } else if (other.customFlags.isEmpty()) {
+            newFlags = this.customFlags;
+        } else {
+            LinkedHashSet<String> flags = new LinkedHashSet<>(this.customFlags);
+            flags.addAll(other.customFlags);
+            newFlags = List.copyOf(flags);
+        }
 
         RptVariables newVariables = this.variables.merge(other.variables);
-
-        return new RptField(List.copyOf(newFlags), newVariables);
+        if (newFlags.equals(this.customFlags) && newVariables.equals(this.variables)) {
+            return this;
+        }
+        return new RptField(newFlags, newVariables);
     }
 
     public static RptField merge(RptField target, RptField source) {
@@ -35,25 +56,21 @@ public record RptField(List<String> customFlags, RptVariables variables) {
     }
 
     public static RptField fromItemStack(ItemStack stack) {
-        try {
+        if (RptFieldHolder.class.isInstance(stack)) {
             RptFieldHolder holder = RptFieldHolder.class.cast(stack);
             Optional<RptField> paramsOpt = holder.rpt$getParams();
             return paramsOpt.orElse(EMPTY);
-        } catch (ClassCastException e) {
-            return EMPTY;
         }
+        return EMPTY;
     }
 
     public static void putToItemStack(ItemStack stack, RptField params) {
-        try {
-            RptFieldHolder holder = RptFieldHolder.class.cast(stack);
-            holder.rpt$setParams(params);
-        } catch (ClassCastException e) {
-            // Ignore
+        if (RptFieldHolder.class.isInstance(stack)) {
+            RptFieldHolder.class.cast(stack).rpt$setParams(params);
         }
     }
 
     public boolean hasFlag(String flag) {
-        return !customFlags.isEmpty() && customFlags.contains(flag);
+        return customFlags.contains(flag);
     }
 }

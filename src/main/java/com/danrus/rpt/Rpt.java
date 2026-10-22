@@ -43,7 +43,7 @@ public class Rpt {
      */
     public static <T> T withExtraParams(ItemStack stack, RptField extra, Supplier<T> action) {
         RptField original = RptField.fromItemStack(stack);
-        if (extra == null || extra.equals(RptField.EMPTY)) {
+        if (extra == null || extra.isEmpty()) {
             return action.get();
         }
 

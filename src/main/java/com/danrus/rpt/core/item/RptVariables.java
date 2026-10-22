@@ -43,20 +43,34 @@ public record RptVariables(Map<String, String> strings, Map<String, Double> numb
 
     public static final RptVariables EMPTY = new RptVariables(Map.of(), Map.of(), Map.of(), Map.of());
 
+    public boolean isEmpty() {
+        return strings.isEmpty() && numbers.isEmpty() && flags.isEmpty() && models.isEmpty();
+    }
+
     public <T> T get(Type<T> type, String name) {
-        if (type == Type.STRING) {
+        if (Type.STRING.equals(type)) {
             return type.clazz.cast(strings.get(name));
-        } else if (type == Type.NUMBER) {
+        } else if (Type.NUMBER.equals(type)) {
             return type.clazz.cast(numbers.get(name));
-        } else if (type == Type.FLAG) {
+        } else if (Type.FLAG.equals(type)) {
             return type.clazz.cast(flags.get(name));
-        } else if (type == Type.MODEL) {
+        } else if (Type.MODEL.equals(type)) {
             return type.clazz.cast(models.get(name));
         }
         throw new IllegalArgumentException("Unsupported variable type: " + type);
     }
 
     public RptVariables merge(RptVariables other) {
+        if (other == null || other.isEmpty()) {
+            return this;
+        }
+        if (this.isEmpty()) {
+            return other;
+        }
+        if (this.equals(other)) {
+            return this;
+        }
+
         Map<String, String> newStrings = new HashMap<>(this.strings);
         newStrings.putAll(other.strings);
 
