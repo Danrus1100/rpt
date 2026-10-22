@@ -47,7 +47,9 @@ public class GameExpressionsHelper {
     }
 
     public static <T> SelectResult<T> selectResultFromCases(List<? extends ExpressionsCase<T>> cases, String expression, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed, T fallback) {
-        double mainEval = evaluate(expression, additionalVars, level, entity, seed);
+        Map<String, Double> vars = generateGameVariables(level, entity, seed);
+        vars.putAll(additionalVars);
+        double mainEval = evaluate(expression, vars);
 
         for (ExpressionsCase<T> entry : cases) {
             if (entry.when().isEmpty()) {
@@ -60,9 +62,9 @@ public class GameExpressionsHelper {
                 boolean matched;
 
                 if (exprStr.startsWith(">") || exprStr.startsWith("<") || exprStr.startsWith("=") || exprStr.startsWith("!")) {
-                    matched = evaluateCondition(exprStr, mainEval, additionalVars, level, entity, seed);
+                    matched = evaluateCondition(exprStr, mainEval, vars);
                 } else {
-                    matched = mainEval == evaluate(exprStr, additionalVars, level, entity, seed);
+                    matched = mainEval == evaluate(exprStr, vars);
                 }
 
                 if (entry.requireAll()) {
@@ -88,13 +90,18 @@ public class GameExpressionsHelper {
     }
 
     public static boolean evaluateCondition(String condition, double mainValue, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        Map<String, Double> vars = generateGameVariables(level, entity, seed);
+        vars.putAll(additionalVars);
+        return evaluateCondition(condition, mainValue, vars);
+    }
+
+    public static boolean evaluateCondition(String condition, double mainValue, Map<String, Double> vars) {
         String fullExprStr = RESERVED_VARIABLE_NAME + " " + condition;
 
         Expression expr = expressionCache.computeIfAbsent(fullExprStr, Expression::new);
 
+        vars.forEach(expr::with);
         expr.with(RESERVED_VARIABLE_NAME, mainValue);
-        generateGameVariables(level, entity, seed).forEach(expr::with);
-        additionalVars.forEach(expr::with);
 
         try {
             return expr.evaluate().getBooleanValue();
@@ -110,10 +117,15 @@ public class GameExpressionsHelper {
     }
 
     public static double evaluate(String expressionStr, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        Map<String, Double> vars = generateGameVariables(level, entity, seed);
+        vars.putAll(additionalVars);
+        return evaluate(expressionStr, vars);
+    }
+
+    public static double evaluate(String expressionStr, Map<String, Double> vars) {
         Expression expr = expressionCache.computeIfAbsent(expressionStr, Expression::new);
 
-        generateGameVariables(level, entity, seed).forEach(expr::with);
-        additionalVars.forEach(expr::with);
+        vars.forEach(expr::with);
 
         try {
             EvaluationValue result = expr.evaluate();

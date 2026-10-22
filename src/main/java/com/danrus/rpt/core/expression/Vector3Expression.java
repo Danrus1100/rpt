@@ -34,10 +34,16 @@ public record Vector3Expression(NumericExpression x, NumericExpression y, Numeri
             );
 
     public Vector3fc evaluateWithGame(Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        Map<String, Double> vars = GameExpressionsHelper.generateGameVariables(level, entity, seed);
+        vars.putAll(additionalVars);
+        return evaluate(vars);
+    }
+
+    public Vector3fc evaluate(Map<String, Double> vars) {
         return new Vector3f(
-                (float) GameExpressionsHelper.evaluate(x.expression(), additionalVars, level, entity, seed),
-                (float) GameExpressionsHelper.evaluate(y.expression(), additionalVars, level, entity, seed),
-                (float) GameExpressionsHelper.evaluate(z.expression(), additionalVars, level, entity, seed)
+                (float) GameExpressionsHelper.evaluate(x.expression(), vars),
+                (float) GameExpressionsHelper.evaluate(y.expression(), vars),
+                (float) GameExpressionsHelper.evaluate(z.expression(), vars)
         );
     }
 

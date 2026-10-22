@@ -1,5 +1,6 @@
 package com.danrus.rpt.core.item.transfrom;
 
+import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import com.danrus.rpt.core.expression.Vector3Expression;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -25,10 +26,12 @@ public record ItemTransformDefinition(Vector3Expression rotation, Vector3Express
     }
 
     public ItemTransform evaluateWithGame(Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
+        Map<String, Double> vars = GameExpressionsHelper.generateGameVariables(level, entity, seed);
+        vars.putAll(additionalVars);
         return new ItemTransform(
-                rotation.evaluateWithGame(additionalVars, level, entity, seed),
-                translation.evaluateWithGame(additionalVars, level, entity, seed),
-                scale.evaluateWithGame(additionalVars, level, entity, seed)
+                rotation.evaluate(vars),
+                translation.evaluate(vars),
+                scale.evaluate(vars)
         );
     }
 }
