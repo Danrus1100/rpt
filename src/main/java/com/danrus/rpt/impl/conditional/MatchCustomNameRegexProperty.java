@@ -36,6 +36,6 @@ public record MatchCustomNameRegexProperty(String regex, Pattern pattern) implem
         if (customNameComponent == null) return false;
 
         String customName = customNameComponent.getString();
-        return pattern.matcher(customName).matches();
+        return pattern.matcher(customName).find();
     }
 }
