@@ -3,7 +3,6 @@ package com.danrus.rpt.core.expression;
 import com.danrus.rpt.core.selection.SelectResult;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.data.EvaluationValue;
-import com.ezylang.evalex.parser.ParseException;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -97,6 +96,9 @@ public class GameExpressionsHelper {
         String fullExprStr = RESERVED_VARIABLE_NAME + " " + condition;
 
         Expression expr = copyOf(fullExprStr);
+        if (expr == null) {
+            return false;
+        }
 
         vars.forEach(expr::with);
         expr.with(RESERVED_VARIABLE_NAME, mainValue);
@@ -109,15 +111,16 @@ public class GameExpressionsHelper {
         }
     }
 
+    @Nullable
     private static Expression copyOf(String expression) {
-        Expression cached = expressionCache.computeIfAbsent(expression, Expression::new);
         try {
+            Expression cached = expressionCache.computeIfAbsent(expression, Expression::new);
             // A copy reuses the parsed AST but gets a fresh data accessor, so variables
             // from the previous item/frame cannot leak into this evaluation.
             return new Expression(cached);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             logError(expression, e);
-            return cached;
+            return null;
         }
     }
 
@@ -134,6 +137,9 @@ public class GameExpressionsHelper {
 
     public static double evaluate(String expressionStr, Map<String, Double> vars) {
         Expression expr = copyOf(expressionStr);
+        if (expr == null) {
+            return 0.0;
+        }
 
         vars.forEach(expr::with);
 
