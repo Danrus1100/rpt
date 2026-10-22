@@ -7,8 +7,8 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public enum AnchorType implements StringRepresentable {
-    LEFT_HAND("right_hand"),
-    RIGHT_HAND("left_hand"),
+    LEFT_HAND("left_hand"),
+    RIGHT_HAND("right_hand"),
     BODY("body"),
     HEAD("head"),
     LEFT_LEG("left_leg"),
