@@ -122,20 +122,20 @@ public class CustomTransformsDispatcher {
 
     private RptItemRenderState getHolder(HumanoidRenderState state, HumanoidArm arm) {
         return switch (arm) {
-            case RIGHT -> (RptItemRenderState) ArmTransformsHelper.getRightItem(state);
-            case LEFT -> (RptItemRenderState) ArmTransformsHelper.getLeftItem(state);
+            case RIGHT -> (RptItemRenderState) state.rightHandItemState;
+            case LEFT -> (RptItemRenderState) state.leftHandItemState;
         };
     }
 
     private HolderPair resolveHolders(HumanoidRenderState state, HumanoidArm mainHand) {
         return switch (mainHand) {
             case RIGHT -> new HolderPair(
-                    (RptItemRenderState) ArmTransformsHelper.getRightItem(state),
-                    (RptItemRenderState) ArmTransformsHelper.getLeftItem(state)
+                    (RptItemRenderState) state.rightHandItemState,
+                    (RptItemRenderState) state.leftHandItemState
             );
             case LEFT -> new HolderPair(
-                    (RptItemRenderState) ArmTransformsHelper.getLeftItem(state),
-                    (RptItemRenderState) ArmTransformsHelper.getRightItem(state)
+                    (RptItemRenderState) state.leftHandItemState,
+                    (RptItemRenderState) state.rightHandItemState
             );
         };
     }

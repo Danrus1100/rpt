@@ -19,9 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -52,7 +50,6 @@ public record ByComponentSelector<C, T>(
             Object2ObjectMap<C, NestedSelector.Unbaked<T>> valueToSelector,
             Optional<NestedSelector.Unbaked<T>> fallback
     ) implements NestedSelector.Unbaked<T> {
-        private static final Map<Codec<?>, MapCodec<?>> CODECS = new IdentityHashMap<>();
 
         @SuppressWarnings("unchecked")
         public static synchronized <T> MapCodec<Unbaked<?, T>> codec(Codec<T> valueCodec) {

@@ -2,7 +2,6 @@ package com.danrus.rpt.core.bake;
 
 import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.ArrayList;

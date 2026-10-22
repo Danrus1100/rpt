@@ -10,9 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements NestedSelector<T> {
@@ -22,7 +20,6 @@ public record CompositeSelector<T>(List<NestedSelector<T>> swappers) implements 
     }
 
     public static record Unbaked<T>(List<NestedSelector.Unbaked<T>> swappers) implements NestedSelector.SimpleUnbaked<T> {
-        private static final Map<Codec<?>, MapCodec<?>> CODECS = new IdentityHashMap<>();
 
         @SuppressWarnings("unchecked")
         public static synchronized <T> MapCodec<Unbaked<T>> codec(Codec<T> valueCodec) {

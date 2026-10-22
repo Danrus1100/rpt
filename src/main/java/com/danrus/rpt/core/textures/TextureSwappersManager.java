@@ -30,7 +30,10 @@ public class TextureSwappersManager
 
     @Override
     protected Identifier prepareLocation(Identifier rawLocation) {
-        String path = rawLocation.getPath().replace(".png", "");
+        String path = rawLocation.getPath();
+        if (path.endsWith(".png")) {
+            path = path.substring(0, path.length() - ".png".length());
+        }
 
         Identifier swapperLocation = Identifier.fromNamespaceAndPath(
                 rawLocation.getNamespace(),

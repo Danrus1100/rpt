@@ -53,11 +53,7 @@ public abstract class ItemInHandRendererMixin {
         boolean isHandRight = humanoidArm == HumanoidArm.RIGHT;
 
         poseStack.pushPose();
-        if (!transform.applyToPose(player, hand, !isHandRight, equippedProgress, poseStack)) {
-            poseStack.popPose();
-            original.call(playerState, renderState, partialTicks, pitch, hand, swingProgress, stack, equippedProgress, poseStack, buffer, combinedLight);
-            return;
-        }
+        transform.applyToPose(player, hand, !isHandRight, equippedProgress, poseStack);
 
         // Vanilla pose transforms must not be applied twice on top of the custom transform.
         rpt$skipVanillaTransform.set(!transform.vanilla());

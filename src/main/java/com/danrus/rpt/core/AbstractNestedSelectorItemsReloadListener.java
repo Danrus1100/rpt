@@ -60,7 +60,7 @@ public abstract class AbstractNestedSelectorItemsReloadListener<T> extends Simpl
             }
             return result.selector();
         } catch (Exception e) {
-            log.error("Can't read {} {} from {}: {}", getNameOfObjective().toLowerCase(), location, resource.sourcePackId(), e);
+            log.error("Can't read {} {} from {}", getNameOfObjective().toLowerCase(), location, resource.sourcePackId(), e);
             return EmptySelector.instance();
         }
     }
@@ -73,9 +73,6 @@ public abstract class AbstractNestedSelectorItemsReloadListener<T> extends Simpl
     protected abstract String getNameOfObjective();
     protected abstract Identifier prepareLocation(Identifier rawLocation);
 
-    protected Optional<List<NestedSelector<T>>> getSelectors(Identifier rawLocation) {
-        return Optional.ofNullable(values.get(prepareLocation(rawLocation)));
-    }
 
 
     public void callback(Identifier rawLocation, ItemStack stack, @Nullable LivingEntity entity, T original, Consumer<T> callback) {

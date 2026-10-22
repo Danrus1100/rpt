@@ -1,10 +1,8 @@
 package com.danrus.rpt.core.template;
 
 import com.danrus.rpt.core.bake.RptModelBakeReloadListener;
-import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;

@@ -53,12 +53,6 @@ public record CustomFirstPersonTransforms(
             }
     );
 
-    public boolean isSingle() {
-        if (isBothExplicitlyEmpty()) {
-            return false;
-        }
-        return main.equals(offhand) || main.isPresent() != offhand.isPresent();
-    }
 
     public boolean isBothExplicitlyEmpty() {
         return main.isEmpty() && offhand.isEmpty();
@@ -83,7 +77,7 @@ public record CustomFirstPersonTransforms(
         };
     }
 
-    public boolean applyToPose(AbstractClientPlayer player, InteractionHand hand, boolean leftHand, float progress, PoseStack poseStack) {
+    public void applyToPose(AbstractClientPlayer player, InteractionHand hand, boolean leftHand, float progress, PoseStack poseStack) {
         ItemTransformDefinition transformDefinition = get(hand);
         ItemTransform transform = transformDefinition.evaluateWithGame(
                 Map.of(
@@ -95,6 +89,5 @@ public record CustomFirstPersonTransforms(
                 player.getId()
             );
         transform.apply(leftHand, poseStack.last());
-        return true;
     }
 }
