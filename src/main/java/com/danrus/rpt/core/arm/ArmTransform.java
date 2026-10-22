@@ -34,10 +34,16 @@ public record ArmTransform(NumericExpression x, NumericExpression y, NumericExpr
     private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
     public boolean isEmpty() {
-        return NumericExpression.ZERO.equals(x) &&
-                NumericExpression.ZERO.equals(y) &&
-                NumericExpression.ZERO.equals(z) &&
+        return isZero(x) && isZero(y) && isZero(z) &&
                 bob && swing && ofVanilla.isEmpty();
+    }
+
+    private static boolean isZero(NumericExpression expression) {
+        try {
+            return Float.parseFloat(expression.expression().trim()) == 0.0F;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public static ArmTransform fromVanilla(String name) {
