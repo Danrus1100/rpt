@@ -1,1 +1,3 @@
- - Crash fix when player renders
+- Port to 26.3
+- Port for NeoForge
+- Various bug fixes

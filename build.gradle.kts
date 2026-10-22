@@ -167,7 +167,7 @@ publishMods {
 
     dryRun = false
 
-    type = STABLE
+    type = BETA
 
     file.set(tasks.named<Jar>("universalJar").flatMap { it.archiveFile })
     additionalFiles.from(tasks.named<Jar>("universalSourcesJar").flatMap { it.archiveFile })
