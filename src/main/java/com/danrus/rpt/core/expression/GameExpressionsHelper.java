@@ -6,12 +6,14 @@ import com.ezylang.evalex.data.EvaluationValue;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
@@ -24,10 +26,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -35,7 +37,7 @@ import java.util.concurrent.Executor;
 public class GameExpressionsHelper {
 
     private static final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
-    private static final List<String> alreadyLogged = new ArrayList<>();
+    private static final Set<String> alreadyLogged = ConcurrentHashMap.newKeySet();
 
     public static final String RESERVED_VARIABLE_NAME = "_val";
     private static final Logger log = LoggerFactory.getLogger(GameExpressionsHelper.class);
@@ -48,33 +50,41 @@ public class GameExpressionsHelper {
         double mainEval = evaluate(expression, additionalVars, level, entity, seed);
 
         for (ExpressionsCase<T> entry : cases) {
-            int req = 0;
+            if (entry.when().isEmpty()) {
+                continue;
+            }
+
+            boolean allMatched = true;
             for (NumericExpression nos : entry.when()) {
                 String exprStr = nos.expression().trim();
+                boolean matched;
 
                 if (exprStr.startsWith(">") || exprStr.startsWith("<") || exprStr.startsWith("=") || exprStr.startsWith("!")) {
-                    if (evaluateCondition(exprStr, mainEval, additionalVars, level, entity, seed)) {
-                        if (entry.requireAll()) req++;
-                        else return SelectResult.ok(entry.value());
-                    }
+                    matched = evaluateCondition(exprStr, mainEval, additionalVars, level, entity, seed);
                 } else {
-                    if (mainEval == evaluate(exprStr, additionalVars, level, entity, seed)) {
-                        return SelectResult.ok(entry.value());
-                    }
+                    matched = mainEval == evaluate(exprStr, additionalVars, level, entity, seed);
                 }
 
-                if (entry.requireAll() && req == entry.when().size()) {
+                if (entry.requireAll()) {
+                    if (!matched) {
+                        allMatched = false;
+                        break;
+                    }
+                } else if (matched) {
                     return SelectResult.ok(entry.value());
                 }
+            }
+
+            if (entry.requireAll() && allMatched) {
+                return SelectResult.ok(entry.value());
             }
         }
         return SelectResult.fallback(fallback);
     }
 
     private static void logError(String expression, Exception e) {
-        if (alreadyLogged.contains(expression)) return;
+        if (!alreadyLogged.add(expression)) return;
         log.error("Failed to evaluate expression {}", expression, e);
-        alreadyLogged.add(expression);
     }
 
     public static boolean evaluateCondition(String condition, double mainValue, Map<String, Double> additionalVars, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
@@ -139,6 +149,7 @@ public class GameExpressionsHelper {
         vars.put("pitch", 0.0);
         vars.put("health", 20.0);
         vars.put("maxHealth", 20.0);
+        vars.put("fallDistance", 0.0);
         vars.put("motionY", 0.0);
 
         vars.put("motionX", 0.0);
@@ -175,6 +186,8 @@ public class GameExpressionsHelper {
         vars.put("attackCooldown", 0.0);
         vars.put("sleeping", 0.0);
         vars.put("attackProgress", 0.0);
+        vars.put("usageProgress", 0.0);
+        vars.put("isSlim", 0.0);
 
         vars.put("lightSky", 0.0);
         vars.put("lightBlock", 0.0);
@@ -241,6 +254,10 @@ public class GameExpressionsHelper {
                 ItemStack itemStack = player.getUseItem();
                 vars.put("usageProgress", itemStack.isEmpty() ? 0.0 : currUsageTime / itemStack.getUseDuration(player));
                 // 1.3.0 end
+
+                if (player instanceof AbstractClientPlayer clientPlayer) {
+                    vars.put("isSlim", clientPlayer.getSkin().model() == PlayerModelType.SLIM ? 1.0 : 0.0);
+                }
             }
 
             BlockPos entityPos = entity.blockPosition();
