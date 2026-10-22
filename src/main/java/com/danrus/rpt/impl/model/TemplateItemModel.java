@@ -5,8 +5,6 @@ import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
 import com.danrus.rpt.Rpt;
-import com.danrus.rpt.core.OwnerHolder;
-import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.template.RptTemplate;
 import com.mojang.serialization.MapCodec;
@@ -16,10 +14,12 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fc;
 
 public class TemplateItemModel extends AbstractRpfItemModel {
 
@@ -30,19 +30,19 @@ public class TemplateItemModel extends AbstractRpfItemModel {
     }
 
     @Override
-    boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, OwnerHolder owner, @Nullable ItemModel prev, TestsResultCollector collector) {
+    public boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, ItemOwner owner, @Nullable ItemModel prev, TestsResultCollector collector) {
         collector.info(getClass().getSimpleName() + ": delegating to template model: " + template.getClass().getSimpleName());
-        return ((RpfItemModel) template.model()).rpf$doDelegate(context, stack, owner.get(), this, collector);
+        return ((RpfItemModel) template.model()).rpf$doDelegate(context, stack, owner, this, collector);
     }
 
     @Override
-    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner,int seed) {
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, ItemOwner owner,int seed) {
         RptField merged = RptField.merge(template.params(), RptField.fromItemStack(stack));
         RptField.putToItemStack(stack, merged);
-        template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
+        template.model().update(renderState, stack, itemModelResolver, displayContext, level, owner, seed);
     }
 
-    public static record Unbaked(Identifier templateId) implements RptUnbakedModel {
+    public static record Unbaked(Identifier templateId) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Identifier.CODEC.fieldOf("template").forGetter(Unbaked::templateId)
@@ -56,7 +56,7 @@ public class TemplateItemModel extends AbstractRpfItemModel {
         }
 
         @Override
-        public @NotNull ItemModel bake(BakingContext context, Baker baker) {
+        public @NotNull ItemModel bake(BakingContext context, Matrix4fc transformation) {
             RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, templateId);
             if (template == null) {
                 throw new IllegalStateException("can't find template " + templateId);

@@ -1,6 +1,5 @@
 package com.danrus.rpt.core.template;
 
-import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.bake.RptModelBakeReloadListener;
 import com.danrus.rpt.duck.BakingContextSource;
 import com.mojang.serialization.JsonOps;

@@ -4,8 +4,6 @@ import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
-import com.danrus.rpt.core.OwnerHolder;
-import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.arm.ArmTransform;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.duck.RptItemRenderState;
@@ -17,9 +15,11 @@ import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemModels;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fc;
 
 import java.util.Optional;
 
@@ -36,12 +36,12 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
     }
 
     @Override
-    boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, OwnerHolder owner, @Nullable ItemModel prev, TestsResultCollector collector) {
-        return RpfItemModel.class.cast(model).rpf$doDelegate(context, stack, owner.get(), this, collector);
+    public boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, ItemOwner owner, @Nullable ItemModel prev, TestsResultCollector collector) {
+        return RpfItemModel.class.cast(model).rpf$doDelegate(context, stack, owner, this, collector);
     }
 
     @Override
-    void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, ItemOwner owner, int seed) {
         if (renderState instanceof RptItemRenderState holder) {
             ArmTransform primary = new ArmTransform(transform, RptField.fromItemStack(stack));
 
@@ -66,10 +66,10 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
             }
         }
 
-        model.update(renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed);
+        model.update(renderState, stack, itemModelResolver, displayContext, level, owner, seed);
     }
 
-    public static record Unbaked(ItemModel.Unbaked model, Optional<ArmTransform> otherTransform, ArmTransform transform) implements RptUnbakedModel {
+    public static record Unbaked(ItemModel.Unbaked model, Optional<ArmTransform> otherTransform, ArmTransform transform) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 ItemModels.CODEC.fieldOf("model").forGetter(Unbaked::model),
@@ -85,8 +85,8 @@ public class ArmTransformWrapper extends AbstractRpfItemModel {
         }
 
         @Override
-        public ItemModel bake(BakingContext context, Baker baker) {
-            return new ArmTransformWrapper(transform, otherTransform, baker.bake(context, model));
+        public ItemModel bake(BakingContext context, Matrix4fc transformation) {
+            return new ArmTransformWrapper(transform, otherTransform, model.bake(context, transformation));
         }
 
         @Override

@@ -32,15 +32,10 @@ java {
 }
 
 repositories {
-    // RPF is published by modstitch with loader capabilities instead of the default
-    // module capability, which attribute-less resolve configurations cannot match.
-    // Consume its jar directly; only the API classes are needed at compile time.
+    // RPF is installed to mavenLocal from ../rpf. Its published Gradle metadata uses
+    // loader capabilities instead of the default module capability, which Loom's
+    // attribute-less resolve configurations cannot match, so consume the jars directly.
     mavenLocal {
-        content { includeGroup("com.danrus") }
-        metadataSources { artifact() }
-    }
-    maven("https://maven.shlakoblock.com/releases") {
-        name = "Shlakoblock"
         content { includeGroup("com.danrus") }
         metadataSources { artifact() }
     }
@@ -93,8 +88,11 @@ dependencies {
 
     fabricImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fapi")}")
 
-    // RPF's API is provided at runtime by the RPF mod, so it is compile-only here.
+    // RPF's API is compiled against the common jar and provided by the RPF mod at runtime.
+    // The loader jars carry the mod manifests, so dev runs load RPF itself.
     commonCompileOnly("com.danrus:rpf:${prop("deps.rpf")}-$minecraftVersion")
+    fabricImplementation("com.danrus:rpf:${prop("deps.rpf")}-$minecraftVersion:fabric@jar")
+    neoforgeImplementation("com.danrus:rpf:${prop("deps.rpf")}-$minecraftVersion:neoforge@jar")
 
     commonImplementation("com.ezylang:EvalEx:${prop("deps.evalex")}")
     commonInclude("com.ezylang:EvalEx:${prop("deps.evalex")}")

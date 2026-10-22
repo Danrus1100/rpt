@@ -29,7 +29,7 @@ public class GuiMixin {
     )
     private static void rpt$wrapSpyglassOverlay(GuiGraphicsExtractor instance, RenderPipeline pipeline, Identifier atlas, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight, Operation<Void> original) {
         Rpt.getTextureSwappersManager().swap(atlas, Minecraft.getInstance().player.getUseItem(), Minecraft.getInstance().player, location -> {
-            original.call(instance, pipeline, location, x, y, u, v, width, height, textureHeight, textureHeight);
+            original.call(instance, pipeline, location, x, y, u, v, width, height, textureWidth, textureHeight);
         });
     }
 

@@ -4,11 +4,9 @@ import com.danrus.rpf.api.RpfItemModel;
 import com.danrus.rpf.api.TestsResultCollector;
 import com.danrus.rpf.api.codec.RpfModelsCodecsExtends;
 import com.danrus.rpf.core.item.ModelUpdateContext;
-import com.danrus.rpt.core.RptUnbakedModel;
 import com.danrus.rpt.core.expression.ExpressionsCase;
 import com.danrus.rpt.core.expression.GameExpressionsHelper;
 import com.danrus.rpt.core.expression.NumericExpression;
-import com.danrus.rpt.core.OwnerHolder;
 import com.danrus.rpt.core.item.RptField;
 import com.danrus.rpt.core.item.RptVariables;
 import com.danrus.rpt.duck.RptFieldHolder;
@@ -18,10 +16,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.*;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4fc;
 
 import java.util.*;
 
@@ -41,23 +41,23 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
     }
 
     @Override
-    boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, OwnerHolder owner, @Nullable ItemModel prev, TestsResultCollector collector) {
+    public boolean rpf$doDelegate(ModelUpdateContext context, ItemStack stack, ItemOwner owner, @Nullable ItemModel prev, TestsResultCollector collector) {
         if (!delegate) {
             collector.hit(ExpressionToExpressionsModel.class, "force cancel delegation");
             return false;
         }
         RptVariables vars = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
-        return  ((RpfItemModel)selectModelToUpdate(vars, context.level(), owner.get() == null ? null : owner.asLivingEntity()
+        return  ((RpfItemModel)selectModelToUpdate(vars, context.level(), owner == null ? null : owner.asLivingEntity()
                 , context.seed()
-        )).rpf$doDelegate(context, stack, owner.get(), prev, collector);
+        )).rpf$doDelegate(context, stack, owner, prev, collector);
     }
 
     @Override
-    void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, OwnerHolder owner, int seed) {
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, ItemOwner owner, int seed) {
         RptVariables vars = RptFieldHolder.class.cast(stack).rpt$getParams().orElse(RptField.EMPTY).variables();
-        selectModelToUpdate(vars, level, owner.get() == null ? null : owner.asLivingEntity()
+        selectModelToUpdate(vars, level, owner == null ? null : owner.asLivingEntity()
                 , seed).update(
-                renderState, stack, itemModelResolver, displayContext, level, owner.get(), seed
+                renderState, stack, itemModelResolver, displayContext, level, owner, seed
         );
     }
 
@@ -65,7 +65,7 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
         return GameExpressionsHelper.selectValueFromCases(modelExpressions, main, vars.numbers(), level, entity, seed, fallback);
     }
 
-    public static record Unbaked(String main, List<ExpressionsCase<ItemModel.Unbaked>> expressions, boolean delegate, Optional<ItemModel.Unbaked> fallback) implements RptUnbakedModel {
+    public static record Unbaked(String main, List<ExpressionsCase<ItemModel.Unbaked>> expressions, boolean delegate, Optional<ItemModel.Unbaked> fallback) implements ItemModel.Unbaked {
 
         public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 Codec.STRING.fieldOf("value").forGetter(Unbaked::main),
@@ -82,13 +82,13 @@ public class ExpressionToExpressionsModel extends AbstractRpfItemModel {
         }
 
         @Override
-        public ItemModel bake(BakingContext context, Baker baker) {
+        public ItemModel bake(BakingContext context, Matrix4fc transformation) {
             List<BakedModelExpressionsCase> modelMap = new ArrayList<>();
             for (ExpressionsCase<ItemModel.Unbaked> expression : expressions) {
-                modelMap.add(new BakedModelExpressionsCase(expression.when(), baker.bake(context, expression.value()), expression.requireAll()));
+                modelMap.add(new BakedModelExpressionsCase(expression.when(), expression.value().bake(context, transformation), expression.requireAll()));
             }
 
-            ItemModel fallbackModel = fallback.map(unbaked -> baker.bake(context, unbaked)).orElseGet(context::missingItemModel);
+            ItemModel fallbackModel = fallback.map(unbaked -> unbaked.bake(context, transformation)).orElseGet(context::missingItemModel);
             return new ExpressionToExpressionsModel(main, modelMap, fallbackModel, delegate);
         }
 
