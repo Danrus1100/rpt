@@ -8,7 +8,10 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.renderer.item.*;
 import net.minecraft.resources.Identifier;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -22,6 +25,9 @@ import org.spongepowered.asm.mixin.Unique;
         SpecialModelWrapper.Unbaked.class
 })
 public class ItemModelMixin implements PatchInformer {
+
+    private static final Logger log = LoggerFactory.getLogger(ItemModelMixin.class);
+    private static final Matrix4fc IDENTITY = new Matrix4f();
 
     @Unique
     private Identifier rpt$patch;
@@ -49,7 +55,10 @@ public class ItemModelMixin implements PatchInformer {
         }
         RptTemplate template = Rpt.getTemplatesManager().getTemplate(context, rpt$patch);
         if (template == null) {
-            throw new IllegalStateException("Unable to find tempalte" + rpt$patch + " for patch model!");
+            throw new IllegalStateException("Unable to find template " + rpt$patch + " for patch model!");
+        }
+        if (!IDENTITY.equals(transformations)) {
+            log.warn("rpt$patch {} is applied on a transformed model; the parent transformation is ignored", rpt$patch);
         }
         return new PatchCapturedItemModel(template);
     }
