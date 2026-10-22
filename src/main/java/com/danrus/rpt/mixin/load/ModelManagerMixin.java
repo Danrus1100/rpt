@@ -19,7 +19,9 @@ public class ModelManagerMixin {
     )
     private CompletableFuture<Void> rpt$wrapReload(PreparableReloadListener.SharedState sharedState, Executor executor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor executor2, Operation<CompletableFuture<Void>> original) {
         ResourceManager resourceManager = sharedState.resourceManager();
-        Rpt.rpt$repairFuture = Rpt.getReloadManager().prepare(resourceManager, executor);
+        // Template parsing is synchronous, so this completes before model discovery runs.
+        // Do not block the reload executor from inside ModelDiscoveryEvent.
+        Rpt.getReloadManager().prepare(resourceManager, executor).join();
         return original.call
                 (sharedState, executor, preparationBarrier, executor2);
     }

@@ -14,11 +14,7 @@ import com.danrus.rpt.impl.select.RptSelectItemModelProperty;
 import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class Rpt {
@@ -28,9 +24,6 @@ public class Rpt {
 
     private static final TextureSwappersManager swappersManager = new TextureSwappersManager();
     private static final FirstPersonAnimManager fpaManager = new FirstPersonAnimManager();
-    private static final Logger log = LoggerFactory.getLogger(Rpt.class);
-    @Nullable
-    public static CompletableFuture<Void> rpt$repairFuture = null;
 
     public static void prepareModelParams(RptSignedItemModel signedItemModel, RptFieldHolder holder) {
         holder.rpt$clearParams();
@@ -81,12 +74,6 @@ public class Rpt {
 
         Rpf.getEventBus().register(ModelDiscoveryEvent.class, event -> {
             if (event.getStage() == AbstractStagedEvent.Stage.PRE) {
-                if (Rpt.rpt$repairFuture == null) {
-                    log.error("Templates were not prepared in time for value discovery. it shouldn't happen!");
-                    return;
-                }
-                Rpt.rpt$repairFuture.join();
-                Rpt.rpt$repairFuture = null;
                 Rpt.getTemplatesManager().forEachUnbakedTemplate(event.getModelDiscovery()::addRoot);
             }
         });
