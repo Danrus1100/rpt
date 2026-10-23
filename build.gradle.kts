@@ -64,8 +64,12 @@ accessTransformers {
     file(neoforgeAccessTransformer.flatMap { it.outputFile })
 }
 
-// NeoGradle needs an explicit dependency from the AT-applying task to the accessx output.
-tasks.matching { it.name == "neoFormApplyAccessTransformer" }.configureEach {
+// NeoGradle applies the generated AT in more than one task; Gradle otherwise reports
+// an implicit-dependency validation error between convertAccessxNeoforge and
+// neoFormTransformSource. Wire both consumers explicitly.
+tasks.matching {
+    it.name == "neoFormApplyAccessTransformer" || it.name == "neoFormTransformSource"
+}.configureEach {
     dependsOn(neoforgeAccessTransformer)
 }
 
